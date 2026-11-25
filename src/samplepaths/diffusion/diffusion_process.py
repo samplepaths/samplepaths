@@ -162,6 +162,13 @@ class DiffusionProcess(GaussianNoise):
         self.__volexp = ensure_single_arg_constant_function(value=value)
         self.__volexp_value = _constant(value)
 
+    def _constant_parameters(self) -> tuple[float | None, float | None, float | None]:
+        """Return the speed, the mean and the volatility which are numbers.
+
+        A parameter given as a function of time is returned as ``None``.
+        """
+        return self.__speed_value, self.__mean_value, self.__vol_value
+
     def _sample(self, n: int, initial: float = 1.0) -> npt.NDArray[np.float64]:
         """Generate a realization of a diffusion process using Euler-Maruyama."""
         check_positive_integer(n=n)

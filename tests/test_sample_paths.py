@@ -92,6 +92,15 @@ CASES: list[tuple[str, dict[str, Any]]] = [
     ("SABRModel", {"volvol": 0.4, "beta": 0.5, "correlation": -0.3}),
     ("SABRModel", {"volvol": 0.4, "beta": 0.0, "correlation": 0.3}),
     ("SABRModel", {"volvol": 0.4, "beta": 1.0}),
+    ("HoLeeProcess", {"drift": lambda t: 0.5 + t, "vol": 0.3, "t": 2.0}),
+    (
+        "HullWhiteTwoFactorModel",
+        {"speed": 1.5, "drift": 0.5, "vol": 0.3, "factor_vol": 0.2, "correlation": -0.4},
+    ),
+    (
+        "TwoFactorCoxIngersollRossModel",
+        {"speed": (2.0, 0.2), "mean": (0.02, 0.03), "vol": (0.1, 0.05), "initial": (0.05, 0.01)},
+    ),
     ("BernoulliProcess", {"p": 0.3}),
     ("ChineseRestaurantProcess", {"discount": 0.5, "strength": 2.0}),
     ("DirichletProcess", {"alpha": 5}),

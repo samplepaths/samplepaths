@@ -32,12 +32,15 @@ class VectorProcess(BaseTimeProcess):
     #: interpreter. ``None`` for the models computed with array operations.
     _paths_per_worker: int | None = None
 
+    #: Largest number of threads of the models which advance step by step.
+    _max_stepping_workers = 6
+
     @override
     def _useful_workers(self, n: int, paths: int) -> int:
         workers = super()._useful_workers(n, paths)
         if self._paths_per_worker is None:
             return workers
-        return max(1, min(workers, paths // self._paths_per_worker))
+        return max(1, min(workers, self._max_stepping_workers, paths // self._paths_per_worker))
 
     @staticmethod
     def _check_correlation(value: float) -> float:

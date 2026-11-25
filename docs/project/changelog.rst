@@ -31,6 +31,20 @@ Added
   ``stochastic-rs``. With 14 threads, 100,000 realizations of 64 values take
   8 milliseconds for an AR(2) process and 16 for a GARCH(1, 1) process,
   against 11 and 11 for ``stochastic-rs``; see :doc:`comparison`.
+* Interest rate models:
+
+  * :py:class:`~samplepaths.diffusion.HoLeeProcess`, with a drift which can
+    be a function of time
+  * :py:class:`~samplepaths.multivariate.HullWhiteTwoFactorModel`
+  * :py:class:`~samplepaths.multivariate.TwoFactorCoxIngersollRossModel`,
+    with factors drawn from their exact distributions
+* ``sample_exact()`` and ``sample_paths_exact()`` of
+  :py:class:`~samplepaths.diffusion.CoxIngersollRossProcess` draw every value
+  from its exact distribution given the previous one. The realizations do
+  not depend on the number of steps and are never negative, where the
+  Euler-Maruyama method of ``sample()`` returns ``nan`` once a step goes
+  below zero. One step gives 100,000 exact final values in 1.6 milliseconds.
+  ``sample()`` and ``sample_paths()`` are unchanged.
 * A sixth family, the :doc:`processes with several components
   </guide/multivariate>`, in the new subpackage ``samplepaths.multivariate``.
   A realization is a two-dimensional array with one component per row, and
@@ -47,7 +61,7 @@ Added
 
   All agree in distribution with ``stochastic-rs``. With 14 threads, 100,000
   realizations of 64 increments take 10 milliseconds for correlated Brownian
-  motions and 61 for a Heston model, against 16 and 26 for ``stochastic-rs``.
+  motions and 39 for a Heston model, against 18 and 28 for ``stochastic-rs``.
 * Five fractional processes, driven by a fractional Brownian motion with a
   Hurst parameter of your choice:
 
@@ -82,7 +96,7 @@ Added
   distribution with ``stochastic-rs``; see :doc:`comparison`.
 * ``docs/scripts/compare_rust_outputs.py`` compares the distributions of the
   results of ``samplepaths`` and ``stochastic-rs`` for the processes they
-  share, in 39 comparisons.
+  share, in 43 comparisons.
 
 * ``sample_paths(n, paths, workers=...)`` and ``sample_paths_with_initial()``
   generate the realizations on several threads. With 14 threads, 100,000

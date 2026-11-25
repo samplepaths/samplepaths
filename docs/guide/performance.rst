@@ -223,6 +223,11 @@ Diffusion
      - —
      - 2.55
      - 20.6x
+   * - ``HoLeeProcess``
+     - 0.029
+     - —
+     - 1.54
+     - 3.5x
    * - ``FractionalOrnsteinUhlenbeckProcess``
      - 0.102
      - —
@@ -368,6 +373,11 @@ Several components
      - —
      - 3.11
      - 2.1x
+   * - ``HullWhiteTwoFactorModel``
+     - 0.110
+     - —
+     - 4.04
+     - 4.7x
    * - ``SABRModel``
      - 0.40
      - —
@@ -383,9 +393,14 @@ Several components
      - —
      - 10.7
      - 8.1x
+   * - ``TwoFactorCoxIngersollRossModel``
+     - 2.23
+     - —
+     - 10.2
+     - 14.0x
 
-A realization of these processes holds two components, so twice the values
-of the other tables. The Heston and the Bates models draw the variance from
+A realization of these processes holds two or three components, so more
+values than in the other tables. The Heston and the Bates models draw the variance from
 a noncentral chi-square distribution at every step, which costs more than a
 normal variate and buys a variance which is exact for any number of steps.
 
@@ -509,6 +524,14 @@ Getting the most out of it
 * **Simulate the models with a changing variance in batches.** One
   realization of 4096 values of a GARCH process takes 2.2 milliseconds, and
   1000 realizations of 256 values take 2.1.
+* **Sample a Cox-Ingersoll-Ross process exactly when the grid is coarse.**
+  ``sample_exact()`` and ``sample_paths_exact()`` draw each value from its
+  exact distribution. A step costs about twice a step of the Euler-Maruyama
+  method: 1.07 against 0.46 milliseconds for 4096 increments, and 94 against
+  50 milliseconds for 100,000 realizations of 64 increments on one thread,
+  or 20 against 21 on several. But the result does not depend on the number
+  of steps, so a few suffice: one step gives 100,000 exact final values in
+  1.6 milliseconds.
 * **Reuse instances.** Several processes keep values which depend only on
   the parameters and on ``n``: the two above, the frequencies of a colored
   noise and the mean increments of an inverse Gaussian process. Create the

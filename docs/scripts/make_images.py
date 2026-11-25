@@ -56,6 +56,8 @@ from samplepaths import (  # noqa: E402
     GaussianNoise,
     GeometricBrownianMotion,
     HestonModel,
+    HoLeeProcess,
+    HullWhiteTwoFactorModel,
     InverseGaussianProcess,
     MarkovChain,
     MixedPoissonProcess,
@@ -69,6 +71,7 @@ from samplepaths import (  # noqa: E402
     SARIMAProcess,
     SquaredBesselProcess,
     TGARCHProcess,
+    TwoFactorCoxIngersollRossModel,
     VarianceGammaProcess,
     VasicekProcess,
     WienerProcess,
@@ -274,6 +277,12 @@ def make_diffusion(output: Path) -> None:
     plot_paths(output, "vasicek_process", "Vasicek process", VasicekProcess())
     plot_paths(
         output,
+        "ho_lee_process",
+        "Ho-Lee process (drift rising with time)",
+        HoLeeProcess(drift=lambda t: 2.0 * t, vol=0.5),
+    )
+    plot_paths(
+        output,
         "fractional_vasicek_process",
         "Fractional Vasicek process (hurst=0.8)",
         FractionalVasicekProcess(hurst=0.8, speed=3.0, mean=1.0, vol=0.5),
@@ -435,6 +444,21 @@ def make_multivariate(output: Path) -> None:
         BatesModel(
             drift=0.05, speed=3.0, mean=0.04, vol=0.5, correlation=-0.7, rate=4.0, jump_mean=-0.08
         ),
+    )
+    plot_components(
+        output,
+        "hull_white_two_factor_model",
+        "Two-factor Hull-White model",
+        HullWhiteTwoFactorModel(
+            speed=2.0, drift=0.1, vol=0.01, factor_speed=0.3, factor_vol=0.05, correlation=-0.5, t=5
+        ),
+    )
+    plot_components(
+        output,
+        "two_factor_cox_ingersoll_ross_model",
+        "Two-factor Cox-Ingersoll-Ross model",
+        TwoFactorCoxIngersollRossModel(t=5),
+        together=True,
     )
     plot_components(
         output,

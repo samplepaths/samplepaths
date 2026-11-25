@@ -159,13 +159,15 @@ dedicated methods:
    * - ``sample_with_initial(n, initial)``
      - :py:class:`~samplepaths.continuous.GeometricBrownianMotion`,
        :py:class:`~samplepaths.continuous.FractionalGeometricBrownianMotion`,
-       all diffusion processes and the Heston, Bates and SABR models
+       all diffusion processes and the Heston, Bates, SABR and two-factor
+       Hull-White models
    * - ``sample_at_with_initial(times, initial)``
      - :py:class:`~samplepaths.continuous.GeometricBrownianMotion`
    * - ``sample_paths_with_initial(n, paths, initial)``
      - :py:class:`~samplepaths.continuous.GeometricBrownianMotion`,
        :py:class:`~samplepaths.continuous.FractionalGeometricBrownianMotion`,
-       all diffusion processes and the Heston, Bates and SABR models
+       all diffusion processes and the Heston, Bates, SABR and two-factor
+       Hull-White models
    * - ``sample_with_endpoint(n, b)`` and
        ``sample_at_with_endpoint(times, b)``
      - :py:class:`~samplepaths.continuous.BrownianMeander`
@@ -174,6 +176,9 @@ dedicated methods:
        :py:class:`~samplepaths.continuous.MixedPoissonProcess`
    * - ``sample_with_start(n, start)``
      - :py:class:`~samplepaths.discrete.MoranProcess`
+   * - ``sample_exact(n, initial)`` and
+       ``sample_paths_exact(n, paths, initial)``
+     - :py:class:`~samplepaths.diffusion.CoxIngersollRossProcess`
    * - ``sample_increments(n)``
      - :py:class:`~samplepaths.discrete.RandomWalk`
    * - ``sample_partition(n)``
