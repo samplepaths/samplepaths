@@ -4,8 +4,8 @@ Changelog
 All notable changes to ``samplepaths``, most recent first. Times were
 measured as described in :doc:`/guide/performance`.
 
-Unreleased
-----------
+0.3.0 (2026-11-25)
+------------------
 
 Added
 ~~~~~
