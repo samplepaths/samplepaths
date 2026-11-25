@@ -7,7 +7,8 @@ import numpy.typing as npt
 from numpy.random import Generator
 
 from .._compat import override
-from .._square_root import square_root_paths
+from .._square_root import square_root_paths, square_root_values
+from .._times import steps_from_zero
 from ..utils.validation import check_coefficients
 from .vector_process import VectorProcess
 
@@ -153,3 +154,31 @@ class TwoFactorCoxIngersollRossModel(VectorProcess):
             realizations[:, index + 1, :] = factor.T
         np.add(realizations[:, 1, :], realizations[:, 2, :], out=realizations[:, 0, :])
         return realizations
+
+    @override
+    def sample_at(self, times: npt.ArrayLike) -> npt.NDArray[np.float64]:
+        """Generate a realization at specified times.
+
+        The factors are drawn from their exact distributions.
+
+        :param times: a vector of increasing time values at which to generate
+            the realization
+        :returns: the realization, with the rate and the two factors in its
+            rows and one value per time
+        """
+        steps, starts_at_zero = steps_from_zero(times)
+
+        realization = np.empty((3, len(steps) + 1))
+        for index in range(2):
+            realization[index + 1] = square_root_values(
+                self.rng,
+                steps,
+                1,
+                speed=self.speed[index],
+                mean=self.mean[index],
+                vol=self.vol[index],
+                initial=self.initial[index],
+                vectorize_from=_VECTORIZE_FROM_PATHS,
+            )[:, 0]
+        realization[0] = realization[1] + realization[2]
+        return realization if starts_at_zero else realization[:, 1:]

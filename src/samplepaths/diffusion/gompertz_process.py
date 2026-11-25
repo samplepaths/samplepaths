@@ -1,5 +1,6 @@
 """Gompertz process."""
 
+import math
 from types import SimpleNamespace
 from typing import Any
 
@@ -106,3 +107,22 @@ class GompertzProcess(EulerMaruyamaProcess):
     @override
     def _confine(self, x: Any, functions: SimpleNamespace) -> Any:
         return functions.clip(x, _SMALLEST, float("inf"))
+
+    @override
+    def _advance(self, gns: list[float], x: float, delta_t: float) -> list[float]:
+        # The method of the base class, written out for numbers: the loop
+        # then makes no call to a method and reads no attribute. It computes
+        # the same values, in the same order of operations.
+        growth = self.growth
+        decay = self.decay
+        vol = self.vol
+        log = math.log
+        infinity = math.inf
+
+        values = [x]
+        for gn in gns:
+            x = x + (growth - decay * log(x)) * x * delta_t + vol * x * gn
+            x = min(max(x, _SMALLEST), infinity)
+            values.append(x)
+
+        return values

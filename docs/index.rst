@@ -89,6 +89,7 @@ with type hints. See :doc:`project/about` for what the fork adds and
    guide/random
    guide/continuous
    guide/diffusion
+   guide/exact
    guide/discrete
    guide/timeseries
    guide/multivariate
@@ -112,6 +113,9 @@ with type hints. See :doc:`project/about` for what the fork adds and
    project/changelog
    project/migration
    project/development
+   project/maintenance
+   project/roadmap
+   project/decisions
    project/license
 
 Indices

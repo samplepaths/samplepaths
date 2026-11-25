@@ -1,5 +1,6 @@
 """Fractional Cox-Ingersoll-Ross process."""
 
+import math
 from types import SimpleNamespace
 from typing import Any
 
@@ -26,6 +27,12 @@ class FractionalCoxIngersollRossProcess(FractionalEulerProcess):
     Realizations are generated using the Euler method with exact increments
     of the fractional Brownian motion. A value which a step would make
     negative is set to zero. :py:meth:`sample` starts from 1.
+
+    .. note::
+
+        The Euler method is known to converge for a Hurst parameter above
+        1/2. Below it, a realization tends to stay at zero once it gets
+        there, which the exact process does not do.
 
     :param hurst: the Hurst parameter :math:`H` in :math:`(0,1)`
     :param speed: the speed of reversion, or :math:`\theta` above
@@ -107,3 +114,21 @@ class FractionalCoxIngersollRossProcess(FractionalEulerProcess):
     @override
     def _confine(self, x: Any, functions: SimpleNamespace) -> Any:
         return functions.maximum(x, 0.0)
+
+    @override
+    def _advance(self, gns: list[float], x: float, delta_t: float) -> list[float]:
+        # The method of the base class, written out for numbers: the loop
+        # then makes no call to a method and reads no attribute. It computes
+        # the same values, in the same order of operations.
+        speed = self.speed
+        mean = self.mean
+        vol = self.vol
+        sqrt = math.sqrt
+
+        values = [x]
+        for gn in gns:
+            x = x + speed * (mean - x) * delta_t + vol * sqrt(x) * gn
+            x = max(x, 0.0)
+            values.append(x)
+
+        return values

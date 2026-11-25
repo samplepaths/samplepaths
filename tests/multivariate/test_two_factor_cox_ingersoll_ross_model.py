@@ -74,9 +74,36 @@ def test_sample_values() -> None:
     )
 
 
-def test_sample_at_is_not_supported() -> None:
-    with pytest.raises(NotImplementedError):
-        ProcessType(**KWARGS).sample_at(np.array([0.0, 0.5, 1.0]))
+def test_sample_at_shape() -> None:
+    instance = ProcessType(**KWARGS)
+
+    with_zero = instance.sample_at(np.array([0.0, 0.5, 2.0]))
+    without_zero = instance.sample_at([0.5, 2.0])
+    assert with_zero.shape == (3, 3)
+    assert without_zero.shape == (3, 2)
+
+
+@pytest.mark.parametrize("times", [[], [1.0, 0.5], [-1.0, 1.0], [0.5, 0.5], [[0.0, 1.0]]])
+def test_sample_at_invalid_times(times: Any) -> None:
+    with pytest.raises(ValueError):
+        ProcessType(**KWARGS).sample_at(times)
+
+
+def test_sample_at_is_reproducible() -> None:
+    first = ProcessType(**KWARGS, rng=np.random.default_rng(5)).sample_at([0.1, 0.4, 3.0])
+    again = ProcessType(**KWARGS, rng=np.random.default_rng(5)).sample_at([0.1, 0.4, 3.0])
+
+    np.testing.assert_array_equal(first, again)
+
+
+def test_sample_at_values() -> None:
+    instance = ProcessType(**KWARGS, rng=np.random.default_rng(1))
+    values = np.array([instance.sample_at([0.0, 0.3, 1.0]) for _ in range(20_000)])
+
+    np.testing.assert_allclose(values[:, 0], values[:, 1] + values[:, 2])
+    np.testing.assert_allclose(values[0, :, 0], [0.06, 0.05, 0.01])
+    expected = [0.02 + 0.03 * math.exp(-2.0), 0.03 - 0.02 * math.exp(-0.2)]
+    np.testing.assert_allclose(values[:, 1:, -1].mean(axis=0), expected, rtol=0.03)
 
 
 def test_threads_give_reproducible_realizations() -> None:

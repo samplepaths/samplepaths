@@ -36,6 +36,9 @@ Run ``make`` without arguments to list the targets.
      - create the virtual environment and install all dependencies
    * - ``make install-test``
      - install the package with what the tests need only
+   * - ``make install-latest``
+     - install what the tests need in its newest versions, ignoring
+       ``uv.lock``
    * - ``make lint``
      - check the code style and formatting with ``ruff``
    * - ``make format``
@@ -46,6 +49,8 @@ Run ``make`` without arguments to list the targets.
      - run the tests
    * - ``make coverage``
      - run the tests in parallel with a coverage report
+   * - ``make check-seeded``
+     - compare the results for a given seed with those of the last release
    * - ``make check``
      - run every check that CI runs
    * - ``make docs``
@@ -181,15 +186,22 @@ previous one.
    * - Workflow
      - What it does
    * - Tests
-     - the tests on Linux, macOS and Windows with Python 3.11 to 3.14
+     - the tests on Linux, macOS and Windows with Python 3.11 to 3.14; the
+       daily run also tests with the newest release of every dependency
    * - Quality
      - ``ruff``, ``mypy`` and a build of the documentation, which runs the
-       examples of the gallery
+       examples of the gallery; a second job compares the results for a
+       given seed with those of the last release
    * - Benchmarks
      - measures the sampling times on the base branch and on the pull
        request, and fails when a method becomes more than two times slower
    * - CodeQL
      - static analysis of the code and of the workflows
+
+See :doc:`maintenance` for what to check when making code faster, comparing
+with ``stochastic-rs`` or changing the workflows, the :doc:`roadmap` for the
+open work and :doc:`decisions` for the choices already made and their
+reasons.
 
 Releasing
 ---------

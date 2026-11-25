@@ -46,7 +46,8 @@ def test_times_match_last_sample(name: str, t: float) -> None:
         "FractionalBrownianMotion",
         "FractionalGaussianNoise",
         "MultifractionalBrownianMotion",
-        "VasicekProcess",
+        "SABRModel",
+        "HullWhiteTwoFactorModel",
     ],
 )
 def test_sample_at_not_supported(name: str) -> None:

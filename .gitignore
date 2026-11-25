@@ -148,3 +148,6 @@ docs/reference/api/
 # Generated example gallery
 docs/gallery/
 docs/sg_execution_times.rst
+
+# Seeded results recorded by make check-seeded
+.seeded-results.npz

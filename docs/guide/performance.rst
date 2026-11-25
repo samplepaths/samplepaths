@@ -199,30 +199,30 @@ Diffusion
      - 1.83
      - 8.3x
    * - ``JacobiProcess``
-     - 0.76
+     - 0.37
+     - —
+     - 2.75
+     - 9.3x
+   * - ``KimuraProcess``
+     - 0.37
      - —
      - 2.68
-     - 18.4x
-   * - ``KimuraProcess``
-     - 0.72
-     - —
-     - 2.54
-     - 18.7x
+     - 9.4x
    * - ``VerhulstProcess``
-     - 0.80
+     - 0.35
      - —
-     - 2.58
-     - 20.3x
+     - 2.62
+     - 9.0x
    * - ``GompertzProcess``
-     - 0.86
+     - 0.37
      - —
-     - 3.02
-     - 17.9x
+     - 3.17
+     - 8.2x
    * - ``FellerLogisticProcess``
-     - 0.81
+     - 0.36
      - —
-     - 2.55
-     - 20.6x
+     - 2.64
+     - 9.4x
    * - ``HoLeeProcess``
      - 0.029
      - —
@@ -239,15 +239,15 @@ Diffusion
      - 3.62
      - 4.3x
    * - ``FractionalCoxIngersollRossProcess``
-     - 0.73
+     - 0.35
      - —
-     - 4.18
-     - 12.2x
+     - 4.17
+     - 7.0x
    * - ``FractionalJacobiProcess``
-     - 0.85
+     - 0.41
      - —
-     - 4.58
-     - 12.8x
+     - 4.66
+     - 7.1x
 
 Discrete-time
 ~~~~~~~~~~~~~
@@ -325,36 +325,36 @@ Time series
      - 0.95
      - 15.0x
    * - ``ARCHProcess``
-     - 1.50
+     - 0.40
      - —
-     - 1.89
-     - 52x
+     - 1.90
+     - 13.9x
    * - ``GARCHProcess``
-     - 2.23
+     - 0.42
      - —
-     - 2.11
-     - 68x
+     - 2.12
+     - 13.4x
    * - ``AGARCHProcess``
-     - 2.37
+     - 0.45
      - —
-     - 2.42
-     - 63x
+     - 2.41
+     - 12.3x
    * - ``TGARCHProcess``
-     - 2.53
+     - 0.49
      - —
-     - 2.57
-     - 62x
+     - 2.69
+     - 12.2x
    * - ``EGARCHProcess``
-     - 2.80
+     - 0.63
      - —
-     - 3.39
-     - 51x
+     - 3.53
+     - 11.8x
 
 The linear models filter white noise in compiled code and cost little more
 than the noise itself. The models with a changing variance advance one value
-at a time in Python, at about half a microsecond per value, so one
-realization is slow and ``sample_paths()``, which advances all realizations
-together, gains the most of all processes.
+at a time in Python, at about a tenth of a microsecond per value for a model
+with one previous value and half a microsecond for higher orders.
+``sample_paths()`` advances all realizations together.
 
 Several components
 ~~~~~~~~~~~~~~~~~~
@@ -522,16 +522,14 @@ Getting the most out of it
   realizations of 64 increments of a Brownian motion take 5.7 instead of 33.8
   milliseconds. See :doc:`paths`.
 * **Simulate the models with a changing variance in batches.** One
-  realization of 4096 values of a GARCH process takes 2.2 milliseconds, and
+  realization of 4096 values of a GARCH process takes 0.42 milliseconds, and
   1000 realizations of 256 values take 2.1.
-* **Sample a Cox-Ingersoll-Ross process exactly when the grid is coarse.**
-  ``sample_exact()`` and ``sample_paths_exact()`` draw each value from its
-  exact distribution. A step costs about twice a step of the Euler-Maruyama
-  method: 1.07 against 0.46 milliseconds for 4096 increments, and 94 against
-  50 milliseconds for 100,000 realizations of 64 increments on one thread,
-  or 20 against 21 on several. But the result does not depend on the number
-  of steps, so a few suffice: one step gives 100,000 exact final values in
-  1.6 milliseconds.
+* **Use the exact methods where they exist.** ``sample_exact()`` and
+  ``sample_paths_exact()`` of the Vasicek, Ornstein-Uhlenbeck and
+  Cox-Ingersoll-Ross processes draw each value from its exact distribution,
+  so a few steps suffice: one step gives 100,000 exact final values in 0.8
+  milliseconds for a Vasicek process and 1.6 for a Cox-Ingersoll-Ross
+  process. See :doc:`exact`.
 * **Reuse instances.** Several processes keep values which depend only on
   the parameters and on ``n``: the two above, the frequencies of a colored
   noise and the mean increments of an inverse Gaussian process. Create the

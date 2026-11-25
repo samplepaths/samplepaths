@@ -100,6 +100,8 @@ def run() -> dict[str, float]:
     results[f"CoxIngersollRossProcess.sample_exact({STEPS})"] = measure(
         lambda: square_root.sample_exact(STEPS)
     )
+    vasicek = samplepaths.VasicekProcess(rng=np.random.default_rng(0))
+    results[f"VasicekProcess.sample_exact({STEPS})"] = measure(lambda: vasicek.sample_exact(STEPS))
     restaurant = samplepaths.ChineseRestaurantProcess(rng=np.random.default_rng(0))
     results[f"ChineseRestaurantProcess.sample_partition({STEPS})"] = measure(
         lambda: restaurant.sample_partition(STEPS)

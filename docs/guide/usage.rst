@@ -124,9 +124,11 @@ a sequence of increasing time values and ignores the parameter ``t``.
     s = bm.sample_at(times)
 
 The following processes cannot be sampled at specified times: the diffusion
-processes, the fractional and multifractional Brownian motions, and the
+processes without an exact method, the fractional and multifractional
+Brownian motions, the SABR and the two-factor Hull-White models, and the
 fractional Gaussian and colored noises. Their ``sample_at()`` raises
-``NotImplementedError``.
+``NotImplementedError``. The diffusion processes which can are described in
+:doc:`exact`.
 
 The ``sample_paths()`` method
 -----------------------------
@@ -162,7 +164,9 @@ dedicated methods:
        all diffusion processes and the Heston, Bates, SABR and two-factor
        Hull-White models
    * - ``sample_at_with_initial(times, initial)``
-     - :py:class:`~samplepaths.continuous.GeometricBrownianMotion`
+     - :py:class:`~samplepaths.continuous.GeometricBrownianMotion`, the
+       Vasicek, Ornstein-Uhlenbeck, Cox-Ingersoll-Ross and Ho-Lee processes
+       and the Heston and Bates models
    * - ``sample_paths_with_initial(n, paths, initial)``
      - :py:class:`~samplepaths.continuous.GeometricBrownianMotion`,
        :py:class:`~samplepaths.continuous.FractionalGeometricBrownianMotion`,
@@ -178,7 +182,8 @@ dedicated methods:
      - :py:class:`~samplepaths.discrete.MoranProcess`
    * - ``sample_exact(n, initial)`` and
        ``sample_paths_exact(n, paths, initial)``
-     - :py:class:`~samplepaths.diffusion.CoxIngersollRossProcess`
+     - the Vasicek, Ornstein-Uhlenbeck and Cox-Ingersoll-Ross processes; see
+       :doc:`exact`
    * - ``sample_increments(n)``
      - :py:class:`~samplepaths.discrete.RandomWalk`
    * - ``sample_partition(n)``
