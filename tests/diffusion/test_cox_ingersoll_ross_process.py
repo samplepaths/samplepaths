@@ -111,3 +111,46 @@ def test_sample_exact_with_threads_is_reproducible_and_leaves_the_euler_method_a
     )
     assert not first._exact
     assert first.sample_paths(8, 5).shape == (5, 9)
+
+
+def test_sample_at_has_the_exact_distribution() -> None:
+    from scipy.stats import kstest, ncx2
+
+    instance = ProcessType(speed=1.0, mean=1.0, vol=0.3, rng=np.random.default_rng(1))
+    final = np.array(
+        [instance.sample_at_with_initial([0.2, 0.7, 1.0], 1.5)[-1] for _ in range(20_000)]
+    )
+
+    scale = 0.3**2 * (1 - math.exp(-1.0)) / 4
+    exact = ncx2(4 / 0.3**2, 1.5 * math.exp(-1.0) / scale, scale=scale)
+    assert kstest(final, exact.cdf).pvalue > 1e-3
+
+
+def test_sample_at_shape_and_arguments() -> None:
+    instance = ProcessType(speed=1.0, mean=1.0, vol=0.3)
+
+    with_zero = instance.sample_at(np.array([0.0, 0.5, 2.0]))
+    assert with_zero.shape == (3,)
+    assert with_zero[0] == 1.0
+    assert instance.sample_at([0.5, 2.0]).shape == (2,)
+    assert instance.sample_at_with_initial([0.0, 1.0], initial=0.0)[0] == 0.0
+    for times in ([], [1.0, 0.5], [-1.0, 1.0]):
+        with pytest.raises(ValueError):
+            instance.sample_at(times)
+    with pytest.raises(ValueError):
+        instance.sample_at_with_initial([0.0, 1.0], initial=-1.0)
+    with pytest.raises(ValueError):
+        ProcessType(speed=0.0, mean=1.0, vol=0.3).sample_at([0.0, 1.0])
+    with pytest.raises(NotImplementedError):
+        kwargs: dict[str, Any] = {"speed": 1.0, "mean": lambda t: 1.0, "vol": 0.3}
+        ProcessType(**kwargs).sample_at([0.0, 1.0])
+
+
+def test_sample_at_without_volatility_and_with_a_mean_of_zero() -> None:
+    times = np.array([0.0, 0.3, 1.0, 4.0])
+    still = ProcessType(speed=2.0, mean=0.5, vol=0.0)
+    np.testing.assert_allclose(still.sample_at(times), 0.5 + 0.5 * np.exp(-2.0 * times))
+
+    falling = ProcessType(speed=2.0, vol=0.5, rng=np.random.default_rng(1))
+    final = np.array([falling.sample_at(times)[-1] for _ in range(2000)])
+    assert final.min() == 0.0

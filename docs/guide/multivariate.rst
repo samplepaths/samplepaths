@@ -249,6 +249,21 @@ factors, which are drawn from their exact distributions.
 Models of the rate with one factor, the Vasicek, Cox-Ingersoll-Ross and
 Ho-Lee processes, are :doc:`diffusion processes <diffusion>`.
 
+Sampling at chosen times
+------------------------
+
+``sample_at(times)`` generates a realization at increasing times of your
+choice for the correlated Brownian motions and the Heston, Bates and
+two-factor Cox-Ingersoll-Ross models. The result has one row per component
+and one column per time. See :doc:`exact`.
+
+.. code-block:: python
+
+    from samplepaths import HestonModel
+
+    heston = HestonModel(speed=2.0, mean=0.04, vol=0.3, correlation=-0.7)
+    price, variance = heston.sample_at([0, 1 / 12, 0.25, 0.5, 1])
+
 Many realizations
 -----------------
 

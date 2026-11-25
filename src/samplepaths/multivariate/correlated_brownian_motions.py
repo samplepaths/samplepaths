@@ -8,6 +8,7 @@ import numpy.typing as npt
 from numpy.random import Generator
 
 from .._compat import override
+from .._times import steps_from_zero
 from ..utils.validation import is_number
 from .vector_process import VectorProcess
 
@@ -100,3 +101,19 @@ class CorrelatedBrownianMotions(VectorProcess):
         realizations = np.zeros((paths, count, n + 1))
         np.cumsum(self.__factor @ noise, axis=-1, out=realizations[..., 1:])
         return realizations
+
+    @override
+    def sample_at(self, times: npt.ArrayLike) -> npt.NDArray[np.float64]:
+        """Generate a realization at specified times.
+
+        :param times: a vector of increasing time values at which to generate
+            the realization
+        :returns: the realization, with one motion per row and one value per
+            time
+        """
+        steps, starts_at_zero = steps_from_zero(times)
+
+        noise = self.rng.normal(scale=np.sqrt(steps), size=(len(self.components), len(steps)))
+        realization = np.zeros((len(self.components), len(steps) + 1))
+        np.cumsum(self.__factor @ noise, axis=-1, out=realization[:, 1:])
+        return realization if starts_at_zero else realization[:, 1:]

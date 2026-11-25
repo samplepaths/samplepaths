@@ -226,7 +226,7 @@ Many realizations
 
 ``sample_paths(n, paths)`` advances all realizations together, which matters
 most for the models with a changing variance: 1000 realizations of 256
-values take about 2 milliseconds, against 150 for a loop over ``sample()``.
+values take about 2 milliseconds, against 28 for a loop over ``sample()``.
 With ``workers``, the random numbers are generated on several threads. See
 :doc:`paths` and :doc:`performance`.
 

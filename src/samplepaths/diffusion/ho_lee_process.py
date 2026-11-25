@@ -7,6 +7,7 @@ import numpy.typing as npt
 from numpy.random import Generator
 
 from .._compat import override
+from .._times import steps_from_zero
 from ..noise.gaussian_noise import GaussianNoise
 from ..utils import ensure_single_arg_constant_function
 from ..utils.validation import (
@@ -126,11 +127,41 @@ class HoLeeProcess(GaussianNoise):
         return self._accumulate(self._sample_gaussian_noise(n), initial)
 
     @override
-    def sample_at(self, times: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
-        raise NotImplementedError(
-            f"{type(self).__name__} cannot be sampled at specified times. "
-            "Use the sample method with a number of increments."
-        )
+    def sample_at(self, times: npt.ArrayLike) -> npt.NDArray[np.float64]:
+        """Generate a realization at specified times, starting from 0.
+
+        :param times: a vector of increasing time values at which to generate
+            the realization
+        :returns: the realization
+        """
+        return self.sample_at_with_initial(times, 0.0)
+
+    def sample_at_with_initial(
+        self,
+        times: npt.ArrayLike,
+        initial: float = 0.0,
+    ) -> npt.NDArray[np.float64]:
+        """Generate a realization at specified times from an initial value.
+
+        The noise is exact. The drift is added at every step with its value
+        at the end of the step, which is exact for a constant drift.
+
+        :param times: a vector of increasing time values at which to generate
+            the realization
+        :param initial: the value of the process at time zero
+        :returns: the realization
+        """
+        check_numeric(value=initial, name="Initial")
+        steps, starts_at_zero = steps_from_zero(times)
+
+        if self.__drift_value is not None:
+            drifts: npt.NDArray[np.float64] | float = self.__drift_value
+        else:
+            drifts = np.array([float(self.__drift(time)) for time in np.cumsum(steps).tolist()])
+
+        changes = drifts * steps + self.vol * self.rng.normal(scale=np.sqrt(steps))
+        values = float(initial) + np.concatenate(([0.0], np.cumsum(changes)))
+        return values if starts_at_zero else values[1:]
 
     def _sample_paths_from(self, n: int, paths: int, initial: float) -> npt.NDArray[np.float64]:
         """Generate several realizations from an initial value."""

@@ -7,6 +7,8 @@ on:
     # Daily on master, to notice new releases of the dependencies or of
     # Python which break the tests.
     - cron: "23 3 * * *"
+  # Allows a run by hand from the Actions tab.
+  workflow_dispatch:
 
 # A new commit on a pull request replaces the runs of the previous one, which
 # would otherwise wait for runners ahead of it. Runs on master are kept.
@@ -50,6 +52,37 @@ jobs:
 
       - name: Install dependencies
         run: make install-test
+
+      - name: Run the tests
+        run: make coverage
+
+  # The other jobs install the versions of uv.lock, which only change once a
+  # month. This one installs the newest release of every dependency, so a
+  # release of numpy or scipy which breaks the package shows within a day.
+  run-tests-with-latest-dependencies:
+    name: Run tests with the latest dependencies
+    if: github.event_name != 'pull_request'
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      UV_NO_SYNC: "1"
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install the newest versions of the dependencies
+        run: make install-latest
+
+      - name: Show the installed versions
+        run: uv pip list
 
       - name: Run the tests
         run: make coverage

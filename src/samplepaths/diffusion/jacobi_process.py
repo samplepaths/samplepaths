@@ -1,5 +1,6 @@
 """Jacobi process."""
 
+import math
 from types import SimpleNamespace
 from typing import Any
 
@@ -106,3 +107,21 @@ class JacobiProcess(EulerMaruyamaProcess):
     @override
     def _confine(self, x: Any, functions: SimpleNamespace) -> Any:
         return functions.clip(x, 0.0, 1.0)
+
+    @override
+    def _advance(self, gns: list[float], x: float, delta_t: float) -> list[float]:
+        # The method of the base class, written out for numbers: the loop
+        # then makes no call to a method and reads no attribute. It computes
+        # the same values, in the same order of operations.
+        speed = self.speed
+        mean = self.mean
+        vol = self.vol
+        sqrt = math.sqrt
+
+        values = [x]
+        for gn in gns:
+            x = x + speed * (mean - x) * delta_t + vol * sqrt(x * (1.0 - x)) * gn
+            x = min(max(x, 0.0), 1.0)
+            values.append(x)
+
+        return values

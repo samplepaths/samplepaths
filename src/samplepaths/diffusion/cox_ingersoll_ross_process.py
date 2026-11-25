@@ -7,7 +7,8 @@ import numpy.typing as npt
 from numpy.random import Generator
 
 from .._compat import override
-from .._square_root import square_root_paths
+from .._square_root import square_root_paths, square_root_values
+from .._times import steps_from_zero
 from ..base import BaseProcess
 from ..utils.validation import check_nonnegative_number, check_positive_integer
 from .diffusion_process import DiffusionProcess
@@ -40,8 +41,8 @@ class CoxIngersollRossProcess(DiffusionProcess):
         dX_t = \theta (\mu - X_t) dt + \sigma \sqrt{X_t} dW_t
 
     :py:meth:`sample` and :py:meth:`sample_paths` generate realizations
-    using the Euler-Maruyama method. :py:meth:`sample_exact` and
-    :py:meth:`sample_paths_exact` draw every value from its exact
+    using the Euler-Maruyama method. :py:meth:`sample_exact`,
+    :py:meth:`sample_paths_exact` and :py:meth:`sample_at` draw every value from its exact
     distribution given the previous one, a noncentral chi-square
     distribution. Their realizations are never negative and do not depend on
     the number of steps: a single step gives the exact distribution of the
@@ -189,6 +190,57 @@ class CoxIngersollRossProcess(DiffusionProcess):
         )
         self.set_times(n)
         return realizations
+
+    @override
+    def sample_at(self, times: npt.ArrayLike) -> npt.NDArray[np.float64]:
+        """Generate a realization at specified times, starting from 1.
+
+        Every value is drawn from its exact distribution given the previous
+        one. The speed, the mean and the volatility must be numbers, with a
+        positive speed and a nonnegative mean and volatility.
+
+        :param times: a vector of increasing time values at which to generate
+            the realization
+        :returns: the realization
+        :raises NotImplementedError: if a parameter is a function of time
+        :raises ValueError: if a parameter is out of range
+        """
+        return self.sample_at_with_initial(times, 1.0)
+
+    def sample_at_with_initial(
+        self,
+        times: npt.ArrayLike,
+        initial: float = 1.0,
+    ) -> npt.NDArray[np.float64]:
+        """Generate a realization at specified times from an initial value.
+
+        :param times: a vector of increasing time values at which to generate
+            the realization
+        :param initial: the value of the process at time zero, nonnegative
+        :returns: the realization
+        :raises NotImplementedError: if a parameter is a function of time
+        :raises ValueError: if a parameter is out of range
+        """
+        check_nonnegative_number(value=initial, name="Initial")
+        if None in self._constant_parameters():
+            raise NotImplementedError(
+                "Sampling at specified times needs constant parameters; got a function "
+                "of time. Use the sample method with a number of increments."
+            )
+        speed, mean, vol = self._exact_parameters()
+        steps, starts_at_zero = steps_from_zero(times)
+
+        values = square_root_values(
+            self.rng,
+            steps,
+            1,
+            speed=speed,
+            mean=mean,
+            vol=vol,
+            initial=float(initial),
+            vectorize_from=_VECTORIZE_FROM_PATHS,
+        )[:, 0]
+        return values if starts_at_zero else values[1:]
 
     @override
     def _useful_workers(self, n: int, paths: int) -> int:

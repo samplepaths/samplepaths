@@ -78,9 +78,47 @@ def test_sample_values() -> None:
     )
 
 
-def test_sample_at_is_not_supported() -> None:
-    with pytest.raises(NotImplementedError):
-        ProcessType(**KWARGS).sample_at(np.array([0.0, 0.5, 1.0]))
+def test_sample_at_shape() -> None:
+    instance = ProcessType(**KWARGS)
+
+    with_zero = instance.sample_at(np.array([0.0, 0.5, 2.0]))
+    without_zero = instance.sample_at([0.5, 2.0])
+    assert with_zero.shape == (2, 3)
+    assert without_zero.shape == (2, 2)
+
+
+@pytest.mark.parametrize("times", [[], [1.0, 0.5], [-1.0, 1.0], [0.5, 0.5], [[0.0, 1.0]]])
+def test_sample_at_invalid_times(times: Any) -> None:
+    with pytest.raises(ValueError):
+        ProcessType(**KWARGS).sample_at(times)
+
+
+def test_sample_at_is_reproducible() -> None:
+    first = ProcessType(**KWARGS, rng=np.random.default_rng(5)).sample_at([0.1, 0.4, 3.0])
+    again = ProcessType(**KWARGS, rng=np.random.default_rng(5)).sample_at([0.1, 0.4, 3.0])
+
+    np.testing.assert_array_equal(first, again)
+
+
+def test_sample_at_values() -> None:
+    from scipy.stats import ks_2samp
+
+    # An uneven grid gives the distribution of an even one.
+    times = np.linspace(0.0, 1.0, 17) ** 2
+    instance = ProcessType(**KWARGS, rng=np.random.default_rng(1))
+    uneven = np.array([instance.sample_at_with_initial(times, 10.0) for _ in range(20_000)])
+    even = instance.sample_paths_with_initial(64, 20_000, initial=10.0)
+
+    assert np.all(uneven[:, 0, 0] == 10.0)
+    assert np.all(uneven[:, 1, 0] == instance.initial_variance)
+    assert ks_2samp(uneven[:, 0, -1], even[:, 0, -1]).pvalue > 1e-3
+    assert ks_2samp(uneven[:, 1, -1], even[:, 1, -1]).pvalue > 1e-3
+    np.testing.assert_allclose(uneven[:, 0, -1].mean(), 10.0 * math.exp(0.05), rtol=0.01)
+
+
+def test_sample_at_invalid_initial() -> None:
+    with pytest.raises(ValueError):
+        ProcessType(**KWARGS).sample_at_with_initial([0.0, 1.0], initial=0.0)
 
 
 def test_threads_give_reproducible_realizations() -> None:

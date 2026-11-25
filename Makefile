@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install install-test lint format typecheck test coverage check \
+.PHONY: help install install-test install-latest lint format typecheck test coverage check \
 	docs docs-live docs-images docs-clean benchmark benchmark-compare \
 	version build check-release publish clean
 
@@ -13,6 +13,10 @@ install:  ## Create the virtual environment and install all dependencies
 
 install-test:  ## Install the package with what the tests need only
 	uv sync --locked --no-default-groups --group test
+
+install-latest:  ## Install what the tests need in its newest versions, ignoring uv.lock
+	uv venv --allow-existing
+	uv pip install --upgrade --editable . --group test
 
 lint:  ## Check the code style and formatting with ruff
 	uv run ruff check src tests docs .github/scripts

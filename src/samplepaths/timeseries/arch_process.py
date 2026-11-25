@@ -1,5 +1,6 @@
 """Autoregressive conditional heteroskedasticity process, or ARCH(p)."""
 
+import math
 from collections.abc import Sequence
 from types import SimpleNamespace
 from typing import Any
@@ -8,7 +9,7 @@ from numpy.random import Generator
 
 from .._compat import override
 from ..utils.validation import check_coefficients
-from .conditional_variance_process import ConditionalVarianceProcess
+from .conditional_variance_process import _SMALLEST_VARIANCE, ConditionalVarianceProcess
 
 
 class ARCHProcess(ConditionalVarianceProcess):
@@ -98,3 +99,32 @@ class ARCHProcess(ConditionalVarianceProcess):
         for coefficient, value in zip(self.alpha, values, strict=False):
             variance = variance + coefficient * value * value
         return variance
+
+    @override
+    def _advance_floats(
+        self,
+        presample: list[float],
+        innovations: list[float],
+    ) -> tuple[list[float], list[float]]:
+        if len(self.alpha) != 1:
+            return super()._advance_floats(presample, innovations)
+
+        # The method of the base class, written out for one previous value:
+        # the loop then makes no call to a method and reads no attribute. It
+        # computes the same values, in the same order of operations.
+        omega = self.omega
+        alpha = self.alpha[0]
+        sqrt = math.sqrt
+        state = self._stationary_state()
+        value = sqrt(state) * presample[0]
+
+        values = []
+        deviations = []
+        for z in innovations:
+            state = omega + alpha * value * value
+            deviation = sqrt(max(state, _SMALLEST_VARIANCE))
+            value = deviation * z
+            values.append(value)
+            deviations.append(deviation)
+
+        return values, deviations

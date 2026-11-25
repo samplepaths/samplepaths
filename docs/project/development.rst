@@ -36,6 +36,9 @@ Run ``make`` without arguments to list the targets.
      - create the virtual environment and install all dependencies
    * - ``make install-test``
      - install the package with what the tests need only
+   * - ``make install-latest``
+     - install what the tests need in its newest versions, ignoring
+       ``uv.lock``
    * - ``make lint``
      - check the code style and formatting with ``ruff``
    * - ``make format``
@@ -181,7 +184,8 @@ previous one.
    * - Workflow
      - What it does
    * - Tests
-     - the tests on Linux, macOS and Windows with Python 3.11 to 3.14
+     - the tests on Linux, macOS and Windows with Python 3.11 to 3.14; the
+       daily run also tests with the newest release of every dependency
    * - Quality
      - ``ruff``, ``mypy`` and a build of the documentation, which runs the
        examples of the gallery

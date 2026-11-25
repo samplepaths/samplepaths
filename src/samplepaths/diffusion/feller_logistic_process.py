@@ -1,5 +1,6 @@
 """Feller logistic process."""
 
+import math
 from types import SimpleNamespace
 from typing import Any
 
@@ -103,3 +104,22 @@ class FellerLogisticProcess(EulerMaruyamaProcess):
     @override
     def _confine(self, x: Any, functions: SimpleNamespace) -> Any:
         return functions.clip(x, 0.0, float("inf"))
+
+    @override
+    def _advance(self, gns: list[float], x: float, delta_t: float) -> list[float]:
+        # The method of the base class, written out for numbers: the loop
+        # then makes no call to a method and reads no attribute. It computes
+        # the same values, in the same order of operations.
+        speed = self.speed
+        level = self.level
+        vol = self.vol
+        sqrt = math.sqrt
+        infinity = math.inf
+
+        values = [x]
+        for gn in gns:
+            x = x + speed * (level - x) * x * delta_t + vol * sqrt(x) * gn
+            x = min(max(x, 0.0), infinity)
+            values.append(x)
+
+        return values

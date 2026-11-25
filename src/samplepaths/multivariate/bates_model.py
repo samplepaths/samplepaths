@@ -135,10 +135,11 @@ class BatesModel(HestonModel):
         return math.exp(self.jump_mean + self.jump_volatility**2 / 2.0) - 1.0
 
     @override
-    def _jumps(self, n: int, paths: int) -> npt.NDArray[np.float64] | float:
+    def _jumps(
+        self, n: int, paths: int, delta_t: float | npt.NDArray[np.float64]
+    ) -> npt.NDArray[np.float64] | float:
         # The sum of k normal jump sizes is normal, with k times the mean and
         # the variance of one, so no jump needs to be drawn on its own.
-        delta_t = self.t / n
         counts = self.rng.poisson(self.rate * delta_t, size=(n, paths))
         jumps: npt.NDArray[np.float64] = self.jump_mean * counts + self.jump_volatility * np.sqrt(
             counts

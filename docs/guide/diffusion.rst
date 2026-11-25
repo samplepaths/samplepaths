@@ -234,33 +234,12 @@ The Hull-White model, which adds reversion to a mean, is the
 given as a function of time. Models of the rate with two factors are
 described with the :doc:`processes with several components <multivariate>`.
 
-Exact Cox-Ingersoll-Ross sampling
----------------------------------
+Exact sampling
+--------------
 
-The value of a Cox-Ingersoll-Ross process after a time step has a known
-distribution given the value before: a multiple of a noncentral chi-square
-distribution. ``sample_exact()`` and ``sample_paths_exact()`` of
-:py:class:`~samplepaths.diffusion.CoxIngersollRossProcess` draw every value
-from it.
-
-.. code-block:: python
-
-    from samplepaths import CoxIngersollRossProcess
-
-    cir = CoxIngersollRossProcess(speed=1.0, mean=0.04, vol=0.6)
-    path = cir.sample_exact(252, initial=0.04)
-    final = cir.sample_paths_exact(1, paths=100_000, initial=0.04)[:, -1]
-
-Compared with ``sample()`` and ``sample_paths()``:
-
-* The realizations do not depend on the number of steps. One step gives the
-  exact distribution of the final value.
-* They are never negative. When ``2 * speed * mean`` is less than
-  ``vol ** 2`` the process reaches zero, and the Euler-Maruyama method steps
-  below it and returns ``nan``; with the parameters above it does so for most
-  realizations. The exact method returns zero and carries on.
-* A step costs about twice as much.
-* The parameters must be numbers, with a positive speed.
+The Vasicek, the Ornstein-Uhlenbeck and the Cox-Ingersoll-Ross processes can
+also be drawn from their exact distributions, on any grid of times, when
+their parameters are numbers. See :doc:`exact`.
 
 The initial value
 -----------------
@@ -307,5 +286,6 @@ step ``t / n`` gets smaller. Keep these points in mind:
   step below zero, after which the square root is undefined and the
   realization contains ``nan``. A smaller time step makes this less likely,
   and its exact method, described above, cannot leave the domain.
-* Diffusion processes cannot be sampled at specified times; ``sample_at()``
-  raises ``NotImplementedError``.
+* Only the processes with an exact method, and the Ho-Lee process, can be
+  sampled at specified times. For the others ``sample_at()`` raises
+  ``NotImplementedError``.

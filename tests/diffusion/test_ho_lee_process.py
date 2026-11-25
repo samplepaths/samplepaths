@@ -73,9 +73,44 @@ def test_sample_with_initial() -> None:
         instance.sample_with_initial(10, initial="a")  # type: ignore[arg-type]
 
 
-def test_sample_at_is_not_supported() -> None:
-    with pytest.raises(NotImplementedError):
-        ProcessType(**KWARGS).sample_at(np.array([0.0, 0.5, 1.0]))
+def test_sample_at_shape() -> None:
+    instance = ProcessType(**KWARGS)
+
+    with_zero = instance.sample_at(np.array([0.0, 0.5, 2.0]))
+    without_zero = instance.sample_at([0.5, 2.0])
+    assert with_zero.shape == (3,)
+    assert without_zero.shape == (2,)
+
+
+@pytest.mark.parametrize("times", [[], [1.0, 0.5], [-1.0, 1.0], [0.5, 0.5], [[0.0, 1.0]]])
+def test_sample_at_invalid_times(times: Any) -> None:
+    with pytest.raises(ValueError):
+        ProcessType(**KWARGS).sample_at(times)
+
+
+def test_sample_at_is_reproducible() -> None:
+    first = ProcessType(**KWARGS, rng=np.random.default_rng(5)).sample_at([0.1, 0.4, 3.0])
+    again = ProcessType(**KWARGS, rng=np.random.default_rng(5)).sample_at([0.1, 0.4, 3.0])
+
+    np.testing.assert_array_equal(first, again)
+
+
+def test_sample_at_values() -> None:
+    instance = ProcessType(**KWARGS, rng=np.random.default_rng(1))
+    values = np.array(
+        [instance.sample_at_with_initial([0.0, 0.3, 2.0], initial=0.1) for _ in range(20_000)]
+    )
+
+    assert np.all(values[:, 0] == 0.1)
+    np.testing.assert_allclose(values.mean(axis=0), [0.1, 0.25, 1.1], atol=0.01)
+    np.testing.assert_allclose(values.std(axis=0)[1:], 0.3 * np.sqrt([0.3, 2.0]), rtol=0.03)
+
+
+def test_sample_at_with_a_drift_given_as_a_function() -> None:
+    instance = ProcessType(drift=lambda t: 2 * t, vol=0.0)
+
+    # Steps of 0.5, 0.5 and 1 with the drift at the end of each: 1, 2 and 4.
+    np.testing.assert_allclose(instance.sample_at([0.5, 1.0, 2.0]), [0.5, 1.5, 5.5])
 
 
 def test_is_a_brownian_motion_with_drift_for_a_constant_drift() -> None:

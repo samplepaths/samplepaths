@@ -44,7 +44,7 @@ stochastic differential equations.
 Speed against a Rust core
 -------------------------
 
-``stochastic-rs`` 2.6.2 was measured against version 0.5.0 of
+``stochastic-rs`` 2.6.2 was measured against version 0.6.0 of
 ``samplepaths`` on the machine described in :doc:`/guide/performance`, which
 has 14 cores, for the processes which both packages provide with the same
 parameters. The times are in milliseconds, and the last column is the time
@@ -116,14 +116,22 @@ One realization of 4096 increments.
      - 0.109
      - 0.396
      - 3.6
+   * - Fractional Cox-Ingersoll-Ross process
+     - 0.089
+     - 0.344
+     - 3.9
    * - CEV process
      - 0.092
      - 0.446
      - 4.8
-   * - Fractional Cox-Ingersoll-Ross process
-     - 0.087
-     - 0.702
-     - 8.1
+   * - EGARCH(1, 1) process
+     - 0.102
+     - 0.627
+     - 6.1
+   * - GARCH(1, 1) process
+     - 0.043
+     - 0.417
+     - 9.7
    * - Heston model
      - 0.111
      - 1.188
@@ -136,21 +144,14 @@ One realization of 4096 increments.
      - 0.033
      - 0.453
      - 13.7
-   * - EGARCH(1, 1) process
-     - 0.093
-     - 2.699
-     - 29.0
-   * - GARCH(1, 1) process
-     - 0.041
-     - 2.157
-     - 53.2
 
 For one realization, compiled code wins: by a factor of 1 to 4 where
-``samplepaths`` calls ``numpy`` a few times, by 5 to 14 for the diffusion
-processes and the Heston model, and by 29 to 53 for the models with a
-changing variance. These two groups advance one value at a time in Python. A
-realization of 4096 values takes about a millisecond or less, and 2 to 3
-milliseconds for the models with a changing variance.
+``samplepaths`` calls ``numpy`` a few times, and by 4 to 14 for the processes
+which advance one value at a time in Python: the diffusion processes, the
+Heston model and the models with a changing variance. A realization of 4096
+values takes about a millisecond or less. The Vasicek and the
+Cox-Ingersoll-Ross processes also have exact methods; that of the Vasicek
+process takes 0.06 milliseconds, 3 times the time of ``stochastic-rs``.
 
 Many realizations
 ~~~~~~~~~~~~~~~~~

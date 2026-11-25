@@ -67,6 +67,10 @@ nitpick_ignore = [
     ("py:class", "numpy.object_"),
     # numpy documents NDArray as data, not as a class.
     ("py:class", "numpy.typing.NDArray"),
+    # ArrayLike is a union which numpy documents as data under another name.
+    ("py:class", "numpy._typing.ArrayLike"),
+    ("py:class", "numpy.typing.ArrayLike"),
+    ("py:class", "ArrayLike"),
     # Internal base class of the processes built on Brownian motion.
     ("py:class", "samplepaths.continuous.brownian_base.BrownianBase"),
 ]

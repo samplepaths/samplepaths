@@ -1,5 +1,6 @@
 """Kimura process, or Wright-Fisher diffusion."""
 
+import math
 from types import SimpleNamespace
 from typing import Any
 
@@ -85,3 +86,21 @@ class KimuraProcess(EulerMaruyamaProcess):
     @override
     def _confine(self, x: Any, functions: SimpleNamespace) -> Any:
         return functions.clip(x, 0.0, 1.0)
+
+    @override
+    def _advance(self, gns: list[float], x: float, delta_t: float) -> list[float]:
+        # The method of the base class, written out for numbers: the loop
+        # then makes no call to a method and reads no attribute. It computes
+        # the same values, in the same order of operations.
+        selection = self.selection
+        vol = self.vol
+        sqrt = math.sqrt
+
+        values = [x]
+        for gn in gns:
+            spread = x * (1.0 - x)
+            x = x + selection * spread * delta_t + vol * sqrt(spread) * gn
+            x = min(max(x, 0.0), 1.0)
+            values.append(x)
+
+        return values

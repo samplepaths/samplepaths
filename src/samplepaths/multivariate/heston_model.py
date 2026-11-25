@@ -5,8 +5,10 @@ import numpy.typing as npt
 from numpy.random import Generator
 
 from .._compat import override
-from .._square_root import square_root_paths
+from .._square_root import square_root_paths, square_root_values
+from .._times import steps_from_zero
 from ..utils.validation import check_nonnegative_number, check_numeric, check_positive_number
+from ._andersen import log_price_changes
 from .vector_process import VectorProcess
 
 #: Number of realizations from which the variances of all realizations are
@@ -171,10 +173,17 @@ class HestonModel(VectorProcess):
             vectorize_from=_VECTORIZE_FROM_PATHS,
         )
 
-    def _jumps(self, n: int, paths: int) -> npt.NDArray[np.float64] | float:
+    def _jumps(
+        self, n: int, paths: int, delta_t: float | npt.NDArray[np.float64]
+    ) -> npt.NDArray[np.float64] | float:
         """Return what jumps add to the logarithm of the price at each step.
 
-        An array of shape ``(n, paths)``, or zero for a model without jumps.
+        :param n: the number of steps
+        :param paths: the number of realizations
+        :param delta_t: the length of the steps, a number or a column with
+            one length per step
+        :returns: an array of shape ``(n, paths)``, or zero for a model
+            without jumps
         """
         return 0.0
 
@@ -184,21 +193,8 @@ class HestonModel(VectorProcess):
         self._check_paths(n, paths)
 
         variances = self._variances(n, paths)
-        before, after = variances[:-1], variances[1:]
-
-        # Andersen (2008), equation 33, with the integral of the variance
-        # over a step approximated by the mean of its two ends.
-        delta_t = self.t / n
-        ratio = self.correlation / self.vol
-        slope = 0.5 * delta_t * (self.speed * ratio - 0.5)
-        independent = 0.5 * delta_t * (1.0 - self.correlation**2)
-
-        changes = self.rng.standard_normal((n, paths))
-        changes *= np.sqrt(independent * (before + after))
-        changes += (self.drift - self.speed * self.mean * ratio) * delta_t
-        changes += (slope - ratio) * before
-        changes += (slope + ratio) * after
-        changes += self._jumps(n, paths)
+        changes = log_price_changes(self, variances, self.t / n)
+        changes += self._jumps(n, paths, self.t / n)
 
         realizations = np.empty((paths, 2, n + 1))
         realizations[:, 0, 0] = initial
@@ -245,3 +241,53 @@ class HestonModel(VectorProcess):
             ),
             dtype=np.float64,
         )
+
+    @override
+    def sample_at(self, times: npt.ArrayLike) -> npt.NDArray[np.float64]:
+        """Generate a realization at specified times, from a price of 1.
+
+        :param times: a vector of increasing time values at which to generate
+            the realization
+        :returns: the realization, with the price in the first row and the
+            variance in the second, and one value per time
+        """
+        return self.sample_at_with_initial(times, 1.0)
+
+    def sample_at_with_initial(
+        self,
+        times: npt.ArrayLike,
+        initial: float = 1.0,
+    ) -> npt.NDArray[np.float64]:
+        """Generate a realization at specified times from an initial price.
+
+        The variance is exact at every time. The price is as accurate as the
+        longest step between two times is short.
+
+        :param times: a vector of increasing time values at which to generate
+            the realization
+        :param initial: the price at time zero
+        :returns: the realization, with the price in the first row and the
+            variance in the second, and one value per time
+        """
+        check_positive_number(value=initial, name="Initial")
+        steps, starts_at_zero = steps_from_zero(times)
+
+        variances = square_root_values(
+            self.rng,
+            steps,
+            1,
+            speed=self.speed,
+            mean=self.mean,
+            vol=self.vol,
+            initial=self.initial_variance,
+            vectorize_from=_VECTORIZE_FROM_PATHS,
+        )
+        lengths = steps[:, np.newaxis]
+        changes = log_price_changes(self, variances, lengths)
+        changes += self._jumps(len(steps), 1, lengths)
+
+        realization = np.empty((2, len(steps) + 1))
+        realization[0, 0] = initial
+        realization[0, 1:] = initial * np.exp(np.cumsum(changes[:, 0]))
+        realization[1] = variances[:, 0]
+        return realization if starts_at_zero else realization[:, 1:]

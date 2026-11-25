@@ -203,13 +203,31 @@ class ConditionalVarianceProcess(BaseSequenceProcess):
 
         return values, deviations
 
+    def _advance_floats(
+        self,
+        presample: list[float],
+        innovations: list[float],
+    ) -> tuple[list[float], list[float]]:
+        """Generate the values of one realization and their standard deviations.
+
+        A subclass overrides this method with a loop written out for a model
+        with one previous value, the most common one, which computes the same
+        values several times faster.
+
+        :param presample: the innovations before the first value, most recent
+            first, one per lag
+        :param innovations: the innovations of the values, in order
+        :returns: the values and their standard deviations
+        """
+        return self._advance(presample, innovations, SCALAR)
+
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:
         check_positive_integer(n=n)
 
         lags = self._lags
         innovations: list[float] = self.rng.standard_normal(lags + n).tolist()
-        values, deviations = self._advance(innovations[:lags], innovations[lags:], SCALAR)
+        values, deviations = self._advance_floats(innovations[:lags], innovations[lags:])
 
         self.__volatility = np.array(deviations)
         return np.array(values)
@@ -231,7 +249,7 @@ class ConditionalVarianceProcess(BaseSequenceProcess):
 
         if len(innovations) < _VECTORIZE_FROM_PATHS:
             # Few realizations: step through each of them in turn.
-            rows = [self._advance(row[:lags], row[lags:], SCALAR) for row in innovations.tolist()]
+            rows = [self._advance_floats(row[:lags], row[lags:]) for row in innovations.tolist()]
             self.__volatility = np.array([deviations for _, deviations in rows])
             return np.array([values for values, _ in rows])
 
