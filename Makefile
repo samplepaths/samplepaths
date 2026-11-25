@@ -42,7 +42,7 @@ docs-clean:  ## Remove the built documentation
 	rm -rf docs/_build
 
 version:  ## Show the version derived from the git tags
-	@uv run python -c "import samplepaths; print(samplepaths.__version__)"
+	@uvx --quiet --with hatch-vcs hatchling version
 
 build:  ## Build the source distribution and the wheel
 	rm -rf dist
