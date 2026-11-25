@@ -100,6 +100,12 @@ Continuous integration
 * Pull requests are merged by squashing. A branch built on another branch
   must be rebased on ``master`` after the first is merged, with
   ``git rebase --onto origin/master <old base> <branch>``.
+* The CodeQL alerts of ``master`` are those of its last daily scan, not of
+  its last commit. An alert which a merged pull request fixed stays open
+  until the next scan, at 04:17 UTC; compare the commit of the alert with
+  ``master`` before fixing it again.
+* ``SECURITY.md`` sends reports to the private vulnerability reporting of
+  GitHub, which is a setting of the repository and must stay enabled.
 
 Known limits
 ------------

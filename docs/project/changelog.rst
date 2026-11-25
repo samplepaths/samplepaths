@@ -20,6 +20,12 @@ Documentation
   :doc:`/project/comparison/speed` and :doc:`/project/comparison/agreement`, and this changelog
   has one page per minor version.
 
+Project
+~~~~~~~
+
+* A security policy, ``SECURITY.md``, says which versions get fixes and how
+  to report a vulnerability privately.
+
 Versions
 --------
 

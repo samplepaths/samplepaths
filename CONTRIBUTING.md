@@ -10,6 +10,8 @@ Open an issue at https://github.com/samplepaths/samplepaths/issues with:
 - a short piece of code which shows the problem, with a seeded generator when it involves random results
 - what you expected and what happened instead
 
+Report a vulnerability privately instead, as [SECURITY.md](SECURITY.md) describes.
+
 ## Making a change
 
 ```shell

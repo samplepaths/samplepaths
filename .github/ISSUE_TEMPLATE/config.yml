@@ -3,3 +3,6 @@ contact_links:
   - name: Documentation
     url: https://samplepaths.readthedocs.io/
     about: Guides, examples and the API reference.
+  - name: Report a vulnerability
+    url: https://github.com/samplepaths/samplepaths/security/advisories/new
+    about: Report a security problem privately, not in a public issue.
