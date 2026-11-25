@@ -117,8 +117,9 @@ Adding a process
    representations, the shape of the realizations and their values for a
    seeded generator.
 5. Add the process to the guide of its family in ``docs/guide`` and a figure
-   to ``docs/scripts/make_images.py``. Add an example to the folder of the
-   family in ``docs/examples``. The API reference is generated
+   to ``docs/scripts/make_images.py``. Add an example named after the module,
+   ``plot_<module>.py``, to the folder of the family in ``docs/examples``;
+   a test checks that every process has one. The API reference is generated
    automatically.
 6. Override ``sample_paths(n, paths)`` when the process can generate many
    realizations in one pass, and add the process to the cases of

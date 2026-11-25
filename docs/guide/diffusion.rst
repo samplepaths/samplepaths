@@ -196,7 +196,9 @@ correlated and the process is rough, as volatility is observed to be.
 Their parameters are numbers, and ``hurst`` can be changed after creation.
 The realizations use exact increments of the fractional Brownian motion,
 generated with the Davies-Harte method, in the Euler method. The method is
-known to converge for a Hurst parameter above 0.5. The two linear processes,
+known to converge for a Hurst parameter above 0.5. Below 0.5 the two
+processes with a square root in their volatility tend to stay at the
+boundary of their domain once they reach it. The two linear processes,
 Ornstein-Uhlenbeck and Vasicek, are computed for all steps at once, and use
 every thread given by ``workers``.
 

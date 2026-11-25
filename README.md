@@ -153,7 +153,7 @@ The documentation at https://samplepaths.readthedocs.io/ contains:
 
 - a [quickstart](https://samplepaths.readthedocs.io/en/latest/getting-started/quickstart.html)
 - a user guide for [sampling](https://samplepaths.readthedocs.io/en/latest/guide/usage.html), [simulating many realizations](https://samplepaths.readthedocs.io/en/latest/guide/paths.html), [random number generation](https://samplepaths.readthedocs.io/en/latest/guide/random.html) and every family of processes
-- a [gallery of examples](https://samplepaths.readthedocs.io/en/latest/gallery/index.html) with their figures
+- a [gallery](https://samplepaths.readthedocs.io/en/latest/gallery/index.html) with a runnable example and its figures for every process
 - measured [sampling times](https://samplepaths.readthedocs.io/en/latest/guide/performance.html) and a [changelog](https://samplepaths.readthedocs.io/en/latest/project/changelog.html)
 - an [API reference](https://samplepaths.readthedocs.io/en/latest/reference/index.html) for every class, method and function
 
