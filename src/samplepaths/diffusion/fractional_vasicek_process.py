@@ -1,21 +1,17 @@
 """Fractional Vasicek process."""
 
-import math
 from types import SimpleNamespace
 from typing import Any
 
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
-from scipy.signal import lfilter
 
 from .._compat import override
+from .._recurrence import solve_linear_recurrence
 from ..noise.gaussian_noise import GaussianNoise
 from ..utils.validation import check_nonnegative_number, check_numeric, check_positive_number
 from .fractional_euler_process import FractionalEulerProcess
-
-#: Largest logarithm of a power of the decay within a block of steps.
-_LOG_POWER_RANGE = 60.0
 
 
 class FractionalVasicekProcess(FractionalEulerProcess):
@@ -120,37 +116,13 @@ class FractionalVasicekProcess(FractionalEulerProcess):
         """Apply the Euler method to realizations of the noise, one per row.
 
         The equation is linear, so its steps form a linear recurrence,
-        ``X[k + 1] = decay X[k] + input[k]``, whose solution is a weighted
-        cumulative sum. It is evaluated with array operations, which release
-        the interpreter lock.
+        ``X[k + 1] = decay X[k] + input[k]``, which is solved for all steps
+        with array operations.
         """
         check_numeric(value=initial, name="Initial")
-        n = noise.shape[-1]
-        delta_t = self.t / n
-        decay = 1.0 - self.speed * delta_t
+        delta_t = self.t / noise.shape[-1]
         inputs = self.speed * self.mean * delta_t + self.vol * noise
-
-        realizations = np.empty((*noise.shape[:-1], n + 1))
-        realizations[..., 0] = float(initial)
-
-        if decay <= 0:
-            # A time step this large makes the method unstable. A compiled
-            # filter evaluates the recurrence as it is written.
-            state = np.full((*noise.shape[:-1], 1), decay * float(initial))
-            realizations[..., 1:], _ = lfilter([1.0], [1.0, -decay], inputs, axis=-1, zi=state)
-            return realizations
-
-        # The powers of the decay are kept within the range of floats by
-        # solving the recurrence over blocks of steps.
-        block = n if decay == 1 else max(1, int(_LOG_POWER_RANGE / abs(math.log(decay))))
-        for start in range(0, n, block):
-            stop = min(n, start + block)
-            powers = decay ** np.arange(1, stop - start + 1)
-            previous = realizations[..., start : start + 1]
-            realizations[..., start + 1 : stop + 1] = powers * (
-                previous + np.cumsum(inputs[..., start:stop] / powers, axis=-1)
-            )
-        return realizations
+        return solve_linear_recurrence(inputs, 1.0 - self.speed * delta_t, float(initial))
 
     @override
     def _useful_workers(self, n: int, paths: int) -> int:

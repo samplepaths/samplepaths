@@ -134,7 +134,7 @@ class SABRModel(VectorProcess):
         if self.beta in (0.0, 1.0):
             # No step is taken in Python, so every thread is useful.
             return workers
-        return max(1, min(workers, paths // _PATHS_PER_WORKER))
+        return max(1, min(workers, self._max_stepping_workers, paths // _PATHS_PER_WORKER))
 
     def _forwards(
         self,

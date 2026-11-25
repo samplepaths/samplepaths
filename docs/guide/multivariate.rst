@@ -2,8 +2,9 @@ Processes with Several Components
 =================================
 
 The :py:mod:`samplepaths.multivariate` module provides processes made of
-several quantities which evolve together: correlated Brownian motions, and
-the models of a price or a rate together with its random volatility.
+several quantities which evolve together: correlated Brownian motions, the
+models of a price or a rate together with its random volatility, and
+interest rate models with two factors.
 
 Overview
 --------
@@ -22,6 +23,10 @@ Overview
      - a price with jumps and its variance
    * - :py:class:`~samplepaths.multivariate.SABRModel`
      - a forward and its volatility
+   * - :py:class:`~samplepaths.multivariate.HullWhiteTwoFactorModel`
+     - an interest rate and the factor which moves its level
+   * - :py:class:`~samplepaths.multivariate.TwoFactorCoxIngersollRossModel`
+     - an interest rate and the two factors it is the sum of
 
 The shape of a realization
 --------------------------
@@ -190,12 +195,67 @@ become negative, to 1, a lognormal model. ``volvol`` is :math:`\nu`,
 The volatility is exact. For ``beta`` strictly between 0 and 1 the forward
 uses the Euler method, and a forward which reaches zero stays there.
 
+Interest rate models with two factors
+-------------------------------------
+
+With one source of randomness, the interest rates of all maturities move
+together. A second factor lets short and long rates move differently.
+
+.. image:: /_static/hull_white_two_factor_model.png
+    :scale: 50%
+
+In a :py:class:`~samplepaths.multivariate.HullWhiteTwoFactorModel` the rate
+reverts to a level which is itself random:
+
+.. math::
+
+    dr_t &= (\theta_t + u_t - a r_t) dt + \sigma_1 dW^1_t \\
+    du_t &= -b u_t dt + \sigma_2 dW^2_t
+
+``speed`` and ``vol`` are :math:`a` and :math:`\sigma_1`, ``factor_speed``
+and ``factor_vol`` are :math:`b` and :math:`\sigma_2`, and ``drift`` is
+:math:`\theta_t`, a number or a function of time. The rate can become
+negative. The realizations use the Euler-Maruyama method, computed for all
+steps at once, and ``sample_with_initial(n, initial)`` chooses the initial
+rate, which is 0 otherwise.
+
+.. code-block:: python
+
+    from samplepaths import HullWhiteTwoFactorModel
+
+    model = HullWhiteTwoFactorModel(
+        speed=2.0, drift=0.06, vol=0.01, factor_speed=0.3, factor_vol=0.02, correlation=-0.5, t=10
+    )
+    rate, factor = model.sample_with_initial(1000, initial=0.03)
+
+.. image:: /_static/two_factor_cox_ingersoll_ross_model.png
+    :scale: 50%
+
+In a :py:class:`~samplepaths.multivariate.TwoFactorCoxIngersollRossModel`
+the rate is the sum of two independent Cox-Ingersoll-Ross processes, usually
+a fast one and a slow one, and is never negative. Each parameter takes one
+value per factor. A realization has three components: the rate and the two
+factors, which are drawn from their exact distributions.
+
+.. code-block:: python
+
+    from samplepaths import TwoFactorCoxIngersollRossModel
+
+    model = TwoFactorCoxIngersollRossModel(
+        speed=(2.0, 0.2), mean=(0.02, 0.03), vol=(0.1, 0.05), t=10
+    )
+    rate, fast, slow = model.sample(1000)
+
+Models of the rate with one factor, the Vasicek, Cox-Ingersoll-Ross and
+Ho-Lee processes, are :doc:`diffusion processes <diffusion>`.
+
 Many realizations
 -----------------
 
-All four generate their realizations together and accept ``workers``. With 14
-threads, 100,000 realizations of 64 increments take 10 milliseconds for two
-correlated Brownian motions, 48 for a SABR model and 61 for a Heston model.
-The Heston, the Bates and, for ``beta`` between 0 and 1, the SABR models
-advance step by step, and use a thread for every 5000 realizations at most.
-See :doc:`paths` and :doc:`performance`.
+All of them generate their realizations together and accept ``workers``.
+With 14 threads, 100,000 realizations of 64 increments take 10 milliseconds
+for two correlated Brownian motions, 24 for a two-factor Hull-White model,
+30 for a SABR model and 39 for a Heston model. The Heston, the Bates and the
+two-factor Cox-Ingersoll-Ross models and, for ``beta`` between 0 and 1, the
+SABR model advance step by step, and use at most six threads, one for every
+5000 realizations. See :doc:`paths` and :doc:`performance`.

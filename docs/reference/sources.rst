@@ -24,3 +24,7 @@ Bibliographical Sources
 * Bates, David S. "Jumps and stochastic volatility: Exchange rate processes implicit in Deutsche Mark options." The Review of Financial Studies 9, no. 1 (1996): 69-107.
 * Hagan, Patrick S., Deep Kumar, Andrew S. Lesniewski, and Diana E. Woodward. "Managing smile risk." Wilmott Magazine (2002): 84-108.
 * Andersen, Leif. "Simple and efficient simulation of the Heston stochastic volatility model." Journal of Computational Finance 11, no. 3 (2008): 1-42.
+* Ho, Thomas SY, and Sang-Bin Lee. "Term structure movements and pricing interest rate contingent claims." The Journal of Finance 41, no. 5 (1986): 1011-1029.
+* Longstaff, Francis A., and Eduardo S. Schwartz. "Interest rate volatility and the term structure: A two-factor general equilibrium model." The Journal of Finance 47, no. 4 (1992): 1259-1282.
+* Hull, John, and Alan White. "Numerical procedures for implementing term structure models II: Two-factor models." The Journal of Derivatives 2, no. 2 (1994): 37-48.
+* Glasserman, Paul. Monte Carlo methods in financial engineering. Springer, 2004.

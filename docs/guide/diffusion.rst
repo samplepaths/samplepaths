@@ -203,10 +203,68 @@ every thread given by ``workers``.
 The fractional counterpart of the geometric Brownian motion is exact and is
 described with the :doc:`continuous-time processes <continuous>`.
 
+Ho-Lee process
+--------------
+
+.. image:: /_static/ho_lee_process.png
+    :scale: 50%
+
+A :py:class:`~samplepaths.diffusion.HoLeeProcess` is a model of the
+instantaneous interest rate which does not revert to a mean:
+
+.. math::
+
+    dX_t = \theta_t dt + \sigma dW_t
+
+Its ``drift`` is a number or a function of time; as a function it lets the
+model reproduce the interest rates observed today for every maturity. The
+noise is exact. ``sample()`` starts from 0.
+
+.. code-block:: python
+
+    from samplepaths import HoLeeProcess
+
+    rates = HoLeeProcess(drift=lambda t: 0.01 + 0.002 * t, vol=0.01, t=10)
+    paths = rates.sample_paths_with_initial(120, paths=5000, initial=0.03)
+
+The Hull-White model, which adds reversion to a mean, is the
+:py:class:`~samplepaths.diffusion.ExtendedVasicekProcess` above with a mean
+given as a function of time. Models of the rate with two factors are
+described with the :doc:`processes with several components <multivariate>`.
+
+Exact Cox-Ingersoll-Ross sampling
+---------------------------------
+
+The value of a Cox-Ingersoll-Ross process after a time step has a known
+distribution given the value before: a multiple of a noncentral chi-square
+distribution. ``sample_exact()`` and ``sample_paths_exact()`` of
+:py:class:`~samplepaths.diffusion.CoxIngersollRossProcess` draw every value
+from it.
+
+.. code-block:: python
+
+    from samplepaths import CoxIngersollRossProcess
+
+    cir = CoxIngersollRossProcess(speed=1.0, mean=0.04, vol=0.6)
+    path = cir.sample_exact(252, initial=0.04)
+    final = cir.sample_paths_exact(1, paths=100_000, initial=0.04)[:, -1]
+
+Compared with ``sample()`` and ``sample_paths()``:
+
+* The realizations do not depend on the number of steps. One step gives the
+  exact distribution of the final value.
+* They are never negative. When ``2 * speed * mean`` is less than
+  ``vol ** 2`` the process reaches zero, and the Euler-Maruyama method steps
+  below it and returns ``nan``; with the parameters above it does so for most
+  realizations. The exact method returns zero and carries on.
+* A step costs about twice as much.
+* The parameters must be numbers, with a positive speed.
+
 The initial value
 -----------------
 
-``sample(n)`` starts every diffusion process from an initial value of 1.
+``sample(n)`` starts the diffusion processes of the general model from an
+initial value of 1.
 Use ``sample_with_initial(n, initial)`` to choose the initial value.
 
 An initial value outside the domain of the volatility term gives a
@@ -245,6 +303,7 @@ step ``t / n`` gets smaller. Keep these points in mind:
 * The approximation can leave the domain of the exact process. A
   Cox-Ingersoll-Ross process is nonnegative, but its discretized path can
   step below zero, after which the square root is undefined and the
-  realization contains ``nan``. A smaller time step makes this less likely.
+  realization contains ``nan``. A smaller time step makes this less likely,
+  and its exact method, described above, cannot leave the domain.
 * Diffusion processes cannot be sampled at specified times; ``sample_at()``
   raises ``NotImplementedError``.

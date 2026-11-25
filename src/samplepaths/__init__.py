@@ -37,6 +37,7 @@ from .diffusion import (
     FractionalOrnsteinUhlenbeckProcess,
     FractionalVasicekProcess,
     GompertzProcess,
+    HoLeeProcess,
     JacobiProcess,
     KimuraProcess,
     OrnsteinUhlenbeckProcess,
@@ -55,7 +56,9 @@ from .multivariate import (
     BatesModel,
     CorrelatedBrownianMotions,
     HestonModel,
+    HullWhiteTwoFactorModel,
     SABRModel,
+    TwoFactorCoxIngersollRossModel,
 )
 from .noise import (
     BlueNoise,
@@ -118,6 +121,7 @@ __all__ = [
     "FractionalOrnsteinUhlenbeckProcess",
     "FractionalVasicekProcess",
     "GompertzProcess",
+    "HoLeeProcess",
     "JacobiProcess",
     "KimuraProcess",
     "OrnsteinUhlenbeckProcess",
@@ -134,7 +138,9 @@ __all__ = [
     "BatesModel",
     "CorrelatedBrownianMotions",
     "HestonModel",
+    "HullWhiteTwoFactorModel",
     "SABRModel",
+    "TwoFactorCoxIngersollRossModel",
     # noise
     "BlueNoise",
     "BrownianNoise",

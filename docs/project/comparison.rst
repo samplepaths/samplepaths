@@ -17,7 +17,7 @@ Where it fits
      - What it is
      - Choose it when
    * - ``samplepaths``
-     - 65 named processes in Python on ``numpy``; typed; reproducible
+     - 68 named processes in Python on ``numpy``; typed; reproducible
        results checked between versions
      - you want readable, dependency-light code, exact reproducibility, or a
        maintained replacement for ``stochastic``
@@ -168,13 +168,13 @@ Both packages can use all cores: ``stochastic-rs`` with ``sample_par()``,
      - ``stochastic-rs``
      - ``samplepaths``
      - Ratio
+   * - Correlated Brownian motions
+     - 18.3
+     - 10.0
+     - 0.5
    * - Gaussian noise
      - 7.1
      - 4.0
-     - 0.6
-   * - Correlated Brownian motions
-     - 15.8
-     - 9.9
      - 0.6
    * - Fractional Brownian motion
      - 17.0
@@ -216,6 +216,10 @@ Both packages can use all cores: ``stochastic-rs`` with ``sample_par()``,
      - 7.8
      - 8.9
      - 1.1
+   * - SABR model
+     - 26.0
+     - 30.4
+     - 1.2
    * - Geometric Brownian motion
      - 7.6
      - 9.0
@@ -224,14 +228,14 @@ Both packages can use all cores: ``stochastic-rs`` with ``sample_par()``,
      - 11.5
      - 16.0
      - 1.4
+   * - Heston model
+     - 28.3
+     - 39.3
+     - 1.4
    * - EGARCH(1, 1) process
      - 19.3
      - 32.9
      - 1.7
-   * - SABR model
-     - 26.5
-     - 48.1
-     - 1.8
    * - Fractional Cox-Ingersoll-Ross process
      - 17.0
      - 33.0
@@ -240,10 +244,6 @@ Both packages can use all cores: ``stochastic-rs`` with ``sample_par()``,
      - 9.9
      - 20.3
      - 2.0
-   * - Heston model
-     - 26.0
-     - 60.5
-     - 2.3
 
 20,000 realizations of 1024 increments:
 
@@ -268,8 +268,8 @@ Both packages can use all cores: ``stochastic-rs`` with ``sample_par()``,
      - 34.9
      - 0.9
    * - Correlated Brownian motions
-     - 34.7
-     - 35.1
+     - 36.4
+     - 37.4
      - 1.0
    * - Poisson process
      - 15.5
@@ -312,13 +312,13 @@ Both packages can use all cores: ``stochastic-rs`` with ``sample_par()``,
      - 121.2
      - 2.2
    * - SABR model
-     - 74.9
-     - 173.4
-     - 2.3
+     - 76.1
+     - 237.5
+     - 3.1
    * - Heston model
-     - 78.4
-     - 196.1
-     - 2.5
+     - 81.5
+     - 255.7
+     - 3.1
    * - CEV process
      - 55.3
      - 212.8
@@ -333,21 +333,24 @@ Both packages can use all cores: ``stochastic-rs`` with ``sample_par()``,
      - 7.9
 
 For large batches of short paths the two are close: ``samplepaths`` is
-between 0.6 and 1.4 times the time of ``stochastic-rs`` for 14 of the 19
-processes, and faster for seven of them. The others take 1.7 to 2.3 times as
-long.
+between 0.5 and 1.4 times the time of ``stochastic-rs`` for 16 of the 19
+processes, and faster for seven of them. The other three take 1.7 to 2.0
+times as long.
 
 Long paths separate the processes by how they are computed. Those written as
 array operations over time, the fractional Vasicek process and the correlated
 Brownian motions among them, stay between 0.8 and 1.4. The time series
 models, the Heston and the SABR models advance step by step with all
-realizations together, and take 1.6 to 2.5 times as long. The CEV, the
+realizations together, and take 1.6 to 3.1 times as long. The CEV, the
 Cox-Ingersoll-Ross and the fractional Cox-Ingersoll-Ross processes, whose
-volatility depends on the value of the process, are 4 to 8 times slower.
+volatility depends on the value of the process, are 4 to 8 times slower with
+the Euler-Maruyama method. For the Cox-Ingersoll-Ross process the exact
+method of ``samplepaths`` is the better choice: it needs no fine grid, and
+one step gives 100,000 exact final values in 1.6 milliseconds.
 
 For small batches the fixed cost of a call dominates. For 1000 realizations
-of 256 increments ``samplepaths`` takes 0.5 to 8.4 milliseconds and is 1.4 to
-7.5 times slower than ``stochastic-rs`` in parallel.
+of 256 increments ``samplepaths`` takes 0.5 to 8.0 milliseconds and is 1.4 to
+6.8 times slower than ``stochastic-rs`` in parallel.
 
 Do the two packages agree?
 --------------------------
@@ -378,247 +381,273 @@ Reproduce it with:
      - p-value
    * - Brownian motion
      - final value
-     - -0.000
+     - 0.008
      - -0.001
-     - 1.00, 1.00
-     - 0.73
+     - 0.99, 1.00
+     - 0.23
    * - Geometric Brownian motion
      - final value
-     - 1.051
+     - 1.054
      - 1.052
      - 0.21, 0.21
-     - 0.94
+     - 0.32
    * - Fractional Brownian motion
      - final value
-     - 0.006
+     - -0.000
      - 0.001
-     - 1.00, 1.00
-     - 0.61
+     - 0.99, 1.00
+     - 0.59
    * - Vasicek process
      - final value
      - 0.611
      - 0.609
      - 0.17, 0.17
-     - 0.15
+     - 0.09
    * - Cox-Ingersoll-Ross process
      - final value
-     - 1.001
+     - 1.000
      - 1.002
      - 0.20, 0.20
-     - 0.58
+     - 0.18
    * - CEV process
      - final value
      - 1.106
      - 1.107
-     - 0.21, 0.22
-     - 0.66
+     - 0.22, 0.22
+     - 0.40
    * - Variance gamma process
      - final value
-     - 0.103
+     - 0.104
      - 0.105
-     - 0.99, 1.01
-     - 0.88
+     - 1.01, 1.01
+     - 0.81
    * - Poisson process
      - time of arrival 64
-     - 31.99
+     - 32.03
      - 32.04
-     - 3.99, 4.01
-     - 0.07
+     - 4.00, 4.01
+     - 0.87
    * - Jacobi process
      - final value
      - 0.474
      - 0.473
      - 0.12, 0.12
-     - 0.47
+     - 0.52
    * - Verhulst process
      - final value
-     - 2.305
+     - 2.306
      - 2.302
      - 0.42, 0.42
-     - 0.49
+     - 0.25
    * - Gompertz process
      - final value
      - 2.187
      - 2.191
      - 0.35, 0.35
-     - 0.34
+     - 0.47
    * - Kimura process
      - final value
      - 0.509
      - 0.509
      - 0.24, 0.24
-     - 0.93
+     - 0.23
    * - Feller logistic process
      - final value
-     - 1.738
+     - 1.742
      - 1.741
      - 0.23, 0.23
-     - 0.50
+     - 0.32
    * - Normal inverse Gaussian process
      - final value
-     - 0.098
+     - 0.101
      - 0.102
      - 0.50, 0.51
-     - 0.76
+     - 0.74
    * - Merton jump diffusion
      - final logarithm
-     - -0.079
+     - -0.093
      - -0.081
      - 0.58, 0.59
-     - 0.98
+     - 0.15
    * - Compound Poisson process
      - value at time 2
-     - -0.815
+     - -0.813
      - -0.806
-     - 0.90, 0.90
-     - 0.09
+     - 0.89, 0.90
+     - 0.33
    * - Hawkes process
      - arrivals in [0, 20]
      - 79.1
      - 78.5
-     - 17.7, 17.4
-     - 0.07
+     - 17.6, 17.4
+     - 0.04
    * - Fractional Vasicek process
      - final value
      - 0.609
      - 0.610
      - 0.16, 0.16
-     - 0.48
+     - 0.57
    * - Fractional Ornstein-Uhlenbeck process
      - final value
-     - 0.218
+     - 0.220
      - 0.219
      - 0.16, 0.16
-     - 0.77
+     - 0.56
    * - Fractional Ornstein-Uhlenbeck process, H = 0.3
      - final value
-     - 0.220
+     - 0.218
      - 0.220
      - 0.18, 0.18
-     - 0.55
+     - 0.03
    * - Fractional Cox-Ingersoll-Ross process
      - final value
+     - 1.011
      - 1.010
-     - 1.010
-     - 0.19, 0.20
-     - 0.88
+     - 0.20, 0.20
+     - 0.77
    * - Fractional Jacobi process
      - final value
      - 0.476
      - 0.475
      - 0.11, 0.11
-     - 0.41
+     - 0.18
    * - Fractional geometric Brownian motion
      - final logarithm
      - 0.048
      - 0.048
      - 0.20, 0.20
-     - 0.79
+     - 0.89
    * - Heston, price
      - final logarithm
-     - 0.019
+     - 0.017
      - 0.017
      - 0.26, 0.26
-     - 0.46
+     - 0.84
    * - Heston, variance
      - final value
      - 0.047
      - 0.047
      - 0.03, 0.03
-     - 0.99
+     - 0.09
    * - Bates, price
      - final logarithm
-     - -0.017
+     - -0.011
      - -0.008
      - 0.36, 0.37
-     - 0.09
+     - 0.45
    * - SABR, forward
      - final value
-     - 1.000
+     - 0.998
      - 0.999
-     - 0.21, 0.20
-     - 0.19
+     - 0.20, 0.20
+     - 0.92
    * - SABR, volatility
      - final value
-     - 0.199
+     - 0.200
      - 0.200
      - 0.08, 0.08
-     - 0.27
+     - 0.52
    * - Correlated Brownian motions  sum of
      - final values
-     - -0.007
+     - 0.009
      - 0.006
      - 1.79, 1.79
-     - 0.49
+     - 0.95
+   * - Cox-Ingersoll-Ross, exact
+     - final value
+     - 1.000
+     - 1.000
+     - 0.20, 0.20
+     - 0.28
+   * - Ho-Lee
+     - final value
+     - 0.506
+     - 0.499
+     - 0.31, 0.31
+     - 0.87
+   * - Hull-White two-factor, rate
+     - final value
+     - 0.279
+     - 0.284
+     - 0.16, 0.16
+     - 0.19
+   * - Hull-White two-factor, factor
+     - final value
+     - -0.001
+     - -0.002
+     - 0.14, 0.14
+     - 0.24
    * - AR(2) process
      - value 300
-     - -0.002
-     - -0.009
-     - 2.27, 2.27
-     - 0.79
+     - 0.010
+     - -0.007
+     - 2.25, 2.29
+     - 0.05
    * - MA(2) process
      - value 300
-     - -0.005
-     - -0.016
-     - 1.78, 1.79
-     - 0.70
+     - 0.015
+     - -0.000
+     - 1.77, 1.77
+     - 0.17
    * - ARIMA(1, 1, 1) process
      - value 300
+     - 0.3
      - -0.0
-     - 0.0
-     - 44.6, 44.9
-     - 0.74
+     - 44.8, 44.9
+     - 0.44
    * - SARIMA(1, 0, 1)(1, 1, 1) process, period 4
      - value 300
-     - -0.1
      - 0.1
-     - 22.2, 22.2
-     - 0.19
+     - -0.0
+     - 22.3, 22.2
+     - 0.42
    * - ARCH(1) process
      - value 300
-     - -0.003
-     - -0.001
-     - 1.00, 1.00
-     - 0.95
+     - 0.007
+     - 0.006
+     - 1.01, 1.00
+     - 0.81
    * - GARCH(1, 1) process
      - value 300
-     - -0.003
-     - 0.015
-     - 0.99, 1.00
-     - 0.019
+     - 0.002
+     - 0.001
+     - 1.01, 1.00
+     - 0.96
    * - GARCH(2, 2) process
      - value 300
+     - -0.005
      - 0.004
-     - -0.000
-     - 0.99, 0.99
-     - 0.73
+     - 1.00, 1.00
+     - 0.28
    * - EGARCH(1, 1) process
      - value 300
      - 0.001
-     - -0.000
+     - -0.001
      - 0.63, 0.63
-     - 0.48
+     - 0.64
    * - Threshold GARCH(1, 1) process
      - value 300
      - 0.002
-     - 0.004
+     - -0.002
      - 1.00, 1.00
-     - 0.97
+     - 0.54
    * - AGARCH of ``stochastic-rs``, threshold GARCH here
      - value 300
-     - 0.005
-     - 0.008
-     - 1.00, 1.00
-     - 0.58
+     - 0.002
+     - -0.005
+     - 0.99, 1.00
+     - 0.42
 
-The test finds no difference in 38 of the 39 comparisons. The GARCH(1, 1)
-process has a p-value of 0.019 in this run; among 39 tests, two below 0.05
-are expected by chance, and its four earlier runs gave 0.36, 0.91, 0.42
-and 0.39. An
-earlier run gave 0.008 for the CEV process, which repeated three times with
-400,000 realizations gave 0.92, 0.72 and 0.19, with means of 1.1052 to
-1.1056 from both packages against an exact mean of 1.1052. So the two
-packages agree for every process they share.
+The test finds no difference in 40 of the 43 comparisons, and three have a
+p-value between 0.03 and 0.05; among 43 tests, two below 0.05 are expected
+by chance. Which comparisons come out low changes from run to run. The
+lowest seen in any run was 0.0003 for the forward of the SABR model; with
+two million realizations from each package the same comparison gives 0.71,
+and twelve repetitions with new random numbers gave p-values from 0.05 to
+0.94, the same spread as ``stochastic-rs`` compared with itself. The counts
+of the Hawkes process, low in two runs, have means of 78.68 and 78.65 over
+60,000 realizations against an exact mean of 78.67. So the two packages
+agree for every process they share.
 
 The comparison was also useful in the other direction. Its first run showed
 two processes of ``samplepaths`` to be wrong, both inherited from the package
@@ -639,7 +668,8 @@ method to the equation, where ``samplepaths`` returns the exact solution
 with the Wick product; the logarithms of the two differ by a known term.
 For the Heston and the Bates models ``stochastic-rs`` applies the Euler
 method, so it is given 1024 steps, where ``samplepaths`` draws the variance
-from its exact distribution and is given 64.
+from its exact distribution and is given 64. The exact method of the
+Cox-Ingersoll-Ross process, with 8 steps, is compared in the same way.
 
 What the numbers do not show
 ----------------------------
@@ -652,22 +682,29 @@ What the numbers do not show
   wherever ``numpy`` and ``scipy`` do. A package with a compiled core needs a
   wheel for the platform and the Python version, or a Rust toolchain.
 * **Reading the algorithm.** Every process is one Python module.
-* **Coverage.** ``stochastic-rs`` has about 40 models which ``samplepaths``
-  does not have yet: further jump and Lévy processes, further stochastic
-  volatility models, interest rate models with several factors and correlated
-  fractional processes. ``samplepaths`` has the Chinese restaurant, the
-  Dirichlet and the Moran processes, the Markov chain, the Bessel processes,
-  the Brownian bridge, excursion and meander, the colored noises, the
-  multifractional Brownian motion, the asymmetric GARCH model with a shift
-  and correlated Brownian motions in any number, which ``stochastic-rs``
-  does not list.
+* **Coverage.** ``stochastic-rs`` has about 35 models which ``samplepaths``
+  does not have: further jump and Lévy processes, rough and multi-factor
+  stochastic volatility models, term-structure models of interest rates and
+  correlated fractional processes. ``samplepaths`` has the Chinese
+  restaurant, the Dirichlet and the Moran processes, the Markov chain, the
+  Bessel processes, the Brownian bridge, excursion and meander, the colored
+  noises, the multifractional Brownian motion, the asymmetric GARCH model
+  with a shift, correlated Brownian motions in any number and exact sampling
+  of the square-root processes, which ``stochastic-rs`` does not list.
 
-Planned
--------
+What was added, and what is left
+--------------------------------
 
-Four batches of missing models are in: the jump processes and the diffusions
-on an interval or for a population, the time series models, the fractional
-models, and the first models with several components: correlated Brownian
-motions and the Heston, Bates and SABR models. Next are the interest rate
-models and exact sampling for the Cox-Ingersoll-Ross process, which removes
-its step-by-step loop.
+The models which ``stochastic-rs`` had and ``samplepaths`` lacked were added
+in five batches, each compared with ``stochastic-rs`` as above:
+
+1. jump processes, and diffusions on an interval or for a population
+2. time series models
+3. fractional models
+4. correlated Brownian motions and the Heston, Bates and SABR models
+5. the Ho-Lee process, two-factor interest rate models and exact sampling
+   of the Cox-Ingersoll-Ross process
+
+Not planned for now are the models listed under coverage above, and what
+``stochastic-rs`` offers beyond simulation: option pricing, calibration and
+statistical tests.

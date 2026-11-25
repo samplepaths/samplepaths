@@ -1,12 +1,11 @@
 """Heston model."""
 
-import math
-
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
 from .._compat import override
+from .._square_root import square_root_paths
 from ..utils.validation import check_nonnegative_number, check_numeric, check_positive_number
 from .vector_process import VectorProcess
 
@@ -159,34 +158,18 @@ class HestonModel(VectorProcess):
         self.__initial_variance = value
 
     def _variances(self, n: int, paths: int) -> npt.NDArray[np.float64]:
-        """Generate the variances, in an array of shape ``(n + 1, paths)``.
-
-        Over a step, the variance is a multiple of a noncentral chi-square
-        variate whose noncentrality depends on the previous variance.
-        """
-        decay = math.exp(-self.speed * self.t / n)
-        scale = self.vol**2 * (1.0 - decay) / (4.0 * self.speed)
-        degrees = 4.0 * self.speed * self.mean / self.vol**2
-        factor = decay / scale
-        draw = self.rng.noncentral_chisquare
-
-        variances = np.empty((n + 1, paths))
-        variances[0] = self.initial_variance
-
-        if paths < _VECTORIZE_FROM_PATHS:
-            # Few realizations: numbers are faster than short arrays.
-            for column in range(paths):
-                variance = self.initial_variance
-                values = []
-                for _ in range(n):
-                    variance = scale * draw(degrees, variance * factor)
-                    values.append(variance)
-                variances[1:, column] = values
-            return variances
-
-        for step in range(n):
-            variances[step + 1] = scale * draw(degrees, variances[step] * factor)
-        return variances
+        """Generate the variances, in an array of shape ``(n + 1, paths)``."""
+        return square_root_paths(
+            self.rng,
+            n,
+            paths,
+            speed=self.speed,
+            mean=self.mean,
+            vol=self.vol,
+            initial=self.initial_variance,
+            t=self.t,
+            vectorize_from=_VECTORIZE_FROM_PATHS,
+        )
 
     def _jumps(self, n: int, paths: int) -> npt.NDArray[np.float64] | float:
         """Return what jumps add to the logarithm of the price at each step.

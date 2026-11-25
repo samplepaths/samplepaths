@@ -12,6 +12,7 @@ from .fractional_jacobi_process import FractionalJacobiProcess
 from .fractional_ornstein_uhlenbeck_process import FractionalOrnsteinUhlenbeckProcess
 from .fractional_vasicek_process import FractionalVasicekProcess
 from .gompertz_process import GompertzProcess
+from .ho_lee_process import HoLeeProcess
 from .jacobi_process import JacobiProcess
 from .kimura_process import KimuraProcess
 from .ornstein_uhlenbeck_process import OrnsteinUhlenbeckProcess
@@ -31,6 +32,7 @@ __all__ = [
     "FractionalOrnsteinUhlenbeckProcess",
     "FractionalVasicekProcess",
     "GompertzProcess",
+    "HoLeeProcess",
     "JacobiProcess",
     "KimuraProcess",
     "OrnsteinUhlenbeckProcess",

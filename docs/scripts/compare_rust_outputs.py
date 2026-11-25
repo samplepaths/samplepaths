@@ -10,7 +10,7 @@ Kolmogorov-Smirnov test::
     uv run --with stochastic-rs python docs/scripts/compare_rust_outputs.py
 
 A p-value which is not small means that the test finds no difference between
-the two distributions. With 39 comparisons, one p-value below 0.05 is
+the two distributions. With 43 comparisons, one p-value below 0.05 is
 expected by chance.
 """
 
@@ -370,6 +370,33 @@ def cases(rng: np.random.Generator, count: int) -> list[tuple[str, str, Array, A
         first + second,
         ours[:, :, -1].sum(axis=1),
     )
+
+    # Interest rate models. The exact method of the Cox-Ingersoll-Ross
+    # process is compared with the Euler method of stochastic-rs on a fine
+    # grid. stochastic-rs generates the Ho-Lee and the two-factor Hull-White
+    # models one realization at a time.
+    add(
+        "Cox-Ingersoll-Ross, exact",
+        final,
+        final_values(rs.PyCir(1.0, 1.0, 0.3, fine, 1.0, 1.0), count),
+        sp.CoxIngersollRossProcess(speed=1.0, mean=1.0, vol=0.3, rng=rng).sample_paths_exact(
+            8, count
+        )[:, -1],
+    )
+    ho_lee = rs.PyHoLee(0.3, POINTS, None, 0.5, 1.0)
+    add(
+        "Ho-Lee",
+        final,
+        looped(lambda: ho_lee.sample()[-1], few),
+        sp.HoLeeProcess(drift=0.5, vol=0.3, rng=rng).sample_paths(n, few)[:, -1],
+    )
+    hull_white = rs.PyHullWhite2F(lambda time: 0.5, 1.5, 0.3, 0.2, -0.4, 0.8, POINTS, 0.1, 1.0)
+    theirs = np.array([[component[-1] for component in hull_white.sample()] for _ in range(few)])
+    ours = sp.HullWhiteTwoFactorModel(
+        speed=1.5, drift=0.5, vol=0.3, factor_speed=0.8, factor_vol=0.2, correlation=-0.4, rng=rng
+    ).sample_paths_with_initial(n, few, initial=0.1)
+    add("Hull-White two-factor, rate", final, theirs[:, 0], ours[:, 0, -1])
+    add("Hull-White two-factor, factor", final, theirs[:, 1], ours[:, 1, -1])
 
     # Time series: the last of SERIES values. The parameters have the same
     # meaning in both packages.

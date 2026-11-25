@@ -96,6 +96,10 @@ def run() -> dict[str, float]:
     results[f"FractionalGaussianNoise.sample_davies_harte({STEPS})"] = measure(
         lambda: noise.sample_davies_harte(STEPS)
     )
+    square_root = samplepaths.CoxIngersollRossProcess(mean=1.0, rng=np.random.default_rng(0))
+    results[f"CoxIngersollRossProcess.sample_exact({STEPS})"] = measure(
+        lambda: square_root.sample_exact(STEPS)
+    )
     restaurant = samplepaths.ChineseRestaurantProcess(rng=np.random.default_rng(0))
     results[f"ChineseRestaurantProcess.sample_partition({STEPS})"] = measure(
         lambda: restaurant.sample_partition(STEPS)
