@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [master]
 
+# The jobs only read the repository.
+permissions:
+  contents: read
+
 # A new commit on a pull request replaces the runs of the previous one, which
 # would otherwise wait for runners ahead of it. Runs on master are kept.
 concurrency:
