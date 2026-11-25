@@ -4,8 +4,15 @@ Changelog
 All notable changes to ``samplepaths``, most recent first. Times were
 measured as described in :doc:`/guide/performance`.
 
-Unreleased
-----------
+0.5.0 (2026-11-25)
+------------------
+
+This version adds 31 processes, which brings the package to 68 in six
+families, and lets ``sample_paths()`` use several threads. The new processes
+were compared with ``stochastic-rs``; the comparison showed two existing
+processes to be wrong, which are corrected and change results. Realizations
+for a given seed are otherwise identical bit for bit to those of version
+0.4.0.
 
 Added
 ~~~~~
