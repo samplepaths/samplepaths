@@ -1,14 +1,16 @@
 name: Tests
 
 on:
-  push:
-    branches: [master]
   pull_request:
     branches: [master]
+  schedule:
+    # Daily on master, to notice new releases of the dependencies or of
+    # Python which break the tests.
+    - cron: "23 3 * * *"
 
 jobs:
-  tests:
-    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+  run-tests:
+    name: Run tests on ${{ matrix.os }} with Python ${{ matrix.python-version }}
 
     strategy:
       matrix:

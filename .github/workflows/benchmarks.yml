@@ -8,8 +8,8 @@ permissions:
   contents: read
 
 jobs:
-  benchmarks:
-    name: Compare with the base branch
+  compare-sampling-times:
+    name: Compare sampling times with the base branch
     runs-on: ubuntu-latest
     timeout-minutes: 30
 

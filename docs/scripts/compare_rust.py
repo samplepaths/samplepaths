@@ -77,6 +77,16 @@ def cases(n: int) -> list[tuple[str, object, sp.base.BaseProcess]]:
             rs.PyCev(0.1, 0.2, 0.5, n, 1.0, 1.0),
             sp.ConstantElasticityVarianceProcess(drift=0.1, vol=0.2, volexp=0.5, rng=rng),
         ),
+        (
+            "Fractional Vasicek",
+            rs.PyFVasicek(0.7, 1.5, 0.5, 0.3, n, 1.0, 1.0),
+            sp.FractionalVasicekProcess(hurst=0.7, speed=1.5, mean=0.5, vol=0.3, rng=rng),
+        ),
+        (
+            "Fractional Cox-Ingersoll-Ross",
+            rs.PyFcir(0.7, 1.0, 1.0, 0.3, n, 1.0, 1.0),
+            sp.FractionalCoxIngersollRossProcess(hurst=0.7, speed=1.0, mean=1.0, vol=0.3, rng=rng),
+        ),
         # Time series: n is the number of values in both packages.
         (
             "AR(2)",

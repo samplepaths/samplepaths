@@ -20,7 +20,7 @@ path = bm.sample(1000)  # 1001 values on [0, 10]
 paths = bm.sample_paths(1000, paths=5000)  # 5000 realizations at once
 ```
 
-- **56 processes** in five families: continuous-time, diffusion, discrete-time, time series and noise
+- **61 processes** in five families: continuous-time, diffusion, discrete-time, time series and noise
 - **One interface**: every process is a class with `sample(n)` and `sample_paths(n, paths)` methods
 - **Pure Python, and fast**: vectorized with NumPy and multi-threaded; 100,000 Brownian paths of 64 steps take 6 ms on 14 cores, level with a Rust implementation ([comparison](https://samplepaths.readthedocs.io/en/latest/project/comparison.html))
 - **Reproducible**: built on `numpy.random.Generator`, per process or through a seedable default
@@ -138,8 +138,8 @@ Every process can be imported from `samplepaths` or from the subpackage of its f
 
 | Family | Subpackage | Processes |
 | --- | --- | --- |
-| Continuous-time | `samplepaths.continuous` | `BesselProcess`, `BrownianBridge`, `BrownianExcursion`, `BrownianMeander`, `BrownianMotion`, `CauchyProcess`, `FractionalBrownianMotion`, `GammaProcess`, `GeometricBrownianMotion`, `CompoundPoissonProcess`, `HawkesProcess`, `InverseGaussianProcess`, `KouJumpDiffusion`, `MertonJumpDiffusion`, `MixedPoissonProcess`, `NormalInverseGaussianProcess`, `MultifractionalBrownianMotion`, `PoissonProcess`, `SquaredBesselProcess`, `VarianceGammaProcess`, `WienerProcess` |
-| Diffusion | `samplepaths.diffusion` | `DiffusionProcess`, `ConstantElasticityVarianceProcess`, `CoxIngersollRossProcess`, `ExtendedVasicekProcess`, `OrnsteinUhlenbeckProcess`, `VasicekProcess`, `JacobiProcess`, `KimuraProcess`, `VerhulstProcess`, `GompertzProcess`, `FellerLogisticProcess` |
+| Continuous-time | `samplepaths.continuous` | `BesselProcess`, `BrownianBridge`, `BrownianExcursion`, `BrownianMeander`, `BrownianMotion`, `CauchyProcess`, `FractionalBrownianMotion`, `FractionalGeometricBrownianMotion`, `GammaProcess`, `GeometricBrownianMotion`, `CompoundPoissonProcess`, `HawkesProcess`, `InverseGaussianProcess`, `KouJumpDiffusion`, `MertonJumpDiffusion`, `MixedPoissonProcess`, `NormalInverseGaussianProcess`, `MultifractionalBrownianMotion`, `PoissonProcess`, `SquaredBesselProcess`, `VarianceGammaProcess`, `WienerProcess` |
+| Diffusion | `samplepaths.diffusion` | `DiffusionProcess`, `ConstantElasticityVarianceProcess`, `CoxIngersollRossProcess`, `ExtendedVasicekProcess`, `OrnsteinUhlenbeckProcess`, `VasicekProcess`, `JacobiProcess`, `KimuraProcess`, `VerhulstProcess`, `GompertzProcess`, `FellerLogisticProcess`, `FractionalOrnsteinUhlenbeckProcess`, `FractionalVasicekProcess`, `FractionalCoxIngersollRossProcess`, `FractionalJacobiProcess` |
 | Discrete-time | `samplepaths.discrete` | `BernoulliProcess`, `ChineseRestaurantProcess`, `DirichletProcess`, `MarkovChain`, `MoranProcess`, `RandomWalk` |
 | Time series | `samplepaths.timeseries` | `AutoregressiveProcess`, `MovingAverageProcess`, `ARIMAProcess`, `SARIMAProcess`, `ARCHProcess`, `GARCHProcess`, `TGARCHProcess`, `AGARCHProcess`, `EGARCHProcess` |
 | Noise | `samplepaths.noise` | `GaussianNoise`, `FractionalGaussianNoise`, `ColoredNoise`, `VioletNoise`, `BlueNoise`, `WhiteNoise`, `PinkNoise`, `RedNoise`, `BrownianNoise` |

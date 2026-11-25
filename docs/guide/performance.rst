@@ -60,6 +60,11 @@ Continuous-time
      - 0.060
      - 2.02
      - 3.8x
+   * - ``FractionalGeometricBrownianMotion``
+     - 0.109
+     - —
+     - 3.93
+     - 4.0x
    * - ``BrownianBridge``
      - 0.032
      - 0.060
@@ -218,6 +223,26 @@ Diffusion
      - —
      - 2.55
      - 20.6x
+   * - ``FractionalOrnsteinUhlenbeckProcess``
+     - 0.102
+     - —
+     - 3.64
+     - 4.3x
+   * - ``FractionalVasicekProcess``
+     - 0.105
+     - —
+     - 3.62
+     - 4.3x
+   * - ``FractionalCoxIngersollRossProcess``
+     - 0.73
+     - —
+     - 4.18
+     - 12.2x
+   * - ``FractionalJacobiProcess``
+     - 0.85
+     - —
+     - 4.58
+     - 12.8x
 
 Discrete-time
 ~~~~~~~~~~~~~

@@ -1,20 +1,19 @@
 name: CodeQL
 
 on:
-  push:
-    branches: [master]
   pull_request:
     branches: [master]
   schedule:
-    # Weekly, to pick up new queries on unchanged code.
-    - cron: "17 4 * * 1"
+    # Daily on master, to analyze what was merged and to pick up new queries
+    # on unchanged code.
+    - cron: "17 4 * * *"
 
 permissions:
   contents: read
 
 jobs:
-  analyze:
-    name: Analyze (${{ matrix.language }})
+  scan-for-vulnerabilities:
+    name: Scan ${{ matrix.language }} code for vulnerabilities
     runs-on: ubuntu-latest
     timeout-minutes: 30
 

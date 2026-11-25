@@ -31,6 +31,20 @@ Added
   ``stochastic-rs``. With 14 threads, 100,000 realizations of 64 values take
   8 milliseconds for an AR(2) process and 16 for a GARCH(1, 1) process,
   against 11 and 11 for ``stochastic-rs``; see :doc:`comparison`.
+* Five fractional processes, driven by a fractional Brownian motion with a
+  Hurst parameter of your choice:
+
+  * :py:class:`~samplepaths.diffusion.FractionalOrnsteinUhlenbeckProcess`,
+    :py:class:`~samplepaths.diffusion.FractionalVasicekProcess`,
+    :py:class:`~samplepaths.diffusion.FractionalCoxIngersollRossProcess` and
+    :py:class:`~samplepaths.diffusion.FractionalJacobiProcess`, sampled with
+    the Euler method on exact increments of the motion
+  * :py:class:`~samplepaths.continuous.FractionalGeometricBrownianMotion`,
+    which is exact
+
+  All agree in distribution with ``stochastic-rs``. With 14 threads, 100,000
+  realizations of 64 increments of a fractional Vasicek process take 16
+  milliseconds, against 15 for ``stochastic-rs``.
 * Ten further processes:
 
   * :py:class:`~samplepaths.continuous.CompoundPoissonProcess`, with jump
@@ -51,7 +65,7 @@ Added
   distribution with ``stochastic-rs``; see :doc:`comparison`.
 * ``docs/scripts/compare_rust_outputs.py`` compares the distributions of the
   results of ``samplepaths`` and ``stochastic-rs`` for the processes they
-  share, in 27 comparisons.
+  share, in 33 comparisons.
 
 * ``sample_paths(n, paths, workers=...)`` and ``sample_paths_with_initial()``
   generate the realizations on several threads. With 14 threads, 100,000

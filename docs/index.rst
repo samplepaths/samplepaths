@@ -49,12 +49,12 @@ paths) of stochastic processes as ``numpy`` arrays. It is pure Python on
     paths = bm.sample_paths(1000, paths=5000)  # 5000 realizations at once
     paths = bm.sample_paths(1000, paths=50_000, workers=8)  # on 8 threads
 
-It provides 56 processes in five families, all sharing one small interface:
+It provides 61 processes in five families, all sharing one small interface:
 
 * :doc:`guide/continuous`, such as Brownian motion, the Poisson and the Hawkes
   processes, the gamma process and jump diffusions
 * :doc:`guide/diffusion`, such as the Vasicek, Cox-Ingersoll-Ross and Jacobi
-  models
+  models and their fractional counterparts
 * :doc:`guide/discrete`, such as Markov chains and random walks
 * :doc:`guide/timeseries`, such as the ARIMA and the GARCH models
 * :doc:`guide/noise`, such as Gaussian, fractional Gaussian and colored noise

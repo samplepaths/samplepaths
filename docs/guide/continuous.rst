@@ -186,6 +186,23 @@ All of its sampling methods return the motion, which starts at zero. The
 increments alone are a
 :py:class:`~samplepaths.noise.FractionalGaussianNoise`.
 
+A :py:class:`~samplepaths.continuous.FractionalGeometricBrownianMotion` is
+the exponential of a fractional Brownian motion with a trend, the fractional
+counterpart of the geometric Brownian motion. Its mean grows as
+:math:`e^{\mu t}` whatever the Hurst parameter, and its realizations are
+exact. The :doc:`diffusion processes <diffusion>` driven by a fractional
+Brownian motion are described on their own page.
+
+.. image:: /_static/fractional_geometric_brownian_motion.png
+    :scale: 50%
+
+.. code-block:: python
+
+    from samplepaths import FractionalGeometricBrownianMotion
+
+    fgbm = FractionalGeometricBrownianMotion(hurst=0.7, drift=0.05, volatility=0.2)
+    prices = fgbm.sample_paths_with_initial(252, paths=1000, initial=100.0)
+
 In a :py:class:`~samplepaths.continuous.MultifractionalBrownianMotion` the
 Hurst parameter is a function of time with values in ``(0, 1)``, so the
 roughness of the path changes over time. It is generated with the
