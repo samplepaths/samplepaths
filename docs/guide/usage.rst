@@ -158,14 +158,14 @@ dedicated methods:
      - Available on
    * - ``sample_with_initial(n, initial)``
      - :py:class:`~samplepaths.continuous.GeometricBrownianMotion`,
-       :py:class:`~samplepaths.continuous.FractionalGeometricBrownianMotion`
-       and all diffusion processes
+       :py:class:`~samplepaths.continuous.FractionalGeometricBrownianMotion`,
+       all diffusion processes and the Heston, Bates and SABR models
    * - ``sample_at_with_initial(times, initial)``
      - :py:class:`~samplepaths.continuous.GeometricBrownianMotion`
    * - ``sample_paths_with_initial(n, paths, initial)``
      - :py:class:`~samplepaths.continuous.GeometricBrownianMotion`,
-       :py:class:`~samplepaths.continuous.FractionalGeometricBrownianMotion`
-       and all diffusion processes
+       :py:class:`~samplepaths.continuous.FractionalGeometricBrownianMotion`,
+       all diffusion processes and the Heston, Bates and SABR models
    * - ``sample_with_endpoint(n, b)`` and
        ``sample_at_with_endpoint(times, b)``
      - :py:class:`~samplepaths.continuous.BrownianMeander`

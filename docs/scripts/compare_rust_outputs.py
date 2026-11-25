@@ -10,7 +10,7 @@ Kolmogorov-Smirnov test::
     uv run --with stochastic-rs python docs/scripts/compare_rust_outputs.py
 
 A p-value which is not small means that the test finds no difference between
-the two distributions. With 33 comparisons, one p-value below 0.05 is
+the two distributions. With 39 comparisons, one p-value below 0.05 is
 expected by chance.
 """
 
@@ -42,6 +42,12 @@ SERIES = 300
 def final_values(process: object, count: int) -> Array:
     """Return the final values of realizations of a stochastic-rs process."""
     return np.asarray(process.sample_par(count))[:, -1]  # type: ignore[attr-defined]
+
+
+def final_components(process: object, count: int) -> tuple[Array, Array]:
+    """Return the final values of both components of a stochastic-rs process."""
+    first, second = process.sample_par(count)  # type: ignore[attr-defined]
+    return np.asarray(first)[:, -1], np.asarray(second)[:, -1]
 
 
 def looped(sample: Callable[[], float], count: int) -> Array:
@@ -289,6 +295,80 @@ def cases(rng: np.random.Generator, count: int) -> list[tuple[str, str, Array, A
             ).sample_paths(n, count)[:, -1]
         )
         + 0.2**2 / 2,
+    )
+
+    # Models with two components. stochastic-rs applies the Euler method to
+    # the Heston and the Bates models, so it gets a fine grid; samplepaths
+    # draws the variance from its exact distribution.
+    fine = 1025
+    their_price, their_variance = final_components(
+        rs.PyHeston(2.0, 0.04, 0.3, -0.7, 0.05, fine, 1.0, 0.09, 1.0), count
+    )
+    ours = sp.HestonModel(
+        drift=0.05, speed=2.0, mean=0.04, vol=0.3, correlation=-0.7, initial_variance=0.09, rng=rng
+    ).sample_paths(n, count)
+    add("Heston, price", "final logarithm", np.log(their_price), np.log(ours[:, 0, -1]))
+    add("Heston, variance", final, their_variance, ours[:, 1, -1])
+
+    # Bates: stochastic-rs takes the relative size of a jump, exp(Y) - 1, and
+    # the variance drift as alpha - beta V.
+    jump_mean, jump_volatility, rate = -0.1, 0.15, 2.0
+    bates = rs.PyBates(
+        rate,
+        math.exp(jump_mean + jump_volatility**2 / 2) - 1,
+        2.0 * 0.04,
+        2.0,
+        0.3,
+        -0.7,
+        lambda: math.exp(jump_rng.normal(jump_mean, jump_volatility)) - 1,
+        fine,
+        0.05,
+        None,
+        None,
+        None,
+        1.0,
+        0.09,
+        1.0,
+    )
+    add(
+        "Bates, price",
+        "final logarithm",
+        looped(lambda: math.log(bates.sample()[0][-1]), few),
+        np.log(
+            sp.BatesModel(
+                drift=0.05,
+                speed=2.0,
+                mean=0.04,
+                vol=0.3,
+                correlation=-0.7,
+                rate=rate,
+                jump_mean=jump_mean,
+                jump_volatility=jump_volatility,
+                initial_variance=0.09,
+                rng=rng,
+            ).sample_paths(n, few)[:, 0, -1]
+        ),
+    )
+
+    # SABR: stochastic-rs calls alpha the volatility of the volatility.
+    their_forward, their_volatility = final_components(
+        rs.PySabr(0.4, 0.5, -0.3, 257, 1.0, 0.2, 1.0), count
+    )
+    ours = sp.SABRModel(
+        volvol=0.4, beta=0.5, correlation=-0.3, initial_volatility=0.2, rng=rng
+    ).sample_paths(256, count)
+    add("SABR, forward", final, their_forward, ours[:, 0, -1])
+    add("SABR, volatility", final, their_volatility, ours[:, 1, -1])
+
+    # Correlated Brownian motions: the sum of the two has a variance of
+    # 2 + 2 rho, so it tests the correlation as well.
+    first, second = final_components(rs.PyCbms(0.6, POINTS, 1.0), count)
+    ours = sp.CorrelatedBrownianMotions(correlation=0.6, rng=rng).sample_paths(n, count)
+    add(
+        "Correlated Brownian motions",
+        "sum of final values",
+        first + second,
+        ours[:, :, -1].sum(axis=1),
     )
 
     # Time series: the last of SERIES values. The parameters have the same

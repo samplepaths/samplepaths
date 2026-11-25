@@ -351,6 +351,44 @@ at a time in Python, at about half a microsecond per value, so one
 realization is slow and ``sample_paths()``, which advances all realizations
 together, gains the most of all processes.
 
+Several components
+~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 15 15 15 15
+
+   * - Process
+     - ``sample()``
+     - ``sample_at()``
+     - ``sample_paths()``
+     - Gain
+   * - ``CorrelatedBrownianMotions``
+     - 0.058
+     - —
+     - 3.11
+     - 2.1x
+   * - ``SABRModel``
+     - 0.40
+     - —
+     - 4.49
+     - 7.2x
+   * - ``HestonModel``
+     - 1.20
+     - —
+     - 8.16
+     - 9.9x
+   * - ``BatesModel``
+     - 1.24
+     - —
+     - 10.7
+     - 8.1x
+
+A realization of these processes holds two components, so twice the values
+of the other tables. The Heston and the Bates models draw the variance from
+a noncentral chi-square distribution at every step, which costs more than a
+normal variate and buys a variance which is exact for any number of steps.
+
 
 Noise
 ~~~~~

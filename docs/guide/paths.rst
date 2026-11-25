@@ -16,7 +16,9 @@ two-dimensional array with one realization per row.
     # (10000, 257)
 
 Each row is what ``sample(n)`` returns: ``n + 1`` values for a process on a
-time interval, ``n`` values for a noise or a discrete-time process. After the
+time interval, ``n`` values for a noise or a discrete-time process. For a
+:doc:`process with several components <multivariate>` each row is itself
+two-dimensional, and the result has the shape ``(paths, components, n + 1)``. After the
 call, ``times`` holds the time values shared by all rows.
 
 Why not a loop?

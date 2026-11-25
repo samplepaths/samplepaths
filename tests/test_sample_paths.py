@@ -83,6 +83,15 @@ CASES: list[tuple[str, dict[str, Any]]] = [
     ("FractionalJacobiProcess", {"hurst": 0.7, "speed": 2.0, "mean": 0.5, "vol": 0.5}),
     ("FractionalOrnsteinUhlenbeckProcess", {"hurst": 0.3, "speed": 1.5, "vol": 0.3}),
     ("FractionalVasicekProcess", {"hurst": 0.7, "speed": 1.5, "mean": 0.5, "vol": 0.3}),
+    (
+        "BatesModel",
+        {"drift": 0.1, "speed": 2.0, "vol": 0.3, "rate": 3.0, "initial_variance": 0.09, "t": 2.0},
+    ),
+    ("CorrelatedBrownianMotions", {"correlation": [[1, 0.5, 0.2], [0.5, 1, -0.3], [0.2, -0.3, 1]]}),
+    ("HestonModel", {"drift": 0.1, "speed": 2.0, "vol": 0.3, "initial_variance": 0.09, "t": 2.0}),
+    ("SABRModel", {"volvol": 0.4, "beta": 0.5, "correlation": -0.3}),
+    ("SABRModel", {"volvol": 0.4, "beta": 0.0, "correlation": 0.3}),
+    ("SABRModel", {"volvol": 0.4, "beta": 1.0}),
     ("BernoulliProcess", {"p": 0.3}),
     ("ChineseRestaurantProcess", {"discount": 0.5, "strength": 2.0}),
     ("DirichletProcess", {"alpha": 5}),
@@ -125,6 +134,11 @@ def one_by_one(process: BaseProcess, n: int, paths: int) -> Any:
     return np.array(rows)
 
 
+def flat(realizations: Any) -> Any:
+    """Put the components of every realization one after the other."""
+    return realizations.reshape(len(realizations), -1)
+
+
 def _column(index: int) -> Callable[[Any], Any]:
     return lambda realizations: realizations[:, index]
 
@@ -160,8 +174,9 @@ def test_sample_paths_shape(name: str, kwargs: dict[str, Any], n: int, paths: in
 
     realizations = process.sample_paths(n, paths)
 
-    expected_length = n if name == "MoranProcess" else len(single)
-    assert realizations.shape == (paths, expected_length)
+    expected_length = n if name == "MoranProcess" else single.shape[-1]
+    expected_shape = single.shape[:-1] + (expected_length,)
+    assert realizations.shape == (paths, *expected_shape)
     assert realizations.dtype == single.dtype
     if isinstance(process, BaseTimeProcess):
         assert process.n == n
@@ -196,8 +211,8 @@ def test_sample_paths_distribution(name: str, kwargs: dict[str, Any], paths: int
 
     assert together.shape == separate.shape
 
-    for label, statistic in _statistics(together.shape[1]).items():
-        result = ks_2samp(statistic(together), statistic(separate))
+    for label, statistic in _statistics(flat(together).shape[1]).items():
+        result = ks_2samp(statistic(flat(together)), statistic(flat(separate)))
         assert result.pvalue > 1e-4, f"{label}: p-value {result.pvalue}"
 
 
@@ -336,8 +351,8 @@ def test_sample_paths_workers_distribution(name: str, kwargs: dict[str, Any]) ->
     together = make(name, kwargs, seed=11).sample_paths(n, paths, workers=4)
     separate = one_by_one(make(name, kwargs, seed=13), n, paths)
 
-    for label, statistic in _statistics(together.shape[1]).items():
-        result = ks_2samp(statistic(together), statistic(separate))
+    for label, statistic in _statistics(flat(together).shape[1]).items():
+        result = ks_2samp(statistic(flat(together)), statistic(flat(separate)))
         assert result.pvalue > 1e-4, f"{label}: p-value {result.pvalue}"
 
 

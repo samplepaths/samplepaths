@@ -31,6 +31,23 @@ Added
   ``stochastic-rs``. With 14 threads, 100,000 realizations of 64 values take
   8 milliseconds for an AR(2) process and 16 for a GARCH(1, 1) process,
   against 11 and 11 for ``stochastic-rs``; see :doc:`comparison`.
+* A sixth family, the :doc:`processes with several components
+  </guide/multivariate>`, in the new subpackage ``samplepaths.multivariate``.
+  A realization is a two-dimensional array with one component per row, and
+  ``sample_paths()`` returns an array of shape
+  ``(paths, components, n + 1)``.
+
+  * :py:class:`~samplepaths.multivariate.CorrelatedBrownianMotions`, for any
+    number of motions and any correlation matrix
+  * :py:class:`~samplepaths.multivariate.HestonModel`, with the variance
+    drawn from its exact distribution
+  * :py:class:`~samplepaths.multivariate.BatesModel`, a Heston model with
+    jumps
+  * :py:class:`~samplepaths.multivariate.SABRModel`
+
+  All agree in distribution with ``stochastic-rs``. With 14 threads, 100,000
+  realizations of 64 increments take 10 milliseconds for correlated Brownian
+  motions and 61 for a Heston model, against 16 and 26 for ``stochastic-rs``.
 * Five fractional processes, driven by a fractional Brownian motion with a
   Hurst parameter of your choice:
 
@@ -65,7 +82,7 @@ Added
   distribution with ``stochastic-rs``; see :doc:`comparison`.
 * ``docs/scripts/compare_rust_outputs.py`` compares the distributions of the
   results of ``samplepaths`` and ``stochastic-rs`` for the processes they
-  share, in 33 comparisons.
+  share, in 39 comparisons.
 
 * ``sample_paths(n, paths, workers=...)`` and ``sample_paths_with_initial()``
   generate the realizations on several threads. With 14 threads, 100,000

@@ -20,3 +20,7 @@ Bibliographical Sources
 * Engle, Robert F. "Discussion: Stock volatility and the crash of '87." The Review of Financial Studies 3, no. 1 (1990): 103-106.
 * Nelson, Daniel B. "Conditional heteroskedasticity in asset returns: A new approach." Econometrica 59, no. 2 (1991): 347-370.
 * Glosten, Lawrence R., Ravi Jagannathan, and David E. Runkle. "On the relation between the expected value and the volatility of the nominal excess return on stocks." The Journal of Finance 48, no. 5 (1993): 1779-1801.
+* Heston, Steven L. "A closed-form solution for options with stochastic volatility with applications to bond and currency options." The Review of Financial Studies 6, no. 2 (1993): 327-343.
+* Bates, David S. "Jumps and stochastic volatility: Exchange rate processes implicit in Deutsche Mark options." The Review of Financial Studies 9, no. 1 (1996): 69-107.
+* Hagan, Patrick S., Deep Kumar, Andrew S. Lesniewski, and Diana E. Woodward. "Managing smile risk." Wilmott Magazine (2002): 84-108.
+* Andersen, Leif. "Simple and efficient simulation of the Heston stochastic volatility model." Journal of Computational Finance 11, no. 3 (2008): 1-42.

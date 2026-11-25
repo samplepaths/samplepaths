@@ -117,7 +117,8 @@ Where to go next
 * :doc:`/guide/usage` describes the sampling methods in detail
 * :doc:`/guide/paths` describes simulating many realizations
 * :doc:`/guide/continuous`, :doc:`/guide/diffusion`, :doc:`/guide/discrete`,
-  :doc:`/guide/timeseries` and :doc:`/guide/noise` describe every process
+  :doc:`/guide/timeseries`, :doc:`/guide/multivariate` and :doc:`/guide/noise`
+  describe every process
 * :doc:`/gallery/index` shows an example with its figure for every process
 * :doc:`/guide/performance` gives measured sampling times
 * :doc:`/reference/index` documents every class, method and function
