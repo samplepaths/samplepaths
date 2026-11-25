@@ -53,7 +53,9 @@ Project
 * ``make check-seeded`` compares the results for a given seed with those of
   the last release, and every pull request runs it.
 * :doc:`maintenance` records what was learned about keeping results,
-  performance and the comparison with ``stochastic-rs``.
+  performance and the comparison with ``stochastic-rs``, the :doc:`roadmap`
+  lists the open work, and :doc:`decisions` the choices made and their
+  reasons.
 
 0.5.0 (2026-11-25)
 ------------------

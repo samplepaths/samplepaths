@@ -2,9 +2,22 @@
 
 `samplepaths` generates realizations of stochastic processes as NumPy arrays. It is pure Python on NumPy and SciPy, and it is meant to stay that way.
 
+## Where knowledge lives
+
+Everything a contributor needs to know is in this repository. Keep it there: do not store rules, plans or decisions in a memory or notes of your own.
+
+| When you | Read | And update it when |
+| --- | --- | --- |
+| start any work | this file | you are given a rule which should hold from now on |
+| look for what to do, or put something off | `docs/project/roadmap.rst` | work is finished, found or postponed |
+| are about to choose between alternatives | `docs/project/decisions.rst` | a choice is made which someone could later question |
+| optimize, compare with `stochastic-rs` or change a workflow | `docs/project/maintenance.rst` | you learn something the next person would have to learn again |
+
+Do not reopen a decision recorded in `docs/project/decisions.rst` without a new reason; say what changed. Update these files in the same change as the work they describe.
+
 ## Commands
 
-Everything runs through `uv` and the top-level `Makefile`. Do not add another task runner or per-folder make files.
+Everything runs through `uv` and the top-level `Makefile`. Do not add another task runner or per-folder make files. All dependencies, those of the docs included, are dependency groups in `pyproject.toml`; do not add requirements files.
 
 ```shell
 make install   # create the environment from uv.lock

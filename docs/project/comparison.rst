@@ -706,6 +706,6 @@ in five batches, each compared with ``stochastic-rs`` as above:
 5. the Ho-Lee process, two-factor interest rate models and exact sampling
    of the Cox-Ingersoll-Ross process
 
-Not planned for now are the models listed under coverage above, and what
-``stochastic-rs`` offers beyond simulation: option pricing, calibration and
-statistical tests.
+What may come next is on the :doc:`roadmap`. Option pricing, calibration and
+statistical tests, which ``stochastic-rs`` offers beyond simulation, are not
+planned; see :doc:`decisions`.

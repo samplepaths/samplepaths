@@ -114,6 +114,8 @@ with type hints. See :doc:`project/about` for what the fork adds and
    project/migration
    project/development
    project/maintenance
+   project/roadmap
+   project/decisions
    project/license
 
 Indices

@@ -199,7 +199,9 @@ previous one.
      - static analysis of the code and of the workflows
 
 See :doc:`maintenance` for what to check when making code faster, comparing
-with ``stochastic-rs`` or changing the workflows.
+with ``stochastic-rs`` or changing the workflows, the :doc:`roadmap` for the
+open work and :doc:`decisions` for the choices already made and their
+reasons.
 
 Releasing
 ---------
