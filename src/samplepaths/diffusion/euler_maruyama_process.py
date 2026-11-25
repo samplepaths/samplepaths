@@ -9,9 +9,9 @@ import numpy.typing as npt
 from numpy.random import Generator
 
 from .._compat import override
+from .._functions import ARRAY, SCALAR
 from ..noise.gaussian_noise import GaussianNoise
 from ..utils.validation import check_numeric, check_positive_integer
-from ._functions import ARRAY, SCALAR
 
 #: Number of realizations from which sample_paths advances all of them
 #: together instead of one after the other.

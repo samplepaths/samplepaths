@@ -77,6 +77,27 @@ def cases(n: int) -> list[tuple[str, object, sp.base.BaseProcess]]:
             rs.PyCev(0.1, 0.2, 0.5, n, 1.0, 1.0),
             sp.ConstantElasticityVarianceProcess(drift=0.1, vol=0.2, volexp=0.5, rng=rng),
         ),
+        # Time series: n is the number of values in both packages.
+        (
+            "AR(2)",
+            rs.PyARp([0.5, -0.3], 1.0, n),
+            sp.AutoregressiveProcess(coefficients=[0.5, -0.3], rng=rng),
+        ),
+        (
+            "ARIMA(1, 1, 1)",
+            rs.PyArima([0.5], [0.3], 1, 1.0, n),
+            sp.ARIMAProcess(ar=0.5, ma=0.3, d=1, rng=rng),
+        ),
+        (
+            "GARCH(1, 1)",
+            rs.PyGarch(0.1, [0.1], [0.8], n),
+            sp.GARCHProcess(omega=0.1, alpha=0.1, beta=0.8, rng=rng),
+        ),
+        (
+            "EGARCH(1, 1)",
+            rs.PyEgarch(-0.1, [0.2], [-0.1], [0.9], n),
+            sp.EGARCHProcess(omega=-0.1, alpha=0.2, gamma=-0.1, beta=0.9, rng=rng),
+        ),
     ]
 
 

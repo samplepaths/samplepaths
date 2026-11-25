@@ -71,6 +71,7 @@ Project layout
        continuous/    continuous-time processes, one module per process
        diffusion/     diffusion processes
        discrete/      discrete-time processes
+       timeseries/    time series models
        noise/         noise processes
        utils/         helper and validation functions
        random.py      default random number generator

@@ -18,6 +18,7 @@ Processes
    samplepaths.continuous
    samplepaths.diffusion
    samplepaths.discrete
+   samplepaths.timeseries
    samplepaths.noise
 
 Base classes

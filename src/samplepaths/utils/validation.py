@@ -1,6 +1,6 @@
 """Validation of parameters and arguments."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from inspect import signature
 from numbers import Integral, Real
 from typing import Any
@@ -175,3 +175,32 @@ def check_numeric_or_single_arg_callable(
         raise TypeError(
             f"{name} must be numeric or a single argument callable; got {type(value).__name__}.",
         )
+
+
+def check_coefficients(
+    *,
+    value: object,
+    name: str = "",
+) -> tuple[float, ...]:
+    """Ensure that a value is a number or a sequence of numbers.
+
+    :param value: the value to check
+    :param name: the name of the value, used in the error message
+    :returns: the coefficients as a tuple of floats; a single number gives a
+        tuple of one coefficient
+    :raises TypeError: if ``value`` is not a number or a sequence of numbers
+    """
+    if is_number(value):
+        return (float(value),)  # type: ignore[arg-type]
+
+    if isinstance(value, str) or not isinstance(value, Sequence | np.ndarray):
+        raise TypeError(
+            f"{name} must be a number or a sequence of numbers; got {type(value).__name__}."
+        )
+
+    coefficients = tuple(value)
+    for coefficient in coefficients:
+        if not is_number(coefficient):
+            raise TypeError(f"{name} must hold numbers; got {type(coefficient).__name__}.")
+
+    return tuple(float(coefficient) for coefficient in coefficients)

@@ -10,7 +10,28 @@ Unreleased
 Added
 ~~~~~
 
-* Ten processes:
+* A fifth family, the :doc:`time series models </guide/timeseries>`, in the
+  new subpackage ``samplepaths.timeseries``, with nine processes:
+
+  * :py:class:`~samplepaths.timeseries.AutoregressiveProcess`,
+    :py:class:`~samplepaths.timeseries.MovingAverageProcess`,
+    :py:class:`~samplepaths.timeseries.ARIMAProcess` and
+    :py:class:`~samplepaths.timeseries.SARIMAProcess`, the linear models
+  * :py:class:`~samplepaths.timeseries.ARCHProcess` and
+    :py:class:`~samplepaths.timeseries.GARCHProcess`, whose variance depends
+    on the past
+  * :py:class:`~samplepaths.timeseries.TGARCHProcess`,
+    :py:class:`~samplepaths.timeseries.AGARCHProcess` and
+    :py:class:`~samplepaths.timeseries.EGARCHProcess`, in which falls raise
+    the variance more than rises
+
+  The models with a changing variance keep the standard deviation of every
+  value in the attribute ``volatility``. Each model is tested against its
+  recurrence and its long-run variance, and all agree in distribution with
+  ``stochastic-rs``. With 14 threads, 100,000 realizations of 64 values take
+  8 milliseconds for an AR(2) process and 16 for a GARCH(1, 1) process,
+  against 11 and 11 for ``stochastic-rs``; see :doc:`comparison`.
+* Ten further processes:
 
   * :py:class:`~samplepaths.continuous.CompoundPoissonProcess`, with jump
     sizes drawn by a function of your choice
@@ -29,8 +50,8 @@ Added
   Each is tested against its known moments or behavior, and all agree in
   distribution with ``stochastic-rs``; see :doc:`comparison`.
 * ``docs/scripts/compare_rust_outputs.py`` compares the distributions of the
-  results of ``samplepaths`` and ``stochastic-rs`` for the 17 processes they
-  share.
+  results of ``samplepaths`` and ``stochastic-rs`` for the processes they
+  share, in 27 comparisons.
 
 * ``sample_paths(n, paths, workers=...)`` and ``sample_paths_with_initial()``
   generate the realizations on several threads. With 14 threads, 100,000

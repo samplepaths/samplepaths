@@ -24,6 +24,10 @@ import numpy.typing as npt  # noqa: E402
 from plot_style import NEUTRAL, PALETTE, use_theme  # noqa: E402
 
 from samplepaths import (  # noqa: E402
+    AGARCHProcess,
+    ARCHProcess,
+    ARIMAProcess,
+    AutoregressiveProcess,
     BernoulliProcess,
     BesselProcess,
     BrownianBridge,
@@ -36,21 +40,26 @@ from samplepaths import (  # noqa: E402
     ConstantElasticityVarianceProcess,
     CoxIngersollRossProcess,
     DirichletProcess,
+    EGARCHProcess,
     ExtendedVasicekProcess,
     FractionalBrownianMotion,
     FractionalGaussianNoise,
     GammaProcess,
+    GARCHProcess,
     GaussianNoise,
     GeometricBrownianMotion,
     InverseGaussianProcess,
     MarkovChain,
     MixedPoissonProcess,
     MoranProcess,
+    MovingAverageProcess,
     MultifractionalBrownianMotion,
     OrnsteinUhlenbeckProcess,
     PoissonProcess,
     RandomWalk,
+    SARIMAProcess,
     SquaredBesselProcess,
+    TGARCHProcess,
     VarianceGammaProcess,
     VasicekProcess,
     WienerProcess,
@@ -281,6 +290,56 @@ def make_discrete(output: Path) -> None:
     save_plot(output, "moran_process", "Moran process", xs, ys, scatter=True, xlabel="Step")
 
 
+def plot_series(
+    output: Path,
+    name: str,
+    title: str,
+    process: BaseProcess,
+    *,
+    n: int = 300,
+    paths: int = 1,
+) -> None:
+    """Plot realizations of a time series model against the step index."""
+    ys = [process.sample(n) for _ in range(paths)]
+    xs = [np.arange(n, dtype=np.float64)] * paths
+    save_plot(output, name, title, xs, ys, xlabel="Step")
+
+
+def make_timeseries(output: Path) -> None:
+    """Generate the figures of the time series models."""
+    plot_series(
+        output,
+        "autoregressive_process",
+        "Autoregressive process (coefficients 0.6 and 0.3)",
+        AutoregressiveProcess(coefficients=[0.6, 0.3]),
+    )
+    plot_series(
+        output,
+        "moving_average_process",
+        "Moving average process (coefficients 0.6 and 0.3)",
+        MovingAverageProcess(coefficients=[0.6, 0.3]),
+    )
+    plot_series(
+        output,
+        "arima_process",
+        "ARIMA(1, 1, 1) process",
+        ARIMAProcess(ar=0.5, ma=0.3, d=1),
+        paths=PATHS,
+    )
+    plot_series(
+        output,
+        "sarima_process",
+        "Seasonal ARIMA process with period 12",
+        SARIMAProcess(ar=0.5, seasonal_ma=0.4, seasonal_d=1, period=12),
+        n=144,
+    )
+    plot_series(output, "arch_process", "ARCH(1) process", ARCHProcess(), n=1000)
+    plot_series(output, "garch_process", "GARCH(1, 1) process", GARCHProcess(), n=1000)
+    plot_series(output, "tgarch_process", "Threshold GARCH process", TGARCHProcess(), n=1000)
+    plot_series(output, "agarch_process", "Asymmetric GARCH process", AGARCHProcess(), n=1000)
+    plot_series(output, "egarch_process", "Exponential GARCH process", EGARCHProcess(), n=1000)
+
+
 def make_noise(output: Path) -> None:
     """Generate the figures of the noise processes."""
     plot_noise(output, "gaussian_noise", "Gaussian noise", GaussianNoise(), n=2**8)
@@ -351,24 +410,27 @@ def make_guides(output: Path) -> None:
     """Generate the explanatory figures of the user guide."""
     rng = np.random.default_rng(11)
 
-    # The four families of processes.
-    fig, axes = plt.subplots(2, 2, figsize=(9, 5))
-    ax = axes[0, 0]
+    # The five families of processes: three panels above two.
+    fig, panels = plt.subplot_mosaic("AABBCC;.DDEE.", figsize=(11, 5))
+    ax = panels["A"]
     process: BaseTimeProcess = BrownianMotion(rng=rng)
     for _ in range(3):
         ax.plot(np.linspace(0, 1, 513), process.sample(512))
     ax.set_title("Continuous-time: Brownian motion")
-    ax = axes[0, 1]
+    ax = panels["B"]
     process = VasicekProcess(speed=6.0, mean=0.0, vol=0.6, rng=rng)
     for initial in (2.0, 1.0, -1.5):
         ax.plot(np.linspace(0, 1, 513), process.sample_with_initial(512, initial=initial))
     ax.set_title("Diffusion: Vasicek process")
-    ax = axes[1, 0]
+    ax = panels["C"]
     walk = RandomWalk(rng=rng)
     for _ in range(3):
         ax.step(np.arange(41), walk.sample(40), where="post")
     ax.set_title("Discrete-time: random walk")
-    ax = axes[1, 1]
+    ax = panels["D"]
+    ax.plot(GARCHProcess(omega=0.05, alpha=0.15, beta=0.8, rng=rng).sample(500), linewidth=0.8)
+    ax.set_title("Time series: GARCH process")
+    ax = panels["E"]
     for offset, beta in ((3.0, 0), (0.0, 1), (-3.0, 2)):
         noise = ColoredNoise(beta=beta, rng=rng).sample(512)
         ax.plot(np.linspace(0, 1, 512), offset + noise / noise.std(), linewidth=0.8)
@@ -487,6 +549,7 @@ def main() -> None:
     make_continuous(args.output)
     make_diffusion(args.output)
     make_discrete(args.output)
+    make_timeseries(args.output)
     make_noise(args.output)
 
 

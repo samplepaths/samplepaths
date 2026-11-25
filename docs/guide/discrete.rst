@@ -2,7 +2,9 @@ Discrete-time Processes
 =======================
 
 The :py:mod:`samplepaths.discrete` module provides processes which evolve in
-steps. They have no time interval; ``sample(n)`` generates ``n`` steps.
+steps. They have no time interval; ``sample(n)`` generates ``n`` steps. The
+models of time series analysis, which also evolve in steps, have their own
+page: :doc:`timeseries`.
 
 Overview
 --------

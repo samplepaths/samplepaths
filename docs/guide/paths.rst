@@ -34,7 +34,9 @@ A loop over ``sample()`` works for every process:
 
 ``sample_paths()`` gives realizations with the same distribution, faster.
 Most processes generate all realizations in one pass, which is 2 to 13
-times faster than the loop for 1000 realizations of 256 increments:
+times faster than the loop for 1000 realizations of 256 increments, and 50
+to 70 times faster for the :doc:`models with a changing variance
+<timeseries>`, which otherwise advance one value at a time in Python:
 
 .. list-table::
    :header-rows: 1
@@ -179,7 +181,11 @@ Three things to know:
   the other ignore ``workers``. The diffusion processes which are not linear,
   such as the Cox-Ingersoll-Ross process, advance step by step in Python and
   use at most four threads, and only for 20,000 realizations or more per
-  thread.
+  thread. The :doc:`time series models <timeseries>` generate their random
+  numbers on the threads and then advance on one of them, which is enough
+  for 100,000 realizations of 64 values to take 8 instead of 27
+  milliseconds for an autoregressive process and 16 instead of 35 for a
+  GARCH process.
 
 Functions passed as parameters, such as a time-dependent mean, are called from
 several threads and must not depend on shared state.

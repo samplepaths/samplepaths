@@ -57,6 +57,17 @@ from .noise import (
     VioletNoise,
     WhiteNoise,
 )
+from .timeseries import (
+    AGARCHProcess,
+    ARCHProcess,
+    ARIMAProcess,
+    AutoregressiveProcess,
+    EGARCHProcess,
+    GARCHProcess,
+    MovingAverageProcess,
+    SARIMAProcess,
+    TGARCHProcess,
+)
 
 __version__ = version("samplepaths")
 
@@ -113,4 +124,14 @@ __all__ = [
     "RedNoise",
     "VioletNoise",
     "WhiteNoise",
+    # time series
+    "AGARCHProcess",
+    "ARCHProcess",
+    "ARIMAProcess",
+    "AutoregressiveProcess",
+    "EGARCHProcess",
+    "GARCHProcess",
+    "MovingAverageProcess",
+    "SARIMAProcess",
+    "TGARCHProcess",
 ]
