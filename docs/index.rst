@@ -1,19 +1,35 @@
 samplepaths
 ===========
 
-|tests| |docs| |pypi| |license|
+|tests| |docs| |pypi| |pyversions| |weekly| |total| |license|
 
 .. |tests| image:: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml/badge.svg
     :target: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml
+    :alt: Tests
 
 .. |docs| image:: https://readthedocs.org/projects/samplepaths/badge/?version=latest
     :target: https://samplepaths.readthedocs.io/
+    :alt: Documentation
 
-.. |pypi| image:: https://img.shields.io/pypi/v/samplepaths.svg
+.. |pypi| image:: https://img.shields.io/pypi/v/samplepaths
     :target: https://pypi.org/project/samplepaths/
+    :alt: PyPI version
 
-.. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg
+.. |pyversions| image:: https://img.shields.io/pypi/pyversions/samplepaths
+    :target: https://pypi.org/project/samplepaths/
+    :alt: Python versions
+
+.. |weekly| image:: https://img.shields.io/pypi/dw/samplepaths?label=downloads%2Fweek
+    :target: https://pypistats.org/packages/samplepaths
+    :alt: Weekly downloads
+
+.. |total| image:: https://img.shields.io/pepy/dt/samplepaths?label=total%20downloads
+    :target: https://pepy.tech/projects/samplepaths
+    :alt: Total downloads
+
+.. |license| image:: https://img.shields.io/pypi/l/samplepaths
     :target: https://github.com/samplepaths/samplepaths/blob/master/LICENSE
+    :alt: License
 
 
 .. image:: /_static/banner.png
