@@ -139,3 +139,52 @@ def test_colored_noise_needs_two_increments(name: str) -> None:
         instance.sample(1)
 
     assert instance.sample(2).shape == (2,)
+
+
+@pytest.mark.parametrize("n", [4, 64, 1024])
+def test_variance_gamma_variance_does_not_depend_on_the_increments(n: int) -> None:
+    # The value at time t has mean drift t and variance
+    # (scale^2 + drift^2 variance) t, whatever the number of increments.
+    instance = samplepaths.VarianceGammaProcess(
+        drift=0.3, variance=1.5, scale=0.8, t=2.0, rng=np.random.default_rng(1)
+    )
+    final = instance.sample_paths(n, 100_000)[:, -1]
+
+    np.testing.assert_allclose(final.mean(), 0.3 * 2.0, atol=0.02)
+    np.testing.assert_allclose(final.var(), (0.8**2 + 0.3**2 * 1.5) * 2.0, rtol=0.03)
+
+
+def test_variance_gamma_sample_and_sample_at_agree() -> None:
+    kwargs = {"drift": 0.3, "variance": 1.5, "scale": 0.8, "t": 2.0}
+    times = np.linspace(0, 2.0, 17)
+
+    on_grid = np.array(
+        [
+            samplepaths.VarianceGammaProcess(rng=np.random.default_rng(seed), **kwargs).sample(16)[
+                -1
+            ]
+            for seed in range(4000)
+        ]
+    )
+    at_times = np.array(
+        [
+            samplepaths.VarianceGammaProcess(rng=np.random.default_rng(seed), **kwargs).sample_at(
+                times
+            )[-1]
+            for seed in range(4000, 8000)
+        ]
+    )
+
+    np.testing.assert_allclose(on_grid.var(), at_times.var(), rtol=0.1)
+    np.testing.assert_allclose(on_grid.var(), (0.8**2 + 0.3**2 * 1.5) * 2.0, rtol=0.1)
+
+
+@pytest.mark.parametrize("drift", [0.3, -0.5])
+def test_constant_elasticity_variance_mean_grows_at_the_drift(drift: float) -> None:
+    # dX = drift X dt + vol X^volexp dW has the mean exp(drift t).
+    instance = samplepaths.ConstantElasticityVarianceProcess(
+        drift=drift, vol=0.2, volexp=0.5, t=2.0, rng=np.random.default_rng(1)
+    )
+    final = instance.sample_paths(400, 50_000)[:, -1]
+
+    np.testing.assert_allclose(final.mean(), np.exp(drift * 2.0), rtol=0.01)

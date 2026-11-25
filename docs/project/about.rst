@@ -165,8 +165,10 @@ Corrected defects
 
 Rewriting the tests and comparing results between versions uncovered defects
 inherited from the original package, among them a drift which ignored the end
-time ``t`` in Brownian motion, a sampling failure of the Cauchy process and
-an interval length which had no effect on colored noise.
+time ``t`` in Brownian motion, a sampling failure of the Cauchy process, an
+interval length which had no effect on colored noise, and a variance gamma
+process whose spread depended on the number of increments. The last one was
+found by comparing results with another package; see :doc:`comparison`.
 They are listed in :doc:`migration` and :doc:`changelog`.
 
 **What you get:** results you can rely on, with a test for each fix.

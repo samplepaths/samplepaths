@@ -105,7 +105,9 @@ class VarianceGammaProcess(GaussianNoise):
         scale = self.variance
 
         gammas = self.rng.gamma(shape=shape, scale=scale, size=n)
-        gn = super().sample(n)
+        self.set_times(n)
+        # Standard normal variates: the gamma clock carries the time scale.
+        gn = self.rng.standard_normal(n)
 
         increments = self.drift * gammas + self.scale * np.sqrt(gammas) * gn
 
@@ -128,7 +130,7 @@ class VarianceGammaProcess(GaussianNoise):
         scale = self.variance
 
         gammas = self.rng.gamma(shape=shapes, scale=scale)
-        gn = super().sample_at(times)
+        gn = self.rng.standard_normal(len(shapes))
 
         increments = self.drift * gammas + self.scale * np.sqrt(gammas) * gn
 
@@ -155,7 +157,8 @@ class VarianceGammaProcess(GaussianNoise):
         scale = self.variance
 
         gammas = self.rng.gamma(shape=shape, scale=scale, size=(paths, n))
-        gn = self._sample_gaussian_noise_paths(n, paths)
+        self.set_times(n)
+        gn = self.rng.standard_normal((paths, n))
 
         increments = self.drift * gammas + self.scale * np.sqrt(gammas) * gn
 
