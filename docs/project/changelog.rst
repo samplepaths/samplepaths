@@ -10,6 +10,28 @@ Unreleased
 Added
 ~~~~~
 
+* Ten processes:
+
+  * :py:class:`~samplepaths.continuous.CompoundPoissonProcess`, with jump
+    sizes drawn by a function of your choice
+  * :py:class:`~samplepaths.continuous.HawkesProcess`, a self-exciting point
+    process
+  * :py:class:`~samplepaths.continuous.NormalInverseGaussianProcess`
+  * :py:class:`~samplepaths.continuous.MertonJumpDiffusion` and
+    :py:class:`~samplepaths.continuous.KouJumpDiffusion`
+  * :py:class:`~samplepaths.diffusion.JacobiProcess` and
+    :py:class:`~samplepaths.diffusion.KimuraProcess`, on the unit interval
+  * :py:class:`~samplepaths.diffusion.VerhulstProcess`,
+    :py:class:`~samplepaths.diffusion.GompertzProcess` and
+    :py:class:`~samplepaths.diffusion.FellerLogisticProcess`, for the size of
+    a population
+
+  Each is tested against its known moments or behavior, and all agree in
+  distribution with ``stochastic-rs``; see :doc:`comparison`.
+* ``docs/scripts/compare_rust_outputs.py`` compares the distributions of the
+  results of ``samplepaths`` and ``stochastic-rs`` for the 17 processes they
+  share.
+
 * ``sample_paths(n, paths, workers=...)`` and ``sample_paths_with_initial()``
   generate the realizations on several threads. With 14 threads, 100,000
   realizations of 64 increments take 5.7 instead of 33.8 milliseconds for a
@@ -31,8 +53,29 @@ Faster
   with those of version 0.4.0 to a relative difference of 1e-9 instead of
   being identical.
 
-Realizations of ``sample()`` and ``sample_at()`` for a given seed are
-identical bit for bit to those of version 0.4.0 in all 906 compared cases.
+Fixed
+~~~~~
+
+Comparing the results with those of ``stochastic-rs`` showed two processes to
+be wrong. Both defects were inherited from the original package, and both
+change results.
+
+* :py:class:`~samplepaths.continuous.VarianceGammaProcess` scaled its normal
+  variates by the square root of the time step, on top of the gamma clock
+  which already carries the time. The spread of a realization was too small
+  and depended on the number of increments: with a unit ``scale`` and
+  ``variance`` the standard deviation at time 1 was 0.27 for 16 increments
+  and 0.10 for 1024, instead of 1.0. ``sample()``, ``sample_at()`` and
+  ``sample_paths()`` are corrected.
+* :py:class:`~samplepaths.diffusion.ConstantElasticityVarianceProcess` had
+  the drift :math:`\mu (X_t - 1)` instead of the documented
+  :math:`\mu X_t`. Started from 1, its mean stayed near 1 instead of growing
+  as :math:`e^{\mu t}`.
+
+Apart from these two processes, realizations of ``sample()`` and
+``sample_at()`` for a given seed are identical bit for bit to those of
+version 0.4.0: 879 of the 906 compared cases, the other 27 being the two
+corrected processes.
 
 0.4.0 (2026-11-25)
 ------------------

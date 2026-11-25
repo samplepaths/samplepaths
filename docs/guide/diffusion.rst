@@ -101,6 +101,59 @@ revert to the mean, and the shaded bands hold 90% of the realizations.
     cir = CoxIngersollRossProcess(speed=1.0, mean=0.05, vol=0.1, t=10)
     rates = cir.sample_with_initial(1000, initial=0.03)
 
+Diffusions on a domain
+----------------------
+
+Five more diffusion processes have a drift or a volatility which the general
+model above does not cover. Each lives on a domain, the unit interval or the
+positive numbers, and their parameters are numbers.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 26 40
+
+   * - Process
+     - Parameters
+     - Equation
+   * - :py:class:`~samplepaths.diffusion.JacobiProcess`
+     - ``speed``, ``mean``, ``vol``
+     - :math:`dX_t = \theta (\mu - X_t) dt + \sigma \sqrt{X_t (1 - X_t)} dW_t`
+   * - :py:class:`~samplepaths.diffusion.KimuraProcess`
+     - ``selection``, ``vol``
+     - :math:`dX_t = s X_t (1 - X_t) dt + \sigma \sqrt{X_t (1 - X_t)} dW_t`
+   * - :py:class:`~samplepaths.diffusion.VerhulstProcess`
+     - ``rate``, ``capacity``, ``vol``
+     - :math:`dX_t = r X_t (1 - X_t / K) dt + \sigma X_t dW_t`
+   * - :py:class:`~samplepaths.diffusion.GompertzProcess`
+     - ``growth``, ``decay``, ``vol``
+     - :math:`dX_t = (a - b \ln X_t) X_t dt + \sigma X_t dW_t`
+   * - :py:class:`~samplepaths.diffusion.FellerLogisticProcess`
+     - ``speed``, ``level``, ``vol``
+     - :math:`dX_t = \kappa (\theta - X_t) X_t dt + \sigma \sqrt{X_t} dW_t`
+
+The Jacobi and the Kimura processes stay in ``[0, 1]`` and model
+proportions: a correlation, or the frequency of an allele in a population.
+The Verhulst, the Gompertz and the Feller logistic processes are positive
+and model the size of a population which grows towards a limit.
+
+.. code-block:: python
+
+    from samplepaths import JacobiProcess
+    from samplepaths import VerhulstProcess
+
+    correlation = JacobiProcess(speed=2.0, mean=0.6, vol=0.4, t=5)
+    path = correlation.sample_with_initial(1000, initial=0.2)
+
+    population = VerhulstProcess(rate=1.5, capacity=1000.0, vol=0.1, t=10)
+    sizes = population.sample_paths_with_initial(1000, paths=500, initial=10.0)
+
+``sample()`` starts the Jacobi and the Kimura processes from 0.5 and the
+others from 1. A step of the Euler-Maruyama method can leave the domain, so
+every value is brought back into it: a value which would be negative becomes
+zero, for example. For the Kimura and the Feller logistic processes the
+boundaries are absorbing, as in the processes they approximate: an allele
+which is lost stays lost, and a population which is extinct stays extinct.
+
 The initial value
 -----------------
 

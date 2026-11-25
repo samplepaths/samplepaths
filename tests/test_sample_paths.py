@@ -22,6 +22,21 @@ T5 = [
 # defaults would hide a term (a zero drift, for example).
 CASES: list[tuple[str, dict[str, Any]]] = [
     ("BesselProcess", {"dim": 3, "t": 2.0}),
+    ("CompoundPoissonProcess", {"rate": 3.0, "t": 2.0}),
+    (
+        "CompoundPoissonProcess",
+        {"rate": 3.0, "jumps": lambda rng, size: rng.exponential(2.0, size), "t": 2.0},
+    ),
+    ("HawkesProcess", {"baseline": 2.0, "excitation": 1.5, "decay": 3.0}),
+    (
+        "KouJumpDiffusion",
+        {"drift": 0.1, "volatility": 0.2, "rate": 3.0, "up_probability": 0.4, "t": 2.0},
+    ),
+    (
+        "MertonJumpDiffusion",
+        {"drift": 0.1, "volatility": 0.2, "rate": 3.0, "jump_mean": -0.1, "t": 2.0},
+    ),
+    ("NormalInverseGaussianProcess", {"alpha": 2.0, "beta": 0.5, "delta": 1.5, "mu": 0.1}),
     ("BrownianBridge", {"b": 1.5, "t": 2.0}),
     ("BrownianExcursion", {"t": 2.0}),
     ("BrownianMeander", {"t": 2.0}),
@@ -46,6 +61,11 @@ CASES: list[tuple[str, dict[str, Any]]] = [
     ("ExtendedVasicekProcess", {"speed": lambda t: 1 + t, "mean": 0.5, "vol": 0.3, "t": 2.0}),
     ("OrnsteinUhlenbeckProcess", {"speed": 1.5, "vol": 0.3, "t": 2.0}),
     ("VasicekProcess", {"speed": 1.5, "mean": 0.5, "vol": 0.3, "t": 2.0}),
+    ("FellerLogisticProcess", {"speed": 1.0, "level": 2.0, "vol": 0.3, "t": 2.0}),
+    ("GompertzProcess", {"growth": 1.0, "decay": 0.5, "vol": 0.2, "t": 2.0}),
+    ("JacobiProcess", {"speed": 2.0, "mean": 0.4, "vol": 0.5, "t": 2.0}),
+    ("KimuraProcess", {"selection": 1.0, "vol": 0.5, "t": 2.0}),
+    ("VerhulstProcess", {"rate": 1.5, "capacity": 20.0, "vol": 0.2, "t": 2.0}),
     ("BernoulliProcess", {"p": 0.3}),
     ("ChineseRestaurantProcess", {"discount": 0.5, "strength": 2.0}),
     ("DirichletProcess", {"alpha": 5}),

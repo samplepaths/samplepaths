@@ -1,0 +1,249 @@
+"""Compare the results of samplepaths and of stochastic-rs.
+
+The two packages use different random number generators, so the same seed
+does not give the same realization. What can be compared is the distribution
+of the results. For every process which both packages provide, this script
+generates many realizations with each and compares a summary of each
+realization (its final value, for most processes) with a two-sample
+Kolmogorov-Smirnov test::
+
+    uv run --with stochastic-rs python docs/scripts/compare_rust_outputs.py
+
+A p-value which is not small means that the test finds no difference between
+the two distributions. With 17 comparisons, one p-value below 0.05 is
+expected by chance.
+"""
+
+import math
+import warnings
+from collections.abc import Callable
+
+import numpy as np
+import numpy.typing as npt
+import stochastic_rs as rs
+from scipy.stats import ks_2samp
+
+import samplepaths as sp
+
+Array = npt.NDArray[np.float64]
+
+#: Number of increments of the realizations on [0, 1].
+STEPS = 64
+
+#: stochastic-rs counts the points of a realization, not its increments.
+POINTS = STEPS + 1
+
+
+def final_values(process: object, count: int) -> Array:
+    """Return the final values of realizations of a stochastic-rs process."""
+    return np.asarray(process.sample_par(count))[:, -1]  # type: ignore[attr-defined]
+
+
+def looped(sample: Callable[[], float], count: int) -> Array:
+    """Collect a summary of realizations generated one by one."""
+    return np.array([sample() for _ in range(count)])
+
+
+def cases(rng: np.random.Generator, count: int) -> list[tuple[str, str, Array, Array]]:
+    """Return, for every shared process, a summary from each package.
+
+    :returns: the name of the process, what is compared, the values of
+        stochastic-rs and the values of samplepaths
+    """
+    n = STEPS
+    few = count // 10  # for the processes generated one realization at a time
+    results: list[tuple[str, str, Array, Array]] = []
+
+    def add(name: str, what: str, theirs: Array, ours: Array) -> None:
+        results.append((name, what, np.asarray(theirs, dtype=float), np.asarray(ours, dtype=float)))
+
+    final = "final value"
+    add(
+        "Brownian motion",
+        final,
+        final_values(rs.PyBm(POINTS, 1.0), count),
+        sp.BrownianMotion(rng=rng).sample_paths(n, count)[:, -1],
+    )
+    add(
+        "Geometric Brownian motion",
+        final,
+        final_values(rs.PyGbm(0.05, 0.2, POINTS, 1.0, 1.0), count),
+        sp.GeometricBrownianMotion(drift=0.05, volatility=0.2, rng=rng).sample_paths(n, count)[
+            :, -1
+        ],
+    )
+    add(
+        "Fractional Brownian motion",
+        final,
+        final_values(rs.PyFbm(0.7, POINTS, 1.0), count),
+        sp.FractionalBrownianMotion(hurst=0.7, rng=rng).sample_paths(n, count)[:, -1],
+    )
+    add(
+        "Vasicek",
+        final,
+        final_values(rs.PyVasicek(1.5, 0.5, 0.3, POINTS, 1.0, 1.0), count),
+        sp.VasicekProcess(speed=1.5, mean=0.5, vol=0.3, rng=rng).sample_paths(n, count)[:, -1],
+    )
+    add(
+        "Cox-Ingersoll-Ross",
+        final,
+        final_values(rs.PyCir(1.0, 1.0, 0.3, POINTS, 1.0, 1.0), count),
+        sp.CoxIngersollRossProcess(speed=1.0, mean=1.0, vol=0.3, rng=rng).sample_paths(n, count)[
+            :, -1
+        ],
+    )
+    add(
+        "CEV",
+        final,
+        final_values(rs.PyCev(0.1, 0.2, 0.5, POINTS, 1.0, 1.0), count),
+        sp.ConstantElasticityVarianceProcess(drift=0.1, vol=0.2, volexp=0.5, rng=rng).sample_paths(
+            n, count
+        )[:, -1],
+    )
+    add(
+        "Variance gamma",
+        final,
+        final_values(rs.PyVg(0.1, 1.0, 1.0, POINTS, 0.0, 1.0), count),
+        sp.VarianceGammaProcess(drift=0.1, variance=1.0, scale=1.0, rng=rng).sample_paths(n, count)[
+            :, -1
+        ],
+    )
+    add(
+        "Poisson",
+        f"time of arrival {n}",
+        final_values(rs.PyPoisson(2.0, POINTS), count),
+        sp.PoissonProcess(rate=2.0, rng=rng).sample_paths(n, count)[:, -1],
+    )
+
+    # stochastic-rs writes the Jacobi drift as alpha - beta x.
+    add(
+        "Jacobi",
+        final,
+        final_values(rs.PyJacobi(1.0, 2.0, 0.5, POINTS, 0.3, 1.0), count),
+        sp.JacobiProcess(speed=2.0, mean=0.5, vol=0.5, rng=rng).sample_paths_with_initial(
+            n, count, initial=0.3
+        )[:, -1],
+    )
+    add(
+        "Verhulst",
+        final,
+        final_values(rs.PyVerhulst(1.0, 10.0, 0.2, POINTS, 1.0, 1.0, False), count),
+        sp.VerhulstProcess(rate=1.0, capacity=10.0, vol=0.2, rng=rng).sample_paths(n, count)[:, -1],
+    )
+    add(
+        "Gompertz",
+        final,
+        final_values(rs.PyGompertz(1.0, 0.5, 0.2, POINTS, 1.0, 1.0), count),
+        sp.GompertzProcess(growth=1.0, decay=0.5, vol=0.2, rng=rng).sample_paths(n, count)[:, -1],
+    )
+    add(
+        "Kimura",
+        final,
+        final_values(rs.PyKimura(1.0, 0.5, POINTS, 0.3, 1.0), count),
+        sp.KimuraProcess(selection=1.0, vol=0.5, rng=rng).sample_paths_with_initial(
+            n, count, initial=0.3
+        )[:, -1],
+    )
+    add(
+        "Feller logistic",
+        final,
+        final_values(rs.PyFellerLogistic(1.0, 2.0, 0.3, POINTS, 1.0, 1.0), count),
+        sp.FellerLogisticProcess(speed=1.0, level=2.0, vol=0.3, rng=rng).sample_paths(n, count)[
+            :, -1
+        ],
+    )
+
+    # Normal inverse Gaussian: stochastic-rs uses a drift theta, a volatility
+    # sigma and a variance kappa of the clock; samplepaths uses alpha, beta
+    # and delta.
+    theta, sigma, kappa = 0.1, 0.5, 0.3
+    beta = theta / sigma**2
+    delta = sigma / math.sqrt(kappa)
+    alpha = math.hypot(1.0 / (sigma * math.sqrt(kappa)), beta)
+    add(
+        "Normal inverse Gaussian",
+        final,
+        final_values(rs.PyNig(theta, sigma, kappa, POINTS, 0.0, 1.0), count),
+        sp.NormalInverseGaussianProcess(alpha=alpha, beta=beta, delta=delta, rng=rng).sample_paths(
+            n, count
+        )[:, -1],
+    )
+
+    # Merton: stochastic-rs simulates the logarithm of the price, with a
+    # compensator theta given by the caller.
+    drift, volatility, rate, jump_mean, jump_volatility = 0.08, 0.2, 3.0, -0.1, 0.3
+    mean_relative_jump = math.exp(jump_mean + jump_volatility**2 / 2) - 1
+    jump_rng = np.random.default_rng(1)
+    merton = rs.PyMerton(
+        drift,
+        volatility,
+        rate,
+        mean_relative_jump,
+        lambda: float(jump_rng.normal(jump_mean, jump_volatility)),
+        POINTS,
+        0.0,
+        1.0,
+    )
+    add(
+        "Merton jump diffusion",
+        "final logarithm",
+        looped(lambda: merton.sample()[-1], few),
+        np.log(
+            sp.MertonJumpDiffusion(
+                drift=drift,
+                volatility=volatility,
+                rate=rate,
+                jump_mean=jump_mean,
+                jump_volatility=jump_volatility,
+                rng=rng,
+            ).sample_paths(n, few)[:, -1]
+        ),
+    )
+
+    # Compound Poisson: stochastic-rs returns the jump times, the values and
+    # the jump sizes up to a time.
+    compound = rs.PyCompoundPoisson(lambda: float(jump_rng.normal(-0.1, 0.3)), 4.0, None, 2.0)
+    add(
+        "Compound Poisson",
+        "value at time 2",
+        looped(lambda: compound.sample()[1][-1], few),
+        sp.CompoundPoissonProcess(
+            rate=4.0,
+            jumps=lambda generator, size: generator.normal(-0.1, 0.3, size),
+            t=2.0,
+            rng=rng,
+        ).sample_paths(n, few)[:, -1],
+    )
+
+    # Hawkes: number of arrivals in [0, 20]. Both results start with time 0;
+    # the one of samplepaths also ends with the first arrival after 20.
+    hawkes = sp.HawkesProcess(baseline=2.0, excitation=1.5, decay=3.0, rng=rng)
+    add(
+        "Hawkes",
+        "arrivals in [0, 20]",
+        looped(lambda: len(rs.PyHawkes(2.0, 1.5, 3.0, None, 20.0).sample()) - 1, few),
+        looped(lambda: len(hawkes.sample_with_length(20.0)) - 2, few),
+    )
+
+    return results
+
+
+def main() -> None:
+    """Run the comparison and print the results."""
+    warnings.simplefilter("ignore")
+    rng = np.random.default_rng(2026)
+
+    print(
+        f"{'process':28s} {'compared':20s} {'rust mean':>10s} {'ours mean':>10s} "
+        f"{'rust std':>9s} {'ours std':>9s} {'p-value':>8s}"
+    )
+    for name, what, theirs, ours in cases(rng, count=40_000):
+        p_value = ks_2samp(theirs, ours).pvalue
+        print(
+            f"{name:28s} {what:20s} {theirs.mean():10.4f} {ours.mean():10.4f} "
+            f"{theirs.std():9.4f} {ours.std():9.4f} {p_value:8.3f}"
+        )
+
+
+if __name__ == "__main__":
+    main()

@@ -115,6 +115,26 @@ Continuous-time
      - 0.77
      - 3.20
      - 3.7x
+   * - ``NormalInverseGaussianProcess``
+     - 0.058
+     - 0.082
+     - 3.50
+     - 2.1x
+   * - ``CompoundPoissonProcess``
+     - 0.032
+     - 0.051
+     - 1.71
+     - 3.2x
+   * - ``MertonJumpDiffusion``
+     - 0.077
+     - 0.12
+     - 4.27
+     - 2.5x
+   * - ``KouJumpDiffusion``
+     - 0.060
+     - 0.10
+     - 3.28
+     - 3.2x
    * - ``PoissonProcess``
      - 0.025
      - —
@@ -125,7 +145,11 @@ Continuous-time
      - —
      - 4.32
      - 1.0x
-
+   * - ``HawkesProcess``
+     - 1.90
+     - —
+     - 149
+     - 1.0x
 
 Diffusion
 ~~~~~~~~~
@@ -169,7 +193,31 @@ Diffusion
      - —
      - 1.83
      - 8.3x
-
+   * - ``JacobiProcess``
+     - 0.76
+     - —
+     - 2.68
+     - 18.4x
+   * - ``KimuraProcess``
+     - 0.72
+     - —
+     - 2.54
+     - 18.7x
+   * - ``VerhulstProcess``
+     - 0.80
+     - —
+     - 2.58
+     - 20.3x
+   * - ``GompertzProcess``
+     - 0.86
+     - —
+     - 3.02
+     - 17.9x
+   * - ``FellerLogisticProcess``
+     - 0.81
+     - —
+     - 2.55
+     - 20.6x
 
 Discrete-time
 ~~~~~~~~~~~~~
@@ -281,12 +329,12 @@ Three things stand out:
 
 * **One realization is cheap.** For most processes, 4096 increments take well
   under a tenth of a millisecond.
-* **Many realizations are cheaper together.** ``sample_paths()`` is 2 to 13
+* **Many realizations are cheaper together.** ``sample_paths()`` is 2 to 20
   times faster than a loop over ``sample()`` for the processes which can
   generate all realizations in one pass. See :doc:`paths`.
 * **Some processes are sequential by nature.** The Chinese restaurant, the
-  Dirichlet and the Moran processes compute every step from the previous
-  ones, with a random decision at each. They run in a Python loop, and
+  Dirichlet, the Moran and the Hawkes processes compute every step from the
+  previous ones, with a random decision at each. They run in a Python loop, and
   ``sample_paths()`` gives no gain for them.
 
 Algorithms with a quadratic cost

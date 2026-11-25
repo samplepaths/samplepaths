@@ -87,5 +87,11 @@ defects:
   change of its ``mean`` function on an instance.
 * ``CauchyProcess.sample_at()`` no longer fails when its random time change
   makes a very large jump.
+* :py:class:`~samplepaths.continuous.VarianceGammaProcess` has the spread of
+  the process it documents, :math:`(\sigma^2 + \theta^2 \nu) t` in
+  variance. It used to be too small and to depend on the number of
+  increments.
+* :py:class:`~samplepaths.diffusion.ConstantElasticityVarianceProcess` has the
+  drift :math:`\mu X_t` it documents, instead of :math:`\mu (X_t - 1)`.
 
 See the :doc:`changelog` for the version in which each fix was made.

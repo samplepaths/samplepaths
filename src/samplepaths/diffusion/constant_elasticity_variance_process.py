@@ -50,7 +50,7 @@ class ConstantElasticityVarianceProcess(DiffusionProcess):
     ) -> None:
         super().__init__(
             speed=-drift,
-            mean=1.0,
+            mean=0.0,
             vol=vol,
             volexp=volexp,
             t=t,
