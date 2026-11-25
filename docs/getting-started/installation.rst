@@ -12,22 +12,31 @@ which are installed automatically:
 
 It is tested on Python 3.12, 3.13 and 3.14 on Linux, macOS and Windows.
 
-Installing from GitHub
-----------------------
+Installing from PyPI
+--------------------
 
-Install the latest version from the
-`GitHub repository <https://github.com/samplepaths/samplepaths>`_ using
-``pip``:
+Install the latest release from
+`PyPI <https://pypi.org/project/samplepaths/>`_ using ``pip``:
 
 .. code-block:: bash
 
-   pip install git+https://github.com/samplepaths/samplepaths.git
+   pip install samplepaths
 
 or add it to a project managed with ``uv``:
 
 .. code-block:: bash
 
-   uv add git+https://github.com/samplepaths/samplepaths.git
+   uv add samplepaths
+
+Installing from GitHub
+----------------------
+
+To use changes which are not released yet, install from the
+`GitHub repository <https://github.com/samplepaths/samplepaths>`_:
+
+.. code-block:: bash
+
+   pip install git+https://github.com/samplepaths/samplepaths.git
 
 Checking the installation
 -------------------------
