@@ -5,8 +5,8 @@ on:
     types: [published]
 
 jobs:
-  publish:
-    name: Publish to PyPI
+  build-and-publish:
+    name: Build and publish to PyPI
     runs-on: ubuntu-latest
 
     environment:

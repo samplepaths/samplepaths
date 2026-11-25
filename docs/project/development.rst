@@ -151,7 +151,10 @@ the interface of the library updates, in the same pull request:
 Continuous integration
 ----------------------
 
-Every pull request to ``master`` runs these workflows:
+Every pull request to ``master`` runs these workflows. The tests and CodeQL
+also run on ``master`` once a day, which catches a new release of a
+dependency that breaks the package; they do not run again when a pull
+request is merged.
 
 .. list-table::
    :header-rows: 1
