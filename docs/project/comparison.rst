@@ -44,7 +44,7 @@ stochastic differential equations.
 Speed against a Rust core
 -------------------------
 
-``stochastic-rs`` 2.6.2 was measured against the development version of
+``stochastic-rs`` 2.6.2 was measured against version 0.5.0 of
 ``samplepaths`` on the machine described in :doc:`/guide/performance`, which
 has 14 cores, for the processes which both packages provide with the same
 parameters. The times are in milliseconds, and the last column is the time
