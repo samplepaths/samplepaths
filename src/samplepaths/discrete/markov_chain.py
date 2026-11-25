@@ -119,7 +119,7 @@ class MarkovChain(BaseSequenceProcess):
         return self.__num_states
 
     @override
-    def sample(self, n: int) -> npt.NDArray[np.float64]:
+    def sample(self, n: int) -> npt.NDArray[np.int64]:
         check_positive_integer(n=n)
 
         states = range(self.num_states)
@@ -128,4 +128,4 @@ class MarkovChain(BaseSequenceProcess):
         for _ in range(n - 1):
             markov_chain.append(self.rng.choice(states, p=self.transition[markov_chain[-1]]))
 
-        return np.array(markov_chain)
+        return np.array(markov_chain, dtype=np.int64)

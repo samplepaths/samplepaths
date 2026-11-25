@@ -7,7 +7,6 @@ import numpy.typing as npt
 from numpy.random import Generator
 
 from ..utils.validation import (
-    check_nonnegative_integer,
     check_positive_integer,
 )
 from .brownian_motion import BrownianMotion
@@ -56,7 +55,7 @@ class BesselProcess(BrownianMotion):
 
     @dim.setter
     def dim(self, value: int) -> None:
-        check_nonnegative_integer(n=value, name="Dimension")
+        check_positive_integer(n=value, name="Dimension")
 
         self._dim = value
 

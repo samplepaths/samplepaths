@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from typing import Any
 
+import numpy as np
 import pytest
 
 from samplepaths.utils.validation import (
@@ -221,3 +222,16 @@ def test_check_increments_invalid(times: list[float]) -> None:
 )
 def test_check_increments(times: list[float]) -> None:
     check_increments(times=times)
+
+
+@pytest.mark.parametrize("n", [np.int64(3), np.int32(1)])
+def test_check_positive_integer_numpy_scalar(n: Any) -> None:
+    check_positive_integer(n=n)
+    check_nonnegative_integer(n=n)
+
+
+@pytest.mark.parametrize("value", [np.float64(0.5), np.float32(0.5), np.int64(2)])
+def test_check_numeric_numpy_scalar(value: Any) -> None:
+    check_numeric(value=value)
+    check_positive_number(value=value)
+    check_nonnegative_number(value=value)

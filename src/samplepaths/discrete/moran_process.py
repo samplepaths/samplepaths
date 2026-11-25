@@ -7,7 +7,7 @@ import numpy.typing as npt
 from numpy.random import Generator
 
 from ..base import BaseSequenceProcess
-from ..utils.validation import check_positive_integer
+from ..utils.validation import check_positive_integer, is_integer
 
 
 def _probabilities(n: int) -> npt.NDArray[np.float64]:
@@ -76,39 +76,40 @@ class MoranProcess(BaseSequenceProcess):
         self,
         n: int,
         start: int,
-    ) -> npt.NDArray[np.float64]:
+    ) -> npt.NDArray[np.int64]:
         """Generate a realization of the Moran process.
 
         Generate a Moran process until absorption occurs (state 0 or n) or
         length of process reaches length :math:`maximum`.
         """
-        if not isinstance(start, int):
+        if not is_integer(start):
             raise TypeError("Initial state must be a positive integer.")
 
         if start < 0 or start > self.maximum:
             raise ValueError("Initial state must be between 0 and " + str(self.maximum))
 
-        if not isinstance(n, int):
+        if not is_integer(n):
             raise TypeError("Sample length must be positive integer.")
 
         if n < 1:
             raise ValueError("Sample length must be at least 1.")
 
+        start = int(start)
         s = [start]
         increments = [-1, 0, 1]
         for _ in range(n - 1):
             if start in (0, self.maximum):
                 break
-            start += self.rng.choice(increments, p=self.__p[start - 1])
+            start += int(self.rng.choice(increments, p=self.__p[start - 1]))
             s.append(start)
 
-        return np.array(s)
+        return np.array(s, dtype=np.int64)
 
     @override
-    def sample(self, n: int) -> npt.NDArray[np.float64]:
+    def sample(self, n: int) -> npt.NDArray[np.int64]:
         return self._sample_moran_process(n, 1)
 
-    def sample_with_start(self, n: int, start: int) -> npt.NDArray[np.float64]:
+    def sample_with_start(self, n: int, start: int) -> npt.NDArray[np.int64]:
         """Generate a realization starting from a specified state.
 
         The realization ends early if the process reaches zero or the maximum

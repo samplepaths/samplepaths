@@ -17,6 +17,10 @@ from samplepaths.continuous import BesselProcess as ProcessType
             -1,
             ValueError,
         ),
+        (
+            0,
+            ValueError,
+        ),
     ],
 )
 def test_bessel_process_invalid_dim(

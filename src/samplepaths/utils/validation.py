@@ -2,10 +2,34 @@
 
 from collections.abc import Callable
 from inspect import signature
+from numbers import Integral, Real
 from typing import Any
 
 import numpy as np
 import numpy.typing as npt
+
+
+def is_integer(value: object) -> bool:
+    """Check whether a value is an integer.
+
+    Python integers and NumPy integer scalars are integers.
+
+    :param value: the value to check
+    :returns: ``True`` if ``value`` is an integer
+    """
+    return isinstance(value, Integral)
+
+
+def is_number(value: object) -> bool:
+    """Check whether a value is a real number.
+
+    Python integers and floats and NumPy integer and floating point scalars
+    are real numbers.
+
+    :param value: the value to check
+    :returns: ``True`` if ``value`` is a real number
+    """
+    return isinstance(value, Real)
 
 
 def check_positive_integer(
@@ -20,7 +44,7 @@ def check_positive_integer(
     :raises TypeError: if ``n`` is not an integer
     :raises ValueError: if ``n`` is not positive
     """
-    if not isinstance(n, int):
+    if not is_integer(n):
         raise TypeError(f"{name} must be an integer; got {type(n).__name__}.")
     if n <= 0:
         raise ValueError(f"{name} must be positive; got {n}.")
@@ -38,7 +62,7 @@ def check_nonnegative_integer(
     :raises TypeError: if ``n`` is not an integer
     :raises ValueError: if ``n`` is negative
     """
-    if not isinstance(n, int):
+    if not is_integer(n):
         raise TypeError(f"{name} must be an integer; got {type(n).__name__}.")
     if n < 0:
         raise ValueError(f"{name} must be nonnegative; got {n}.")
@@ -55,7 +79,7 @@ def check_numeric(
     :param name: the name of the value, used in the error message
     :raises TypeError: if ``value`` is not a number
     """
-    if not isinstance(value, (float, int)):
+    if not is_number(value):
         raise TypeError(f"{name} value must be a number; got {type(value).__name__}.")
 
 
@@ -146,7 +170,7 @@ def check_numeric_or_single_arg_callable(
         raise ValueError(
             f"{name} callable must have a single argument; got {len(signature(value).parameters)}."
         )
-    if not isinstance(value, (float, int)) and not callable(value):
+    if not is_number(value) and not callable(value):
         raise TypeError(
             f"{name} must be numeric or a single argument callable; got {type(value).__name__}.",
         )

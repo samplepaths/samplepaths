@@ -54,3 +54,30 @@ def test_sample_at_not_supported(name: str) -> None:
 
     with pytest.raises(NotImplementedError):
         instance.sample_at(np.array([0.0, 0.5, 2.0]))
+
+
+def test_numpy_scalar_arguments() -> None:
+    drift: Any = np.int64(1)
+    scale: Any = np.float32(2.0)
+    p: Any = np.float32(0.25)
+    n: Any = np.int64(4)
+
+    instance = samplepaths.BrownianMotion(drift=drift, scale=scale, t=np.float64(3.0))
+
+    assert instance.sample(n).shape == (5,)
+    assert samplepaths.BernoulliProcess(p=p).sample(n).shape == (4,)
+    assert samplepaths.FractionalGaussianNoise(hurst=np.float64(0.7)).hurst == 0.7
+
+
+@pytest.mark.parametrize(
+    "name, kwargs",
+    [
+        ("ChineseRestaurantProcess", {}),
+        ("MarkovChain", {}),
+        ("MoranProcess", {"maximum": 10}),
+    ],
+)
+def test_integer_valued_processes(name: str, kwargs: dict[str, Any]) -> None:
+    instance = getattr(samplepaths, name)(**kwargs)
+
+    assert instance.sample(8).dtype == np.int64

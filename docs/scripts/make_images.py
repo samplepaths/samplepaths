@@ -66,7 +66,7 @@ PATHS = 3
 #: Number of increments of the continuous-time realizations.
 STEPS = 2**12
 
-Array = npt.NDArray[np.float64]
+Array = npt.NDArray[np.float64] | npt.NDArray[np.int64]
 
 #: Colors of the realizations. They are legible on light and dark backgrounds.
 PALETTE = ["#6366f1", "#14b8a6", "#f59e0b", "#f43f5e", "#0ea5e9"]

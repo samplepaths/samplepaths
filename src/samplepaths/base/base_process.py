@@ -43,9 +43,10 @@ class BaseProcess(ABC):
             raise TypeError("rng must be of type `numpy.random.Generator`")
 
     @abstractmethod
-    def sample(self, n: int) -> npt.NDArray[np.float64]:
+    def sample(self, n: int) -> npt.NDArray[np.float64] | npt.NDArray[np.int64]:
         """Generate a realization.
 
         :param n: the number of increments to generate
-        :returns: the realization
+        :returns: the realization. Processes with integer values, such as
+            the state of a Markov chain, return an array of integers.
         """

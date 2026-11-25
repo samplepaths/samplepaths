@@ -7,7 +7,7 @@ import numpy.typing as npt
 from numpy.random import Generator
 
 from ..base import BaseSequenceProcess
-from ..utils.validation import check_positive_integer
+from ..utils.validation import check_positive_integer, is_number
 
 
 class BernoulliProcess(BaseSequenceProcess):
@@ -48,7 +48,7 @@ class BernoulliProcess(BaseSequenceProcess):
 
     @p.setter
     def p(self, value: float) -> None:
-        if not isinstance(value, (int, float)):
+        if not is_number(value):
             raise TypeError(
                 "Probability of success must be a number between 0.0 and 1.0",
             )

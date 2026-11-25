@@ -31,7 +31,7 @@ class GammaProcess(BaseTimeProcess):
     :param variance: variance of increase per unit time; supply with
         :py:attr:`mean`
     :param rate: the rate of jump arrivals; supply with :py:attr:`scale`
-    :param scale: the size of the jumps; supple with :py:attr:`rate`
+    :param scale: the size of the jumps; supply with :py:attr:`rate`
     :param t: the right hand endpoint of the time interval :math:`[0,t]`
         for the process
     :param rng: a custom random number generator

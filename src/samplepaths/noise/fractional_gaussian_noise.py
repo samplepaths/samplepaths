@@ -84,7 +84,7 @@ class FractionalGaussianNoise(BaseTimeProcess):
 
     @hurst.setter
     def hurst(self, value: float) -> None:
-        if not isinstance(value, float):
+        if not isinstance(value, (float, np.floating)):
             raise TypeError("Hurst value must be a number on interval (0,1).")
 
         if value <= 0 or value >= 1:

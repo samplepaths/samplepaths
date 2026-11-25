@@ -40,6 +40,8 @@ nitpick_ignore = [
     # numpy documents its scalar types as attributes, not classes, so the
     # references generated from type hints cannot be resolved.
     ("py:class", "numpy.float64"),
+    ("py:class", "numpy.int64"),
+    ("py:class", "numpy.object_"),
 ]
 
 autodoc_member_order = "bysource"

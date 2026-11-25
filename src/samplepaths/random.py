@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from .utils.validation import is_integer
+
 _default_rng = np.random.default_rng()
 
 #: The default random number generator
@@ -42,7 +44,7 @@ def seed(
     """
     global generator
 
-    if not isinstance(value, int):
+    if not is_integer(value):
         raise TypeError("Seed value must be an integer.")
 
     generator = np.random.default_rng(seed=value)

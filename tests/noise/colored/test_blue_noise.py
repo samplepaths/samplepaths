@@ -4,14 +4,14 @@ import pytest
 from samplepaths.noise import BlueNoise as ProcessType
 
 
-def test_colored_noise_str_repr() -> None:
+def test_blue_noise_str_repr() -> None:
     instance = ProcessType(t=2.0)
 
     assert str(instance) == "Colored noise generator with exponent -1 on interval [0, 2.0]"
     assert repr(instance) == "ColoredNoise(beta=-1, t=2.0)"
 
 
-def test_colored_noise_sample_shape() -> None:
+def test_blue_noise_sample_shape() -> None:
     instance = ProcessType(t=1.0)
     n = 1000
     samples = instance.sample(n=n)
@@ -29,7 +29,7 @@ def test_colored_noise_sample_shape() -> None:
         ),
     ],
 )
-def test_colored_noise_sample_values(
+def test_blue_noise_sample_values(
     t: float,
     n: int,
     expected: list[float],

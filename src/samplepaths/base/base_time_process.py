@@ -1,5 +1,7 @@
 """Base class of the processes defined on a time interval."""
 
+from abc import abstractmethod
+
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
@@ -34,6 +36,14 @@ class BaseTimeProcess(BaseProcess):
 
         self.__n: int | None = None
         self.__times: npt.NDArray[np.float64] | None = None
+
+    @abstractmethod
+    def sample(self, n: int) -> npt.NDArray[np.float64]:
+        """Generate a realization.
+
+        :param n: the number of increments to generate
+        :returns: the realization
+        """
 
     @property
     def t(self) -> float:
