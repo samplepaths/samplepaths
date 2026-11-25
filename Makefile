@@ -1,32 +1,52 @@
-cov:
-	open htmlcov/index.html
+.DEFAULT_GOAL := help
 
-.PHONY: docs
-docs:
-	poetry export --dev -f requirements.txt > docs/requirements.txt
-	cd docs && \
-	make html
-	open docs/_build/html/index.html
+.PHONY: help install lint format typecheck test coverage check \
+	docs docs-live docs-images docs-clean build publish clean
 
-fmt:
-	poetry run isort .
-	poetry run black .
+help:  ## Show the available targets
+	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "} {printf "  %-14s %s\n", $$1, $$2}'
 
-setup:
-	asdf install
-	poetry install
+install:  ## Create the virtual environment and install all dependencies
+	uv sync --locked
 
-test:
-	poetry run pytest
+lint:  ## Check the code style and formatting with ruff
+	uv run ruff check src tests docs
+	uv run ruff format --check src tests docs
 
-build:
-	poetry build
+format:  ## Format the code and apply the safe lint fixes
+	uv run ruff check --fix src tests docs
+	uv run ruff format src tests docs
 
-clean:
+typecheck:  ## Check the types with mypy
+	uv run mypy src tests
+
+test:  ## Run the tests
+	uv run pytest
+
+coverage:  ## Run the tests in parallel with a coverage report
+	uv run pytest -n auto --cov --cov-report=term-missing:skip-covered --cov-report=xml
+
+check: lint typecheck test docs  ## Run every check that CI runs
+
+docs:  ## Build the HTML documentation, treating warnings as errors
+	uv run sphinx-build -b html -W --keep-going docs docs/_build/html
+
+docs-live:  ## Serve the documentation and rebuild it on changes
+	uv run sphinx-autobuild docs docs/_build/html
+
+docs-images:  ## Regenerate the figures shown in the documentation
+	uv run python docs/scripts/make_images.py
+
+docs-clean:  ## Remove the built documentation
+	rm -rf docs/_build
+
+build:  ## Build the source distribution and the wheel
 	rm -rf dist
+	uv build
 
-publish: clean build
-	poetry publish
+publish: build  ## Upload the built distributions to PyPI
+	uv publish
 
-release: clean build
-	ghr -u crflynn -r stochastic -c $(shell git rev-parse HEAD) -delete -b "release" -n $(shell poetry version --short) $(shell poetry version --short) dist/
+clean: docs-clean  ## Remove build, test and cache artifacts
+	rm -rf dist htmlcov coverage.xml .coverage .pytest_cache .mypy_cache .ruff_cache

@@ -142,3 +142,5 @@ cython_debug/
 
 # intellij
 .idea/
+# Generated API reference
+docs/reference/api/

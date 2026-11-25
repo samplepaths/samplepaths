@@ -1,0 +1,66 @@
+{
+  // A
+  // B
+  // C
+  "cSpell.words": [
+    "allclose",
+    "Hosking",
+    "inspectable",
+    "Liouville",
+    "multifractional",
+    "numpy",
+    "samplepaths",
+    "rtol",
+    "scipy"
+  ],
+  // D
+  // E
+  "editor.formatOnSave": true,
+  // F
+  "files.exclude": {
+    "**/__pycache__": true,
+  },
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  // G
+  // H
+  // I
+  // J
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  // K
+  // L
+  // M
+  // N
+  // O
+  // P
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "mypy-type-checker.importStrategy": "fromEnvironment",
+  "ruff.importStrategy": "fromEnvironment",
+  "notebook.formatOnSave.enabled": true,
+  "notebook.lineNumbers": "on"
+  // Q
+  // R
+  // S
+  // T
+  // U
+  // V
+  // W
+  // X
+  // Y
+  // Z
+}

@@ -1,80 +1,114 @@
-[tool.poetry]
-name = "stochastic"
-version = "0.7.0"
-description = "Generate realizations of stochastic processes"
-authors = ["Flynn <crf204@gmail.com>"]
-license = "MIT"
-readme = "README.rst"
-homepage = "https://github.com/crflynn/stochastic"
-repository = "https://github.com/crflynn/stochastic"
-documentation = "https://stochastic.readthedocs.io/en/latest/"
-keywords = ["stochastic", "processes"]
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "License :: OSI Approved :: MIT License",
-    "Intended Audience :: Science/Research",
-    "Natural Language :: English",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Scientific/Engineering :: Physics",
-]
-include = [
-    { path="CHANGELOG.rst", format="sdist" },
-    { path="CONTRIBUTORS.rst", format="sdist" },
-    { path="LICENSE.txt", format="sdist" }
-]
-
-[tool.poetry.dependencies]
-python = ">=3.8,<3.11"  # constrained by scipy
-numpy = "^1.19"
-scipy = "^1.8"
-
-[tool.poetry.dev-dependencies]
-matplotlib = "^3.1"
-pytest = "^4.5"
-pytest-cov = "^2.7"
-pytest-xdist = "^1.28"
-pytest-mock = "^1.10"
-sphinx = "^2.0"
-sphinx-rtd-theme = "^0.4.3"
-sphinx-autobuild = "^0.7.1"
-codecov = "^2.1.7"
-Jinja2 = "3.0.3"  # https://github.com/sphinx-doc/sphinx/issues/10291
-black = "^22.3.0"
-isort = "^5.10.1"
-
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.black]
-line-length = 88
-target-version = ['py38']
-include = '\.pyi?$'
-exclude = '''
 
-(
-  /(
-      \.eggs
-    | \.git
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-  )/
-)
-'''
+[project]
+name = "samplepaths"
+version = "0.1.0"
+description = "Generate realizations of stochastic processes"
+readme = "README.rst"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Bassem Girgis", email = "brgirgis@gmail.com" },
+  { name = "Christopher Flynn", email = "crf204@gmail.com" },
+]
+maintainers = [{ name = "Bassem Girgis", email = "brgirgis@gmail.com" }]
+keywords = ["stochastic", "processes", "simulation", "monte carlo"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Typing :: Typed",
+]
+dependencies = ["numpy>=2.2.6", "scipy>=1.15.3"]
 
-[tool.isort]
-force_single_line = true
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-line_length = 88
+
+[project.urls]
+Homepage = "https://github.com/samplepaths/samplepaths"
+Repository = "https://github.com/samplepaths/samplepaths"
+Issues = "https://github.com/samplepaths/samplepaths/issues"
+Author = "https://girgis.me"
+
+
+[dependency-groups]
+test = ["pytest>=9.0.2", "pytest-cov>=7.0.0", "pytest-xdist>=3.8.0"]
+lint = ["mypy>=1.19.1", "ruff>=0.14.0", "scipy-stubs>=1.15.3.0"]
+docs = [
+  "matplotlib>=3.10.8",
+  "sphinx>=8.1.3",
+  "sphinx-autobuild>=2024.10.3",
+  "furo>=2025.9.25",
+]
+# The notebooks compare samplepaths against the original stochastic package.
+notebooks = [
+  "ipykernel>=7.1.0",
+  "nbformat>=5.10.4",
+  "plotly>=6.5.2",
+  "stochastic>=0.4.0",
+]
+dev = [
+  { include-group = "test" },
+  { include-group = "lint" },
+  { include-group = "docs" },
+  { include-group = "notebooks" },
+]
+
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/README.rst", "/LICENSE"]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+
+[tool.coverage.run]
+source = ["samplepaths"]
+
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "B",   # flake8-bugbear
+  "UP",  # pyupgrade
+  "T20", # flake8-print
+  "D",   # pydocstyle
+]
+ignore = [
+  "D105", # magic methods need no docstring
+  "D107", # constructor parameters are documented in the class docstring
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+"docs/conf.py" = ["D"]
+"docs/scripts/make_images.py" = ["T20"]
+
+
+[tool.mypy]
+strict = true
+warn_unreachable = true
+disallow_any_unimported = true
+show_error_codes = true

@@ -1,185 +1,119 @@
-stochastic
-==========
+samplepaths
+============
 
-|build| |rtd| |codecov| |pypi| |pyversions|
+|tests| |license|
 
-.. |build| image:: https://github.com/crflynn/stochastic/actions/workflows/build.yml/badge.svg
-    :target: https://github.com/crflynn/stochastic/actions
+.. |tests| image:: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml/badge.svg
+    :target: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml
 
-.. |rtd| image:: https://img.shields.io/readthedocs/stochastic.svg
-    :target: http://stochastic.readthedocs.io/en/latest/
-
-.. |codecov| image:: https://codecov.io/gh/crflynn/stochastic/branch/master/graphs/badge.svg
-    :target: https://codecov.io/gh/crflynn/stochastic
-
-.. |pypi| image:: https://img.shields.io/pypi/v/stochastic.svg
-    :target: https://pypi.python.org/pypi/stochastic
-
-.. |pyversions| image:: https://img.shields.io/pypi/pyversions/stochastic.svg
-    :target: https://pypi.python.org/pypi/stochastic
+.. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg
+    :target: https://github.com/samplepaths/samplepaths/blob/master/LICENSE
 
 
-A python package for generating realizations of stochastic processes.
+A Python package for generating realizations of stochastic processes.
+
+``samplepaths`` is an independently maintained fork of
+`stochastic <https://github.com/crflynn/stochastic>`_ by Christopher Flynn,
+modernized for current Python, ``numpy`` and ``scipy`` releases and shipped
+with type hints. It is maintained by `Bassem Girgis <https://girgis.me>`_.
 
 Installation
 ------------
 
-The ``stochastic`` package is available on pypi and can be installed using pip
+Install ``samplepaths`` from its GitHub repository using pip
 
 .. code-block:: shell
 
-    pip install stochastic
+    pip install git+https://github.com/samplepaths/samplepaths.git
+
+``samplepaths`` requires Python 3.12 or newer.
 
 Dependencies
 ~~~~~~~~~~~~
 
-Stochastic uses ``numpy`` for many calculations and ``scipy`` for sampling
+``samplepaths`` uses ``numpy`` for many calculations and ``scipy`` for sampling
 specific random variables.
+
+Quickstart
+----------
+
+Every process is a class with a ``sample(n)`` method which generates a
+realization as a ``numpy`` array.
+
+.. code-block:: python
+
+    from samplepaths import BrownianMotion
+
+    bm = BrownianMotion(drift=1, scale=2, t=10)
+    path = bm.sample(1000)  # 1001 values on [0, 10]
+    times = bm.times  # the matching time values
+
+Pass a ``numpy.random.Generator`` for reproducible results, or seed the
+generator shared by all processes:
+
+.. code-block:: python
+
+    import numpy as np
+    from samplepaths import BrownianMotion
+    from samplepaths import random
+
+    bm = BrownianMotion(rng=np.random.default_rng(42))
+
+    random.seed(value=42)
+
+Some processes can be sampled at times of your choice, and some have
+additional sampling methods:
+
+.. code-block:: python
+
+    from samplepaths import BrownianMotion
+    from samplepaths import FractionalGaussianNoise
+    from samplepaths import GeometricBrownianMotion
+
+    values = BrownianMotion(drift=1).sample_at([0, 3, 10, 11, 11.2, 20])
+    prices = GeometricBrownianMotion(drift=0.05, volatility=0.2).sample_with_initial(252, initial=100.0)
+    noise = FractionalGaussianNoise(hurst=0.6).sample_hosking(32)
 
 Processes
 ---------
 
-This package offers a number of common discrete-time, continuous-time, and
-noise process objects for generating realizations of stochastic processes as
-``numpy`` arrays.
+All processes can be imported from ``samplepaths`` or from the subpackage of
+their family. Diffusion processes are approximated using the Euler-Maruyama
+method.
 
-The diffusion processes are approximated using the Euler–Maruyama method.
+* ``samplepaths.continuous``: BesselProcess, BrownianBridge,
+  BrownianExcursion, BrownianMeander, BrownianMotion, CauchyProcess,
+  FractionalBrownianMotion, GammaProcess, GeometricBrownianMotion,
+  InverseGaussianProcess, MixedPoissonProcess,
+  MultifractionalBrownianMotion, PoissonProcess, SquaredBesselProcess,
+  VarianceGammaProcess, WienerProcess
+* ``samplepaths.diffusion``: DiffusionProcess (generalized),
+  ConstantElasticityVarianceProcess, CoxIngersollRossProcess,
+  ExtendedVasicekProcess, OrnsteinUhlenbeckProcess, VasicekProcess
+* ``samplepaths.discrete``: BernoulliProcess, ChineseRestaurantProcess,
+  DirichletProcess, MarkovChain, MoranProcess, RandomWalk
+* ``samplepaths.noise``: BlueNoise, BrownianNoise, ColoredNoise,
+  FractionalGaussianNoise, GaussianNoise, PinkNoise, RedNoise, VioletNoise,
+  WhiteNoise
 
-Here are the currently supported processes and their class references within
-the package.
+Documentation
+-------------
 
-* stochastic.processes
+The documentation lives in the ``docs`` directory. Build it with
+``make docs`` and open ``docs/_build/html/index.html``. It contains a user
+guide for every family of processes and an API reference.
 
-    * continuous
+Development
+-----------
 
-        * BesselProcess
-        * BrownianBridge
-        * BrownianExcursion
-        * BrownianMeander
-        * BrownianMotion
-        * CauchyProcess
-        * FractionalBrownianMotion
-        * GammaProcess
-        * GeometricBrownianMotion
-        * InverseGaussianProcess
-        * MixedPoissonProcess
-        * MultifractionalBrownianMotion
-        * PoissonProcess
-        * SquaredBesselProcess
-        * VarianceGammaProcess
-        * WienerProcess
+.. code-block:: shell
 
-    * diffusion
+    make install  # create the environment with uv
+    make check    # lint, type check, test and build the docs
 
-        * DiffusionProcess (generalized)
-        * ConstantElasticityVarianceProcess
-        * CoxIngersollRossProcess
-        * ExtendedVasicekProcess
-        * OrnsteinUhlenbeckProcess
-        * VasicekProcess
+Run ``make`` to list all targets.
 
-    * discrete
+License
+-------
 
-        * BernoulliProcess
-        * ChineseRestaurantProcess
-        * DirichletProcess
-        * MarkovChain
-        * MoranProcess
-        * RandomWalk
-
-    * noise
-
-        * BlueNoise
-        * BrownianNoise
-        * ColoredNoise
-        * PinkNoise
-        * RedNoise
-        * VioletNoise
-        * WhiteNoise
-        * FractionalGaussianNoise
-        * GaussianNoise
-
-Usage patterns
---------------
-
-Sampling
-~~~~~~~~
-
-To use ``stochastic``, import the process you want and instantiate with the
-required parameters. Every process class has a ``sample`` method for generating
-realizations. The ``sample`` methods accept a parameter ``n`` for the quantity
-of steps in the realization, but others (Poisson, for instance) may take
-additional parameters. Parameters can be accessed as attributes of the
-instance.
-
-.. code-block:: python
-
-    from stochastic.processes.discrete import BernoulliProcess
-
-
-    bp = BernoulliProcess(p=0.6)
-    s = bp.sample(16)
-    success_probability = bp.p
-
-
-Continuous processes provide a default parameter, ``t``, which indicates the
-maximum time of the process realizations. The default value is 1. The sample
-method will generate ``n`` equally spaced increments on the
-interval ``[0, t]``.
-
-Sampling at specific times
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Some continuous processes also provide a ``sample_at()`` method, in which a
-sequence of time values can be passed at which the object will generate a
-realization. This method ignores the parameter, ``t``, specified on
-instantiation.
-
-
-.. code-block:: python
-
-    from stochastic.processes.continuous import BrownianMotion
-
-
-    bm = BrownianMotion(drift=1, scale=1, t=1)
-    times = [0, 3, 10, 11, 11.2, 20]
-    s = bm.sample_at(times)
-
-Sample times
-~~~~~~~~~~~~
-
-Continuous processes also provide a method ``times()`` which generates the time
-values (using ``numpy.linspace``) corresponding to a realization of ``n``
-steps. This is particularly useful for plotting your samples.
-
-
-.. code-block:: python
-
-    import matplotlib.pyplot as plt
-    from stochastic.processes.continuous import FractionalBrownianMotion
-
-
-    fbm = FractionalBrownianMotion(hurst=0.7, t=1)
-    s = fbm.sample(32)
-    times = fbm.times(32)
-
-    plt.plot(times, s)
-    plt.show()
-
-
-Specifying an algorithm
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Some processes provide an optional parameter ``algorithm``, in which one can
-specify which algorithm to use to generate the realization using the
-``sample()`` or ``sample_at()`` methods. See the documentation for
-process-specific implementations.
-
-
-.. code-block:: python
-
-    from stochastic.processes.noise import FractionalGaussianNoise
-
-
-    fgn = FractionalGaussianNoise(hurst=0.6, t=1)
-    s = fgn.sample(32, algorithm='hosking')
+``samplepaths`` is released under the MIT license. See the ``LICENSE`` file.
