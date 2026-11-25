@@ -113,6 +113,7 @@ with type hints. See :doc:`project/about` for what the fork adds and
    project/changelog
    project/migration
    project/development
+   project/maintenance
    project/license
 
 Indices

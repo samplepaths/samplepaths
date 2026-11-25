@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 
 .PHONY: help install install-test install-latest lint format typecheck test coverage check \
+	check-seeded \
 	docs docs-live docs-images docs-clean benchmark benchmark-compare \
 	version build check-release publish clean
 
@@ -37,6 +38,15 @@ coverage:  ## Run the tests in parallel with a coverage report
 
 check: lint typecheck test docs  ## Run every check that CI runs
 
+# The released version to compare seeded results with: the last tag.
+VERSION ?= $(shell git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+SEEDED_RESULTS := .seeded-results.npz
+
+check-seeded:  ## Compare seeded results with a release, the last one or VERSION=0.5.0
+	uv run --no-project --with "samplepaths==$(VERSION)" --with pytest \
+		python .github/scripts/seeded_results.py record $(SEEDED_RESULTS)
+	uv run python .github/scripts/seeded_results.py compare $(SEEDED_RESULTS)
+
 docs:  ## Build the HTML documentation, treating warnings as errors
 	uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 
@@ -69,4 +79,5 @@ publish:  ## Upload the built distributions to PyPI
 	uv publish
 
 clean: docs-clean  ## Remove build, test and cache artifacts
-	rm -rf dist htmlcov coverage.xml .coverage .pytest_cache .mypy_cache .ruff_cache
+	rm -rf dist htmlcov coverage.xml .coverage .pytest_cache .mypy_cache .ruff_cache \
+		$(SEEDED_RESULTS)

@@ -28,6 +28,12 @@ class FractionalCoxIngersollRossProcess(FractionalEulerProcess):
     of the fractional Brownian motion. A value which a step would make
     negative is set to zero. :py:meth:`sample` starts from 1.
 
+    .. note::
+
+        The Euler method is known to converge for a Hurst parameter above
+        1/2. Below it, a realization tends to stay at zero once it gets
+        there, which the exact process does not do.
+
     :param hurst: the Hurst parameter :math:`H` in :math:`(0,1)`
     :param speed: the speed of reversion, or :math:`\theta` above
     :param mean: the mean of the process, or :math:`\mu` above, nonnegative

@@ -49,6 +49,8 @@ Run ``make`` without arguments to list the targets.
      - run the tests
    * - ``make coverage``
      - run the tests in parallel with a coverage report
+   * - ``make check-seeded``
+     - compare the results for a given seed with those of the last release
    * - ``make check``
      - run every check that CI runs
    * - ``make docs``
@@ -188,12 +190,16 @@ previous one.
        daily run also tests with the newest release of every dependency
    * - Quality
      - ``ruff``, ``mypy`` and a build of the documentation, which runs the
-       examples of the gallery
+       examples of the gallery; a second job compares the results for a
+       given seed with those of the last release
    * - Benchmarks
      - measures the sampling times on the base branch and on the pull
        request, and fails when a method becomes more than two times slower
    * - CodeQL
      - static analysis of the code and of the workflows
+
+See :doc:`maintenance` for what to check when making code faster, comparing
+with ``stochastic-rs`` or changing the workflows.
 
 Releasing
 ---------

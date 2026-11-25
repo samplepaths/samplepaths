@@ -50,6 +50,10 @@ Project
 * The tests also run once a day with the newest release of every dependency,
   where the other jobs use the versions of ``uv.lock``. ``make
   install-latest`` installs them locally.
+* ``make check-seeded`` compares the results for a given seed with those of
+  the last release, and every pull request runs it.
+* :doc:`maintenance` records what was learned about keeping results,
+  performance and the comparison with ``stochastic-rs``.
 
 0.5.0 (2026-11-25)
 ------------------

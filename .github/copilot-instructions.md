@@ -29,7 +29,7 @@ The workflows in `.github/workflows` call make targets only. A step which needs 
 
 `sample()` and `sample_at()` return the same values, bit for bit, for the same seed from one version to the next. This is a promise to users.
 
-- An optimization must compute the same values in the same order of floating point operations. Check it against the previous version on seeded realizations before and after the change.
+- An optimization must compute the same values in the same order of floating point operations. Run `make check-seeded`, which compares with the last release bit for bit.
 - A better algorithm goes into a new method, not into `sample()`. This is why exact sampling is `sample_exact()` and `sample_paths_exact()`.
 - A fix which has to change results is allowed. The changelog then says which process, what was wrong and how results change.
 - `sample_paths()` may draw its random numbers in a different order than repeated calls to `sample()`. It must give the same distribution, and the same result for the same seed and number of workers.
@@ -61,7 +61,7 @@ A process with several components returns one array with a component axis: `(com
 
 ## Comparing with stochastic-rs
 
-`stochastic-rs` is a package with a Rust core which serves as the reference for speed and for checking results. It is not a dependency.
+`stochastic-rs` is a package with a Rust core which serves as the reference for speed and for checking results. It is not a dependency. `docs/project/maintenance.rst` has the details, and what was learned about performance and the workflows.
 
 - Its `n` is the number of points of a realization; here `n` is the number of increments.
 - The two use different random number generators, so only distributions can be compared. A single small p-value among many comparisons is expected by chance; repeat with more realizations before concluding that two results differ.
