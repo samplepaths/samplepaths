@@ -10,7 +10,7 @@ version and compares them with another::
 
 ``make check-seeded`` records with a released version installed from PyPI
 and compares with the working tree. The processes and their parameters are
-the cases of ``tests/test_sample_paths.py``; a process which the recording
+the cases of ``tests/sample_paths/cases.py``; a process which the recording
 version does not have is left out.
 
 The methods with their own interface, ``sample_exact()`` and the variants
@@ -31,7 +31,7 @@ import numpy as np
 
 def _load_cases() -> Any:
     """Load the module of the tests which lists the processes to sample."""
-    path = Path(__file__).resolve().parents[2] / "tests" / "test_sample_paths.py"
+    path = Path(__file__).resolve().parents[2] / "tests" / "sample_paths" / "cases.py"
     spec = importlib.util.spec_from_file_location("cases_of_the_tests", path)
     if spec is None or spec.loader is None:
         raise ImportError(f"Cannot load {path}.")

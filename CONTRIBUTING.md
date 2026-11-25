@@ -24,7 +24,7 @@ Run `make` to list all targets. A pull request should:
 - keep `make check` passing
 - add tests for the change; a fix comes with a test which fails without it
 - leave the results of `sample()` and `sample_at()` for a given seed unchanged, or say in the changelog why they change
-- update the documentation in the same pull request: the guide page of the feature, an example in `docs/examples` when it helps, and the "Unreleased" section of `docs/project/changelog.rst`
+- update the documentation in the same pull request: the guide page of the feature, an example in `docs/examples` when it helps, and an "Unreleased" section in `docs/project/changelog.rst`
 - put every new class in its own module
 
 The [development page](https://samplepaths.readthedocs.io/en/latest/project/development.html) describes the layout of the project, the code style and how to add a process.

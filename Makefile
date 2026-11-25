@@ -43,7 +43,7 @@ VERSION ?= $(shell git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
 SEEDED_RESULTS := .seeded-results.npz
 
 check-seeded:  ## Compare seeded results with a release, the last one or VERSION=0.5.0
-	uv run --no-project --with "samplepaths==$(VERSION)" --with pytest \
+	uv run --no-project --with "samplepaths==$(VERSION)" \
 		python .github/scripts/seeded_results.py record $(SEEDED_RESULTS)
 	uv run python .github/scripts/seeded_results.py compare $(SEEDED_RESULTS)
 

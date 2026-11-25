@@ -8,7 +8,7 @@ from .._compat import override
 from .._square_root import square_root_paths, square_root_values
 from .._times import steps_from_zero
 from ..utils.validation import check_nonnegative_number, check_numeric, check_positive_number
-from ._andersen import log_price_changes
+from ._heston_model.andersen import log_price_changes
 from .vector_process import VectorProcess
 
 #: Number of realizations from which the variances of all realizations are

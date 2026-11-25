@@ -1,0 +1,89 @@
+Version 0.2
+===========
+
+0.2.0 (2026-11-25)
+------------------
+
+Faster
+~~~~~~
+
+Loops over the increments in Python were replaced with ``numpy`` operations.
+Times in milliseconds, for 4096 values unless noted:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 52 16 16 16
+
+   * - Method
+     - 0.1.1
+     - 0.2.0
+     - Gain
+   * - ``CauchyProcess.sample_at()``
+     - 38.6
+     - 0.10
+     - 370x
+   * - ``BesselProcess.sample()``
+     - 2.39
+     - 0.03
+     - 70x
+   * - ``MarkovChain.sample()``
+     - 15.1
+     - 0.21
+     - 73x
+   * - ``FractionalGaussianNoise.sample_hosking()`` (1024)
+     - 237
+     - 3.3
+     - 72x
+   * - ``GaussianNoise.sample_at()``
+     - 1.68
+     - 0.03
+     - 49x
+   * - ``BrownianMotion.sample_at()``
+     - 1.77
+     - 0.05
+     - 36x
+   * - ``BrownianMeander.sample_at()``
+     - 5.31
+     - 0.17
+     - 32x
+   * - ``MultifractionalBrownianMotion.sample()`` (512)
+     - 45.5
+     - 1.6
+     - 29x
+   * - ``MoranProcess.sample()``
+     - 8.70
+     - 0.39
+     - 23x
+   * - ``InverseGaussianProcess.sample()``
+     - 0.95
+     - 0.07
+     - 15x
+   * - ``ChineseRestaurantProcess.sample()``
+     - 17.3
+     - 3.4
+     - 5x
+   * - ``DirichletProcess.sample()``
+     - 12.3
+     - 4.9
+     - 2.5x
+
+Of 831 seeded realizations compared with version 0.1.1, 781 are identical
+bit for bit, 48 agree to a relative difference of 1e-9, where ``numpy`` now
+adds the terms of a sum in a different order, and 2, both from
+``CauchyProcess.sample_at()``, agree to 2.5e-8 because of the fix below.
+
+Fixed
+~~~~~
+
+* ``CauchyProcess.sample_at()`` no longer fails with "Times must be strictly
+  increasing" when its random time change makes a very large jump. The path
+  is built from the increments of the time change directly.
+* :py:class:`~samplepaths.noise.ColoredNoise` computes its frequencies again
+  when ``beta`` or ``t`` is changed on an instance.
+* :py:class:`~samplepaths.discrete.MoranProcess` computes its transition
+  probabilities again when ``maximum`` is changed on an instance.
+
+Added
+~~~~~
+
+* ``docs/scripts/benchmark.py`` and ``make benchmark``.

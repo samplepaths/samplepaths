@@ -1,0 +1,48 @@
+Version 0.3
+===========
+
+0.3.0 (2026-11-25)
+------------------
+
+Added
+~~~~~
+
+* ``sample_paths(n, paths)`` on every process generates many independent
+  realizations in one call, as a two-dimensional array. For 1000 realizations
+  of 256 increments it is 2 to 13 times faster than a loop over ``sample()``
+  for most processes: 1.8 instead of 14.6 milliseconds for a Vasicek process,
+  1.4 instead of 5.2 for a Brownian motion. See :doc:`/guide/paths`.
+* ``sample_paths_with_initial(n, paths, initial)`` on
+  :py:class:`~samplepaths.continuous.GeometricBrownianMotion` and on the
+  diffusion processes.
+* ``docs/scripts/benchmark.py --paths`` measures many realizations.
+
+Faster
+~~~~~~
+
+* Diffusion processes: 0.21 instead of 0.98 milliseconds for 4096 increments
+  with constant parameters (4.7 times faster), and 0.44 instead of 1.00 for
+  the Cox-Ingersoll-Ross process.
+* :py:class:`~samplepaths.continuous.MultifractionalBrownianMotion` and
+  Hosking's method keep the part of the computation which does not depend on
+  the random numbers. From the second realization of an instance on, 512
+  increments of the former take 0.34 instead of 1.6 milliseconds and 1024
+  increments of the latter 0.98 instead of 3.4.
+* :py:class:`~samplepaths.discrete.ChineseRestaurantProcess` with many
+  tables: 12 instead of 33 milliseconds for 4096 customers with
+  ``discount=0.5`` and ``strength=2``, and 25 instead of 281 with
+  ``discount=0.9`` and ``strength=5``.
+
+Realizations of ``sample()`` and ``sample_at()`` for a given seed are
+identical bit for bit to those of version 0.2.0 in all 906 compared cases,
+which cover every process and sampling method.
+
+Changed
+~~~~~~~
+
+* In the diffusion processes, an initial value outside the domain of the
+  volatility term behaves like any later value. A negative initial value with
+  a fractional exponent gives ``nan``, where the first step used to produce a
+  complex number, and an initial value of zero with a negative exponent gives
+  ``inf`` instead of raising ``ZeroDivisionError``. Both emit a
+  ``RuntimeWarning``.

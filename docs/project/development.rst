@@ -93,7 +93,9 @@ Project layout
    docs/              this documentation
        guide/         the user guide
        examples/      the examples of the gallery, run at build time
-       scripts/       the benchmark and the script which draws the figures
+       scripts/       the benchmark, the comparison with stochastic-rs and the
+                      script which draws the figures, with their modules in
+                      private packages
    .github/
        workflows/     the workflows of continuous integration
        scripts/       the scripts run by the workflows
@@ -133,13 +135,13 @@ Adding a process
    representations, the shape of the realizations and their values for a
    seeded generator.
 5. Add the process to the guide of its family in ``docs/guide`` and a figure
-   to ``docs/scripts/make_images.py``. Add an example named after the module,
+   to a module of ``docs/scripts/_images``. Add an example named after the module,
    ``plot_<module>.py``, to the folder of the family in ``docs/examples``;
    a test checks that every process has one. The API reference is generated
    automatically.
 6. Override ``sample_paths(n, paths)`` when the process can generate many
    realizations in one pass, and add the process to the cases of
-   ``tests/test_sample_paths.py``, which compares the result with repeated
+   ``tests/sample_paths/cases.py``, whose tests compare the result with repeated
    calls to ``sample()``. A process which derives from another process must
    override it, or it would inherit the realizations of its parent.
 
@@ -156,9 +158,10 @@ the interface of the library updates, in the same pull request:
 
 * the guide page of the feature in ``docs/guide``, including its examples
 * the gallery in ``docs/examples`` when an example shows the change best
-* ``docs/guide/performance.rst`` when sampling times change, with times
-  measured by ``make benchmark``
-* the "Unreleased" section of ``docs/project/changelog.rst``
+* ``docs/guide/performance/timings.rst`` and ``docs/guide/performance.rst`` when
+  sampling times change, with times measured by ``make benchmark``
+* an "Unreleased" section in ``docs/project/changelog.rst``, above the list
+  of versions
 * ``README.md`` when the change affects what a first-time reader should know
 
 .. code-block:: bash
@@ -209,9 +212,12 @@ Releasing
 The version of the package is not written in any file. It is read from the
 git tag of the release: the tag ``v0.2.0`` gives the version ``0.2.0``.
 
-To release, rename the "Unreleased" section of ``docs/project/changelog.rst``
-to the new version and its date, merge that change, and create a GitHub
-release on ``master`` with a new tag of the form ``vX.Y.Z``. Publishing the release runs the ``Publish`` workflow, which
+To release, move the "Unreleased" section of ``docs/project/changelog.rst``
+to the page of its minor version in ``docs/project/changelog``, under a
+heading with the new version and its date; a new minor version gets a new
+page, listed first in ``changelog.rst``. Merge that change, and create a
+GitHub release on ``master`` with a new tag of the form ``vX.Y.Z``.
+Publishing the release runs the ``Publish`` workflow, which
 builds the distributions, checks that their version matches the tag and
 uploads them to PyPI using trusted publishing.
 

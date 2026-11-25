@@ -1,0 +1,27 @@
+Version 0.1
+===========
+
+0.1.1 (2026-11-25)
+------------------
+
+* The package version is read from the git tag of the release.
+* The README was rewritten in Markdown. The library code is unchanged from
+  0.1.0.
+
+0.1.0 (2026-11-25)
+------------------
+
+First release, a fork of ``stochastic`` 0.7.0 under a new name. The changes
+from the original package are described in :doc:`/project/migration`. In short:
+
+* runs on Python 3.12 or newer with ``numpy`` 2 and ``scipy`` 1.15
+* type hints throughout
+* one ``sample(n)`` signature on every process, with dedicated methods for
+  the variants
+* keyword-only arguments on the continuous-time, diffusion and noise
+  processes
+* random number generation with :py:class:`numpy.random.Generator` only
+* the ``times`` attribute replaces the ``times(n)`` method
+* corrected drift of :py:class:`~samplepaths.continuous.BrownianMotion` and
+  :py:class:`~samplepaths.continuous.GeometricBrownianMotion` for an end time
+  other than 1

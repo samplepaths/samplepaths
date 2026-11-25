@@ -32,7 +32,7 @@ The workflows in `.github/workflows` call make targets only. A step which needs 
 
 - **American English** in code, comments, documentation and commit messages: color, behavior, modeling, analyze.
 - **One class per file.** Every class, internal base classes included, has its own module named after it in snake case. Modules of helper functions without a class are fine and start with an underscore, such as `_recurrence.py`.
-- **Files stay under 300 lines.** Before a file reaches that size, move helpers to a private module or split it by topic. Several older files are still over the limit; split one when you change it.
+- **Files stay under 300 lines.** Split a file before it reaches that size. What a split produces goes into a place of its own, named after the file it came from: a private subpackage for code (`diffusion_process.py` with `_diffusion_process/`, `make_images.py` with `_images/`), and a subdirectory for documentation pages and tests (`comparison.rst` with `comparison/`, `tests/sample_paths/`). The original file stays where it was and keeps its name.
 - **Standard tooling only.** `ruff` for lint and format, `mypy` in strict mode, `pytest`. No unusual configuration.
 - Every public module, class, method and function has a docstring with Sphinx field lists (`:param name:`, `:returns:`, `:raises Error:`). Types are in the hints, not in the docstrings.
 - Constructors take keyword-only parameters, and parameters are validated in property setters with the functions of `samplepaths.utils.validation`.
@@ -52,7 +52,7 @@ The workflows in `.github/workflows` call make targets only. A step which needs 
 1. Add a module with the class to the subpackage of its family: `continuous`, `diffusion`, `discrete`, `timeseries`, `multivariate` or `noise`. Derive from `BaseTimeProcess` for a process on a time interval or `BaseSequenceProcess` for one which evolves in steps.
 2. Export it from the subpackage and from `samplepaths/__init__.py`.
 3. Add a test module in the same layout under `tests`, with invalid parameters, the string representations, shapes, seeded values and a check against a known moment or distribution.
-4. Add the process to `CASES` in `tests/test_sample_paths.py`, which compares `sample_paths()` with `sample()`.
+4. Add the process to `CASES` in `tests/sample_paths/cases.py`; the tests of `sample_paths()` and the check of seeded results read it.
 5. Add an example named `docs/examples/<family>/plot_<module>.py`; a test fails without it.
 6. Override `_sample_paths` when all realizations can be generated together. A loop over steps in Python with all realizations in one array is the usual way. Check on a large batch whether threads help before setting `_parallel_paths`: many short NumPy calls on small arrays get slower with more threads.
 
@@ -60,9 +60,9 @@ A process with several components returns one array with a component axis: `(com
 
 ## Documentation is part of the change
 
-- Update every affected page in the same change: the guide page in `docs/guide`, the performance and comparison pages when a number moves, the README and the "Unreleased" section of `docs/project/changelog.rst`.
+- Update every affected page in the same change: the guide page in `docs/guide`, the performance and comparison pages when a number moves, the README and an "Unreleased" section in `docs/project/changelog.rst`, above the list of versions.
 - Rewrite and reorganize so that the docs read as one coherent guide. Do not append a section per change.
-- Quote measured numbers only. Sampling times come from `docs/scripts/benchmark.py`, and the comparison with `stochastic-rs` from `docs/scripts/compare_rust.py` and `compare_rust_outputs.py`.
+- Quote measured numbers only. Sampling times come from `docs/scripts/benchmark.py` and go into `docs/guide/performance/timings.rst`; the comparison with `stochastic-rs` comes from `docs/scripts/compare_rust.py` and `compare_rust_outputs.py` and goes into `docs/project/comparison/speed.rst` and `agreement.rst`.
 - The docs build with warnings as errors and run every example of the gallery.
 
 ## Git and releases
@@ -70,7 +70,7 @@ A process with several components returns one array with a component axis: `(com
 - `master` is protected: changes go through a pull request, merged by squashing. The maintainer merges; do not merge yourself.
 - Commit, push or open a pull request only when asked to.
 - The version is not written in any file. It is read from the git tag: `v0.6.0` gives `0.6.0`.
-- To release: rename "Unreleased" in the changelog to the version and its date in a pull request; after it is merged, create a GitHub release on `master` with the tag `vX.Y.Z`. Publishing the release uploads to PyPI.
+- To release: in a pull request, move the "Unreleased" section of `docs/project/changelog.rst` to the page of its minor version in `docs/project/changelog/`, under a heading with the version and its date. After it is merged, create a GitHub release on `master` with the tag `vX.Y.Z`. Publishing the release uploads to PyPI.
 
 ## Comparing with stochastic-rs
 

@@ -77,7 +77,8 @@ to 70 times faster for the :doc:`models with a changing variance
      - 1.4 ms
      - 3.7x
 
-See :doc:`performance` for all processes and for how the times were measured.
+See :doc:`/guide/performance/timings` for all processes and :doc:`performance` for how the times
+were measured.
 
 A worked example
 ----------------
