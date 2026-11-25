@@ -37,6 +37,7 @@ dependencies = ["numpy>=2.2.6", "scipy>=1.15.3"]
 
 [project.urls]
 Homepage = "https://github.com/samplepaths/samplepaths"
+Documentation = "https://samplepaths.readthedocs.io/"
 Repository = "https://github.com/samplepaths/samplepaths"
 Issues = "https://github.com/samplepaths/samplepaths/issues"
 Author = "https://girgis.me"

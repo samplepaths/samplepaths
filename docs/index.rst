@@ -1,10 +1,13 @@
 samplepaths
 ===========
 
-|tests| |license|
+|tests| |docs| |license|
 
 .. |tests| image:: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml/badge.svg
     :target: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml
+
+.. |docs| image:: https://readthedocs.org/projects/samplepaths/badge/?version=latest
+    :target: https://samplepaths.readthedocs.io/
 
 .. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://github.com/samplepaths/samplepaths/blob/master/LICENSE
