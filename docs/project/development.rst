@@ -122,10 +122,13 @@ are generated from the docstrings at build time and are not committed.
 Releasing
 ---------
 
-1. Update ``version`` in ``pyproject.toml`` and run ``uv lock``.
-2. Merge the change to ``master``.
-3. Create a GitHub release with a tag matching the version, such as
-   ``v0.1.0``.
+The version of the package is not written in any file. It is read from the
+git tag of the release: the tag ``v0.2.0`` gives the version ``0.2.0``.
 
-Publishing the release runs the ``Publish`` workflow, which builds the
-distributions and uploads them to PyPI using trusted publishing.
+To release, create a GitHub release on ``master`` with a new tag of the form
+``vX.Y.Z``. Publishing the release runs the ``Publish`` workflow, which
+builds the distributions, checks that their version matches the tag and
+uploads them to PyPI using trusted publishing.
+
+Between releases the version is derived from the most recent tag and the
+number of commits since, for example ``0.2.1.dev3+g1a2b3c4``.
