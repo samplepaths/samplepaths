@@ -44,6 +44,8 @@ class MarkovChain(BaseSequenceProcess):
     :param rng: a custom random number generator
     """
 
+    _parallel_paths = True
+
     def __init__(
         self,
         transition: Iterable[Iterable[float]] | npt.NDArray[np.float64] = DEFAULT_TRANSITION,
@@ -150,7 +152,7 @@ class MarkovChain(BaseSequenceProcess):
         return np.array(markov_chain, dtype=np.int64)
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.int64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.int64]:
         check_positive_integer(n=n)
         check_positive_integer(n=paths, name="Number of paths")
 
@@ -182,3 +184,7 @@ class MarkovChain(BaseSequenceProcess):
             realizations[:, k] = current
 
         return realizations
+
+    @override
+    def sample_paths(self, n: int, paths: int, workers: int = 1) -> npt.NDArray[np.int64]:
+        return np.asarray(super().sample_paths(n, paths, workers), dtype=np.int64)

@@ -49,6 +49,8 @@ class MultifractionalBrownianMotion(BaseTimeProcess):
     :param rng: a custom random number generator
     """
 
+    _parallel_paths = True
+
     def __init__(
         self,
         *,
@@ -152,7 +154,7 @@ class MultifractionalBrownianMotion(BaseTimeProcess):
         return self._sample_multifractional_brownian_motion(n)
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         check_positive_integer(n=n, name="Number of increments")
         check_positive_integer(n=paths, name="Number of paths")
 
@@ -168,3 +170,8 @@ class MultifractionalBrownianMotion(BaseTimeProcess):
             mbm[:, k] = coefs[:, :k] @ weights[k][::-1]
 
         return mbm
+
+    @override
+    def _prepare_paths(self, n: int) -> None:
+        self.set_times(n)
+        self._weights(n, 1.0 * self.t / n)

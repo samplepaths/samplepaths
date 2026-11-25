@@ -38,6 +38,8 @@ class ColoredNoise(BaseTimeProcess):
     :param rng: a custom random number generator
     """
 
+    _parallel_paths = True
+
     def __init__(
         self,
         *,
@@ -126,7 +128,7 @@ class ColoredNoise(BaseTimeProcess):
         return self._sample_colored_noise(n)
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         check_positive_integer(n=n, name="Number of increments")
         check_positive_integer(n=paths, name="Number of paths")
         self.set_times(n)
@@ -153,3 +155,8 @@ class ColoredNoise(BaseTimeProcess):
             np.sqrt(self.t) * np.fft.ifft(f, axis=1).real / np.std(f, axis=1, keepdims=True)
         )
         return realizations
+
+    @override
+    def _prepare_paths(self, n: int) -> None:
+        self.set_times(n)
+        self._update_spectrum(n)

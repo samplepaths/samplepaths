@@ -64,6 +64,8 @@ class FractionalGaussianNoise(BaseTimeProcess):
     :param rng: a custom random number generator
     """
 
+    _parallel_paths = True
+
     def __init__(
         self,
         *,
@@ -280,5 +282,5 @@ class FractionalGaussianNoise(BaseTimeProcess):
         return realizations
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         return self._davies_harte_paths(n, paths)

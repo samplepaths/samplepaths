@@ -4,7 +4,8 @@ Performance
 ``samplepaths`` generates realizations with ``numpy`` operations wherever the
 algorithm allows it. This page gives measured sampling times and explains
 how to get the most out of the library. For how the times changed between
-versions, see the :doc:`/project/changelog`.
+versions, see the :doc:`/project/changelog`; for how they compare with a
+package written in Rust, see :doc:`/project/comparison`.
 
 How the times were measured
 ---------------------------
@@ -327,6 +328,9 @@ Getting the most out of it
 
 * **Use** ``sample_paths()`` **for many realizations.** It avoids the cost of
   a Python call per realization, which dominates for short paths.
+* **Use** ``workers`` **for large batches.** With 14 threads, 100,000
+  realizations of 64 increments of a Brownian motion take 5.7 instead of 33.8
+  milliseconds. See :doc:`paths`.
 * **Reuse instances.** Several processes keep values which depend only on
   the parameters and on ``n``: the two above, the frequencies of a colored
   noise and the mean increments of an inverse Gaussian process. Create the

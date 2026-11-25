@@ -109,7 +109,7 @@ class CauchyProcess(BrownianBase):
         return self._sample_cauchy_process_at(times)
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         check_positive_integer(n=n, name="Number of increments")
         check_positive_integer(n=paths, name="Number of paths")
         self.set_times(n)

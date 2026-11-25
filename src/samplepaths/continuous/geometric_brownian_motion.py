@@ -181,7 +181,7 @@ class GeometricBrownianMotion(GaussianNoise):
         return realizations
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         return self._sample_geometric_brownian_motion_paths(n, paths, 1.0)
 
     def sample_paths_with_initial(
@@ -189,12 +189,24 @@ class GeometricBrownianMotion(GaussianNoise):
         n: int,
         paths: int,
         initial: float = 1.0,
+        workers: int = 1,
     ) -> npt.NDArray[np.float64]:
         """Generate several realizations starting from an initial value.
 
         :param n: the number of increments of each realization
         :param paths: the number of realizations
         :param initial: the initial value of the process :math:`S_0`
+        :param workers: the number of threads to use
         :returns: a two-dimensional array with one realization per row
         """
-        return self._sample_geometric_brownian_motion_paths(n, paths, initial)
+        return np.asarray(
+            self._run_paths(
+                lambda process, count: process._sample_geometric_brownian_motion_paths(
+                    n, count, initial
+                ),
+                n,
+                paths,
+                workers,
+            ),
+            dtype=np.float64,
+        )

@@ -116,12 +116,81 @@ as easy, for example the probability that the price ever exceeds 130:
 
     print((prices.max(axis=1) > 130).mean())
 
+Using several threads
+---------------------
+
+``sample_paths()`` can generate the realizations on several threads. Pass the
+number of threads as ``workers``:
+
+.. code-block:: python
+
+    from samplepaths import FractionalBrownianMotion
+
+    fbm = FractionalBrownianMotion(hurst=0.7)
+    realizations = fbm.sample_paths(n=64, paths=100_000, workers=8)
+
+Each thread generates a share of the realizations with its own random number
+generator, derived from the generator of the process. ``numpy`` does not hold
+the interpreter while it generates and transforms the numbers, so the threads
+run in parallel. On a machine with 14 cores:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 20 20 20
+
+   * - 100,000 realizations of 64 increments
+     - 1 worker
+     - 14 workers
+     - Gain
+   * - Gaussian noise
+     - 23.2 ms
+     - 4.0 ms
+     - 5.8x
+   * - Brownian motion
+     - 33.8 ms
+     - 5.7 ms
+     - 5.9x
+   * - Fractional Brownian motion
+     - 81.2 ms
+     - 11.3 ms
+     - 7.2x
+   * - Variance gamma process
+     - 104.7 ms
+     - 14.9 ms
+     - 7.0x
+   * - Vasicek process
+     - 44.3 ms
+     - 8.9 ms
+     - 5.0x
+   * - Cox-Ingersoll-Ross process
+     - 52.9 ms
+     - 20.3 ms
+     - 2.6x
+
+Three things to know:
+
+* **Threads pay off for large batches.** A thread is only started for every
+  50,000 values to generate, so a small batch runs on one thread whatever
+  ``workers`` is.
+* **The result depends on the number of workers.** A seed gives the same
+  array every time for a given ``workers``, and a different array for another
+  number of workers, because the random numbers are split differently.
+* **Not every process gains.** The processes generated one realization after
+  the other ignore ``workers``. The diffusion processes which are not linear,
+  such as the Cox-Ingersoll-Ross process, advance step by step in Python and
+  use at most four threads, and only for 20,000 realizations or more per
+  thread.
+
+Functions passed as parameters, such as a time-dependent mean, are called from
+several threads and must not depend on shared state.
+
 Starting from an initial value
 ------------------------------
 
 ``sample_paths()`` starts the geometric Brownian motion and the diffusion
 processes from 1, as ``sample()`` does. Use
-``sample_paths_with_initial(n, paths, initial)`` to choose the initial value:
+``sample_paths_with_initial(n, paths, initial)`` to choose the initial value.
+It takes ``workers`` as well.
 
 .. code-block:: python
 

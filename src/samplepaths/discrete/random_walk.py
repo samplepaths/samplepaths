@@ -28,6 +28,8 @@ class RandomWalk(BaseSequenceProcess):
         step value. If not provided each step has equal weight/probability.
     """
 
+    _parallel_paths = True
+
     def __init__(
         self,
         *,
@@ -115,7 +117,7 @@ class RandomWalk(BaseSequenceProcess):
         return self._sample_random_walk_increments(n)
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         check_positive_integer(n=n)
         check_positive_integer(n=paths, name="Number of paths")
 

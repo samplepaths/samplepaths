@@ -94,5 +94,5 @@ class BrownianBridge(BrownianBase):
         return bridges
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         return self._sample_brownian_bridge_paths(n, paths)

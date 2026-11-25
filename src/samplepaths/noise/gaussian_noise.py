@@ -21,6 +21,8 @@ class GaussianNoise(BaseTimeProcess):
     :param rng: a custom random number generator
     """
 
+    _parallel_paths = True
+
     def __str__(self) -> str:
         return f"Gaussian noise generator on interval [0, {self.t}]"
 
@@ -76,5 +78,5 @@ class GaussianNoise(BaseTimeProcess):
         return self.rng.normal(scale=np.sqrt(1.0 * self.t / n), size=(paths, n))
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         return self._sample_gaussian_noise_paths(n, paths)

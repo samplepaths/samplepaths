@@ -125,10 +125,13 @@ class BaseTimeProcess(BaseProcess):
         )
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
-        return self._stack_paths(n, paths)
+    def sample_paths(self, n: int, paths: int, workers: int = 1) -> npt.NDArray[np.float64]:
+        return np.asarray(super().sample_paths(n, paths, workers), dtype=np.float64)
 
-    def _stack_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
-        """Generate several realizations with one call to sample for each."""
-        check_positive_integer(n=paths, name="Number of paths")
+    @override
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         return np.array([self.sample(n) for _ in range(paths)], dtype=np.float64)
+
+    @override
+    def _prepare_paths(self, n: int) -> None:
+        self.set_times(n)

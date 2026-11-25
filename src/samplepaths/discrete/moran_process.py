@@ -133,7 +133,7 @@ class MoranProcess(BaseSequenceProcess):
         return self._sample_moran_process(n, start)
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.int64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.int64]:
         check_positive_integer(n=paths, name="Number of paths")
 
         # A realization which reaches zero or the maximum value ends early.
@@ -145,3 +145,7 @@ class MoranProcess(BaseSequenceProcess):
             row[len(sample) :] = sample[-1]
 
         return realizations
+
+    @override
+    def sample_paths(self, n: int, paths: int, workers: int = 1) -> npt.NDArray[np.int64]:
+        return np.asarray(super().sample_paths(n, paths, workers), dtype=np.int64)

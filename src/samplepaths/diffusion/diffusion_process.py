@@ -1,10 +1,12 @@
 """Generalized diffusion process."""
 
+import math
 from collections.abc import Callable
 
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
+from scipy.signal import lfilter
 
 from .._compat import override
 from ..noise import GaussianNoise
@@ -18,6 +20,13 @@ from ..utils.validation import (
 #: Number of realizations from which sample_paths advances all of them
 #: together instead of one after the other.
 _VECTORIZE_FROM_PATHS = 32
+
+#: Largest logarithm of a power of the decay used in the linear recurrence.
+_LOG_POWER_RANGE = 60.0
+
+#: Limits on the threads used by the diffusions which advance step by step.
+_STEPPING_MAX_WORKERS = 4
+_STEPPING_PATHS_PER_WORKER = 20_000
 
 
 def _constant(value: Callable[[float], float] | float | int) -> float | None:
@@ -210,7 +219,16 @@ class DiffusionProcess(GaussianNoise):
 
         return s
 
-    def _sample_paths(self, n: int, paths: int, initial: float) -> npt.NDArray[np.float64]:
+    @override
+    def _useful_workers(self, n: int, paths: int) -> int:
+        if self.__speed_value is not None and self.__volexp_value == 0:
+            return super()._useful_workers(n, paths)
+
+        # The other diffusions advance step by step in Python. Threads then
+        # compete for the interpreter unless each handles many realizations.
+        return max(1, min(_STEPPING_MAX_WORKERS, paths // _STEPPING_PATHS_PER_WORKER))
+
+    def _sample_paths_from(self, n: int, paths: int, initial: float) -> npt.NDArray[np.float64]:
         """Generate several realizations of a diffusion process."""
         check_numeric(value=initial, name="Initial")
 
@@ -227,6 +245,39 @@ class DiffusionProcess(GaussianNoise):
             return np.array(
                 [self._euler_maruyama(gns, float(initial), delta_t) for gns in noise.tolist()]
             )
+
+        if speed is not None and volexp == 0:
+            # A constant speed without a volatility exponent gives a linear
+            # recurrence, X[k + 1] = decay X[k] + c[k], whose solution is a
+            # weighted cumulative sum. It is evaluated for all realizations
+            # and all steps with array operations.
+            times = delta_t * np.arange(1, n + 1)
+            means = mean if mean is not None else np.array([self.__mean(t) for t in times])
+            vols = vol if vol is not None else np.array([self.__vol(t) for t in times])
+            decay = 1.0 - speed * delta_t
+            inputs = speed * means * delta_t + vols * noise
+
+            realizations = np.empty((paths, n + 1))
+            realizations[:, 0] = float(initial)
+
+            if decay > 0:
+                # The powers of the decay are kept within the range of floats
+                # by solving the recurrence over blocks of steps.
+                block = n if decay == 1 else max(1, int(_LOG_POWER_RANGE / abs(math.log(decay))))
+                for start in range(0, n, block):
+                    stop = min(n, start + block)
+                    powers = decay ** np.arange(1, stop - start + 1)
+                    previous = realizations[:, start : start + 1]
+                    realizations[:, start + 1 : stop + 1] = powers * (
+                        previous + np.cumsum(inputs[:, start:stop] / powers, axis=1)
+                    )
+            else:
+                # A time step this large makes the method unstable. A compiled
+                # filter evaluates the recurrence as it is written.
+                state = np.full((paths, 1), decay * float(initial))
+                realizations[:, 1:], _ = lfilter([1.0], [1.0, -decay], inputs, axis=1, zi=state)
+
+            return realizations
 
         # Many realizations: advance all of them together, one step at a time.
         speed_function = self.__speed
@@ -256,23 +307,33 @@ class DiffusionProcess(GaussianNoise):
         return realizations
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
-        return self._sample_paths(n, paths, 1.0)
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        return self._sample_paths_from(n, paths, 1.0)
 
     def sample_paths_with_initial(
         self,
         n: int,
         paths: int,
         initial: float,
+        workers: int = 1,
     ) -> npt.NDArray[np.float64]:
         """Generate several realizations starting from an initial value.
 
         :param n: the number of increments of each realization
         :param paths: the number of realizations
         :param initial: the initial value of the process
+        :param workers: the number of threads to use
         :returns: a two-dimensional array with one realization per row
         """
-        return self._sample_paths(n, paths, initial)
+        return np.asarray(
+            self._run_paths(
+                lambda process, count: process._sample_paths_from(n, count, initial),
+                n,
+                paths,
+                workers,
+            ),
+            dtype=np.float64,
+        )
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:

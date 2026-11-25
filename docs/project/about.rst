@@ -86,8 +86,12 @@ Compared with the first release of the fork, on the same machine:
 Every speedup is checked to leave seeded realizations unchanged, up to
 floating point rounding.
 
+``sample_paths()`` can also spread a large batch over several threads, which
+brings it level with a package written in Rust for most processes.
+
 **What you get:** simulations which run in a fraction of the time and still
-reproduce earlier results. See :doc:`/guide/performance`.
+reproduce earlier results. See :doc:`/guide/performance` and
+:doc:`comparison`.
 
 Explicit, validated parameters
 ------------------------------

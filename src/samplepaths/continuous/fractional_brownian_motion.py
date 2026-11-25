@@ -60,6 +60,6 @@ class FractionalBrownianMotion(FractionalGaussianNoise):
         return self._accumulate(self._sample_fractional_gaussian_noise(n, "hosking"))
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         fgn = self._davies_harte_paths(n, paths)
         return np.concatenate((np.zeros((paths, 1)), np.cumsum(fgn, axis=1)), axis=1)

@@ -75,5 +75,5 @@ class BrownianBase(GaussianNoise):
         return bm
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         return self._sample_brownian_motion_paths(n, paths)
