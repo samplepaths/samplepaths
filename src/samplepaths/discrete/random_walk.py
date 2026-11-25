@@ -95,7 +95,8 @@ class RandomWalk(BaseSequenceProcess):
 
     def _sample_random_walk(self, n: int) -> npt.NDArray[np.float64]:
         """Generate a random walk."""
-        return np.array([0] + list(np.cumsum(self._sample_random_walk_increments(n))))
+        increments = self._sample_random_walk_increments(n)
+        return np.concatenate((np.zeros(1, dtype=increments.dtype), np.cumsum(increments)))
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:

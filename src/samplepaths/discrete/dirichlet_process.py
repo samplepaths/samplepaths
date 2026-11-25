@@ -83,14 +83,19 @@ class DirichletProcess(BaseSequenceProcess):
 
         :param n: the number of steps of the Dirichlet process to generate.
         """
-        sequence = np.empty(n, dtype=np.float64)
+        alpha = self.alpha
+        base = self.base
+        uniform = self.rng.uniform
+        integers = self.rng.integers
+
+        sequence: list[float] = []
         for k in range(n):
-            p = self.alpha / (self.alpha + k)
-            if self.rng.uniform() < p:
-                sequence[k] = self.base()
+            if uniform() < alpha / (alpha + k):
+                sequence.append(base())
             else:
-                sequence[k] = self.rng.choice(sequence[:k])
-        return sequence
+                # Repeat one of the previous values, chosen uniformly.
+                sequence.append(sequence[integers(0, k)])
+        return np.array(sequence, dtype=np.float64)
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:

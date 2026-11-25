@@ -128,16 +128,7 @@ class VarianceGammaProcess(GaussianNoise):
         shapes = np.diff(times) / self.variance
         scale = self.variance
 
-        gammas = np.array(
-            [
-                self.rng.gamma(
-                    shape=shape,
-                    scale=scale,
-                    size=1,
-                )[0]
-                for shape in shapes
-            ]
-        )
+        gammas = self.rng.gamma(shape=shapes, scale=scale)
         gn = super().sample_at(times)
 
         increments = self.drift * gammas + self.scale * np.sqrt(gammas) * gn

@@ -104,7 +104,7 @@ class BrownianMotion(GaussianNoise):
             bm = np.insert(bm, 0, [0])
 
         if self.drift != 0:
-            bm += [self.drift * t for t in times]
+            bm += self.drift * np.asarray(times, dtype=np.float64)
 
         return bm
 

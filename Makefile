@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 .PHONY: help install lint format typecheck test coverage check \
-	docs docs-live docs-images docs-clean version build clean
+	docs docs-live docs-images docs-clean benchmark version build clean
 
 help:  ## Show the available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -40,6 +40,9 @@ docs-images:  ## Regenerate the figures shown in the documentation
 
 docs-clean:  ## Remove the built documentation
 	rm -rf docs/_build
+
+benchmark:  ## Measure the time of the sampling methods
+	uv run python docs/scripts/benchmark.py
 
 version:  ## Show the version derived from the git tags
 	@uvx --quiet --with hatch-vcs hatchling version

@@ -52,6 +52,8 @@ Run ``make`` without arguments to list the targets.
      - serve the documentation and rebuild it on changes
    * - ``make docs-images``
      - regenerate the figures shown in the documentation
+   * - ``make benchmark``
+     - measure the time of the sampling methods
    * - ``make version``
      - show the version derived from the git tags
    * - ``make build``

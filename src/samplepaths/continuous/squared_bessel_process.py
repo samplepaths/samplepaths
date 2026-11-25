@@ -39,18 +39,20 @@ class SquaredBesselProcess(BesselProcess):
         """Generate a realization of a squared Bessel process."""
         check_positive_integer(n=n)
 
-        samples = [self._sample_brownian_motion(n) for _ in range(self.dim)]
+        samples = np.array([self._sample_brownian_motion(n) for _ in range(self.dim)])
 
-        return np.array([sum(map(lambda x: x**2, coord)) for coord in zip(*samples, strict=True)])
+        squares: npt.NDArray[np.float64] = np.sum(np.square(samples), axis=0)
+        return squares
 
     def _sample_squared_bessel_process_at(
         self,
         times: npt.NDArray[np.float64],
     ) -> npt.NDArray[np.float64]:
         """Generate a realization of a squared Bessel process."""
-        samples = [self._sample_brownian_motion_at(times) for _ in range(self.dim)]
+        samples = np.array([self._sample_brownian_motion_at(times) for _ in range(self.dim)])
 
-        return np.array([sum(map(lambda x: x**2, coord)) for coord in zip(*samples, strict=True)])
+        squares: npt.NDArray[np.float64] = np.sum(np.square(samples), axis=0)
+        return squares
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:

@@ -75,9 +75,7 @@ class PoissonProcess(BaseProcess):
                 size=n,
             )
 
-            s = np.array([0.0] + list(np.cumsum(exponentials)))
-
-            return s
+            return np.concatenate(([0.0], np.cumsum(exponentials)))
 
         if length is not None:
             check_positive_number(value=length, name="Sample length")

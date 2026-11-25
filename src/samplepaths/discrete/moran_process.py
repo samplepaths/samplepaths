@@ -1,5 +1,6 @@
 """Moran process."""
 
+from bisect import bisect_right
 from typing import override
 
 import numpy as np
@@ -50,7 +51,6 @@ class MoranProcess(BaseSequenceProcess):
         super().__init__(rng=rng)
 
         self.maximum = maximum
-        self.__p = _probabilities(maximum)
 
     def __str__(self) -> str:
         return f"Moran process with {self.maximum} states"
@@ -71,6 +71,11 @@ class MoranProcess(BaseSequenceProcess):
             raise ValueError(f"Number of states must be at least 3; got {n}.")
 
         self.__maximum = n
+
+        # Cumulative distributions of the increment (-1, 0 or 1) per state.
+        cumulative = np.cumsum(_probabilities(n), axis=1)
+        cumulative /= cumulative[:, -1:]
+        self.__cumulative: list[list[float]] = cumulative.tolist()
 
     def _sample_moran_process(
         self,
@@ -96,11 +101,17 @@ class MoranProcess(BaseSequenceProcess):
 
         start = int(start)
         s = [start]
-        increments = [-1, 0, 1]
+        # Each step inverts the cumulative distribution of the increment at a
+        # uniform variate, which is what Generator.choice does, without its
+        # overhead per call. The variates are drawn one at a time because the
+        # realization may stop early.
+        cumulative = self.__cumulative
+        random = self.rng.random
+        maximum = self.maximum
         for _ in range(n - 1):
-            if start in (0, self.maximum):
+            if start in (0, maximum):
                 break
-            start += int(self.rng.choice(increments, p=self.__p[start - 1]))
+            start += bisect_right(cumulative[start - 1], random()) - 1
             s.append(start)
 
         return np.array(s, dtype=np.int64)

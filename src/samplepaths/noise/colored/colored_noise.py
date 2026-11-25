@@ -48,7 +48,7 @@ class ColoredNoise(BaseTimeProcess):
 
         self.beta = beta
 
-        self.__n: int | None = None
+        self.__key: tuple[int, float, float] | None = None
         self.__half: int | None = None
         self.__frequencies: npt.NDArray[np.float64] | None = None
         self.__scale: npt.NDArray[np.float64] | None = None
@@ -75,20 +75,16 @@ class ColoredNoise(BaseTimeProcess):
         check_positive_integer(n=n, name="Number of increments")
         self.set_times(n)
 
-        if self.__n != n:
-            self.__n = n
+        # The frequencies and their scale depend on n, beta and t only, so
+        # they are reused by consecutive realizations.
+        key = (n, self.beta, self.t)
+        if self.__key != key:
+            self.__key = key
 
+            frequencies = np.asarray(np.fft.fftfreq(n, self.t), dtype=np.float64)
             self.__half = (n + 1) // 2
-
-            self.__frequencies = np.fft.fftfreq(
-                n,
-                self.t,
-            )  # type: ignore[assignment]
-            assert self.__frequencies is not None
-
-            self.__scale = np.asarray(
-                [np.sqrt(0.5 * (1 / w) ** self.beta) for w in self.__frequencies[1 : self.__half]]
-            )
+            self.__frequencies = frequencies
+            self.__scale = np.sqrt(0.5 * (1 / frequencies[1 : self.__half]) ** self.beta)
 
         assert self.__frequencies is not None
         assert self.__half is not None

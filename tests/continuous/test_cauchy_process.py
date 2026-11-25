@@ -50,3 +50,17 @@ def test_cauchy_process_sample_values(
 
     samples = instance.sample(n=n)
     np.testing.assert_allclose(samples, expected, rtol=1e-6)
+
+
+@pytest.mark.parametrize("seed", [683, 824, 1057, 1074, 2099])
+def test_cauchy_process_sample_at_heavy_tails(seed: int) -> None:
+    # The subordinator has very heavy tails. For these seeds one of its
+    # increments is many orders of magnitude larger than the others, which
+    # used to make the accumulated times not strictly increasing.
+    instance = ProcessType(rng=np.random.default_rng(seed))
+    times = np.concatenate(([0.0], np.sort(np.random.default_rng(5).uniform(0.01, 4.0, 200))))
+
+    samples = instance.sample_at(times=times)
+
+    assert samples.shape == times.shape
+    assert np.all(np.isfinite(samples))

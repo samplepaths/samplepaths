@@ -91,20 +91,6 @@ class MultifractionalBrownianMotion(BaseTimeProcess):
 
         return hs
 
-    def _w(
-        self,
-        t: float,
-        hurst: float,
-        dt: float,
-    ) -> float:
-        """Get the Riemann-Liouville method weight for time t."""
-        w = float(
-            1.0
-            / gamma(hurst + 0.5)
-            * np.sqrt((t ** (2 * hurst) - (t - dt) ** (2 * hurst)) / (2 * hurst * dt))
-        )
-        return w
-
     def _sample_multifractional_brownian_motion(self, n: int) -> npt.NDArray[np.float64]:
         """Generate Riemann-Liouville mBm."""
         gn = self.rng.normal(0.0, 1.0, n)
@@ -113,15 +99,22 @@ class MultifractionalBrownianMotion(BaseTimeProcess):
         dt = 1.0 * self.t / self.n
         hs = self._get_hurst(self.hurst)
 
-        mbm = [0]
-        coefs = [(g / np.sqrt(dt)) * dt for g in gn]
+        coefs = (gn / np.sqrt(dt)) * dt
+        times = self.times
 
+        mbm = np.zeros(self.n + 1)
         for k in range(1, self.n + 1):
-            weights = [self._w(t, hs[k], dt) for t in self.times[1 : k + 1]]
-            seq = [coefs[i - 1] * weights[k - i] for i in range(1, k + 1)]
-            mbm.append(sum(seq))
+            # The weights of the Riemann-Liouville method for the Hurst value
+            # at time k, for the times 1 to k, applied to the increments in
+            # reverse order.
+            hurst = hs[k]
+            elapsed = times[1 : k + 1]
+            weights = np.sqrt(
+                (elapsed ** (2 * hurst) - (elapsed - dt) ** (2 * hurst)) / (2 * hurst * dt)
+            ) / gamma(hurst + 0.5)
+            mbm[k] = coefs[:k] @ weights[::-1]
 
-        return np.array(mbm)
+        return mbm
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:

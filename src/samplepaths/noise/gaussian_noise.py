@@ -55,16 +55,7 @@ class GaussianNoise(BaseTimeProcess):
 
         increments = times_to_increments(times=times)
 
-        noise = np.array(
-            [
-                self.rng.normal(
-                    scale=np.sqrt(inc),
-                )
-                for inc in increments
-            ]
-        )
-
-        return noise
+        return self.rng.normal(scale=np.sqrt(increments))
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:
