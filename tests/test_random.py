@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pystochastic import random
+from samplepaths import random
 
 
 def test_random_default() -> None:

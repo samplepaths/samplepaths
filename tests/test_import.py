@@ -2,13 +2,12 @@ import importlib
 import os
 import warnings
 from pkgutil import walk_packages
-from typing import Tuple
 
 import pytest
 
 _dir = os.path.abspath(os.path.dirname(__file__))
 
-ALL_PACKAGES = ["pystochastic"]
+ALL_PACKAGES = ["samplepaths"]
 
 PROJECT_ROOT = os.path.abspath(
     os.path.join(
@@ -18,11 +17,12 @@ PROJECT_ROOT = os.path.abspath(
 )
 
 
-def all_modules() -> Tuple[str, ...]:
+def all_modules() -> tuple[str, ...]:
 
     def onerror(name: str) -> None:
         warnings.warn(
             f"Failed to import {name} when expanding module_info fixture",
+            stacklevel=2,
         )
 
     modules = [

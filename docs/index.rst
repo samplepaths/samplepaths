@@ -1,73 +1,82 @@
-pystochastic
-==========
+samplepaths
+===========
 
-|build| |rtd| |codecov| |pypi| |pyversions|
+|tests| |license|
 
-.. |build| image:: https://github.com/pystochastic/pystochastic/actions/workflows/build.yml/badge.svg
-    :target: https://github.com/pystochastic/pystochastic/actions
+.. |tests| image:: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml/badge.svg
+    :target: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml
 
-.. |rtd| image:: https://img.shields.io/readthedocs/stochastic.svg
-    :target: http://stochastic.readthedocs.io/en/latest/
-
-.. |codecov| image:: https://codecov.io/gh/pystochastic/pystochastic/branch/master/graphs/badge.svg
-    :target: https://codecov.io/gh/pystochastic/pystochastic
-
-.. |pypi| image:: https://img.shields.io/pypi/v/stochastic.svg
-    :target: https://pypi.python.org/pypi/stochastic
-
-.. |pyversions| image:: https://img.shields.io/pypi/pyversions/stochastic.svg
-    :target: https://pypi.python.org/pypi/stochastic
+.. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg
+    :target: https://github.com/samplepaths/samplepaths/blob/master/LICENSE
 
 
-``pystochastic`` is a python package for generating realizations of
-stochastic processes.
+.. image:: /_static/banner.png
+    :alt: Realizations of a Brownian motion with drift and their quantile bands
+    :width: 100%
 
-Installation
-------------
+``samplepaths`` is a Python package for generating realizations (sample
+paths) of stochastic processes as ``numpy`` arrays.
 
-``pystochastic`` is available on `pypi <https://pypi.python.org/pypi>`_ and can be
-installed using ``pip``:
+.. code-block:: python
 
-.. code-block:: bash
+    from samplepaths import BrownianMotion
 
-   pip install pystochastic
+    bm = BrownianMotion(drift=1, scale=2, t=10)
+    path = bm.sample(1000)  # 1001 values on [0, 10]
 
-Dependencies
-------------
+It provides 37 processes in four families, all sharing one small interface:
 
-``pystochastic`` depends on ``numpy`` for most calculations and ``scipy`` for
-certain random variable generation.
+* :doc:`guide/continuous`, such as Brownian motion, the Poisson process and the
+  gamma process
+* :doc:`guide/diffusion`, such as the Vasicek and Cox-Ingersoll-Ross models
+* :doc:`guide/discrete`, such as Markov chains and random walks
+* :doc:`guide/noise`, such as Gaussian, fractional Gaussian and colored noise
 
-Compatibility
--------------
+.. image:: /_static/families.png
+    :alt: One example process of each of the four families
+    :width: 100%
 
-``pystochastic`` is tested on Python versions 3.12-14.
+``samplepaths`` is an independently maintained fork of
+`stochastic <https://github.com/crflynn/stochastic>`_ by Christopher Flynn,
+modernized for current Python, ``numpy`` and ``scipy`` releases and shipped
+with type hints. See :doc:`project/refactor` for what the fork improves and
+:doc:`project/migration` for the changes needed to port existing code.
 
-Performance
------------
-
-This package uses ``numpy`` and ``scipy`` wherever possible for faster
-computation. For improved performance under Monte Carlo simulation, some
-classes will store results of intermediate computations for faster generation
-on subsequent simulations.
-
-Documentation
--------------
-
+``samplepaths`` is maintained by `Bassem Girgis <https://girgis.me>`_.
 
 .. toctree::
    :maxdepth: 2
+   :caption: Getting started
 
-   general
-   random
-   continuous
-   diffusion
-   discrete
-   noise
-   sources
-   notes
+   getting-started/installation
+   getting-started/quickstart
 
+.. toctree::
+   :maxdepth: 2
+   :caption: User guide
 
+   guide/usage
+   guide/random
+   guide/continuous
+   guide/diffusion
+   guide/discrete
+   guide/noise
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Reference
+
+   reference/index
+   reference/sources
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Project
+
+   project/refactor
+   project/migration
+   project/development
+   project/license
 
 Indices
 -------

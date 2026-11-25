@@ -1,149 +1,114 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm", "setuptools-git-versioning"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 
 [project]
-name = "pystochastic"
+name = "samplepaths"
+version = "0.1.0"
+description = "Generate realizations of stochastic processes"
+readme = "README.rst"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
   { name = "Bassem Girgis", email = "brgirgis@gmail.com" },
-  { name = "Flynn", email = "crf204@gmail.com" },
+  { name = "Christopher Flynn", email = "crf204@gmail.com" },
 ]
 maintainers = [{ name = "Bassem Girgis", email = "brgirgis@gmail.com" }]
-description = "Generate realizations of stochastic processes"
-readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.12"
-keywords = ["stochastic", "processes"]
-license = { text = "MIT" }
-dynamic = ["version"]
+keywords = ["stochastic", "processes", "simulation", "monte carlo"]
 classifiers = [
-  'Development Status :: 5 - Production/Stable',
-
-  'Operating System :: Microsoft :: Windows',
-  'Operating System :: POSIX :: Linux',
-  'Operating System :: MacOS',
-
-  'License :: OSI Approved :: MIT License',
-
-
-  'Intended Audience :: Science/Research',
-  'Natural Language :: English',
-
-  'Programming Language :: Python :: 3',
-  'Programming Language :: Python :: Implementation :: CPython',
-  'Topic :: Scientific/Engineering',
-  'Topic :: Scientific/Engineering :: Mathematics',
-  'Topic :: Scientific/Engineering :: Physics',
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Typing :: Typed",
 ]
 dependencies = ["numpy>=2.2.6", "scipy>=1.15.3"]
 
 
 [project.urls]
-Homepage = "https://github.com/pystochastic/pystochastic.git"
-Documentation = "https://github.com/pystochastic/pystochastic.git"
-Repository = "https://pystochastic.readthedocs.io/en/latest/"
-Issues = "https://github.com/pystochastic/pystochastic.git/issues"
-
-
-[project.scripts]
-git-mirror = "pygitmirror.__main__:main"
+Homepage = "https://github.com/samplepaths/samplepaths"
+Repository = "https://github.com/samplepaths/samplepaths"
+Issues = "https://github.com/samplepaths/samplepaths/issues"
+Author = "https://girgis.me"
 
 
 [dependency-groups]
-dev = [
-  "black>=26.1.0",
-  "build>=1.4.0",
-  "codecov>=2.1.13",
-  "flake8>=7.3.0",
-  "ipykernel>=7.1.0",
-  "isort>=7.0.0",
-  "jinja2>=3.1.6",
+test = ["pytest>=9.0.2", "pytest-cov>=7.0.0", "pytest-xdist>=3.8.0"]
+lint = ["mypy>=1.19.1", "ruff>=0.14.0", "scipy-stubs>=1.15.3.0"]
+docs = [
   "matplotlib>=3.10.8",
-  "mypy>=1.19.1",
-  "nbformat>=5.10.4",
-  "plotly>=6.5.2",
-  "pylint>=4.0.4",
-  "pytest>=9.0.2",
-  "pytest-cov>=7.0.0",
-  "pytest-mock>=3.15.1",
-  "pytest-xdist>=3.8.0",
-  "scipy-stubs>=1.15.3.0",
   "sphinx>=8.1.3",
   "sphinx-autobuild>=2024.10.3",
-  "sphinx-rtd-theme>=3.1.0",
+  "furo>=2025.9.25",
+]
+# The notebooks compare samplepaths against the original stochastic package.
+notebooks = [
+  "ipykernel>=7.1.0",
+  "nbformat>=5.10.4",
+  "plotly>=6.5.2",
   "stochastic>=0.4.0",
-  "twine>=6.2.0",
+]
+dev = [
+  { include-group = "test" },
+  { include-group = "lint" },
+  { include-group = "docs" },
+  { include-group = "notebooks" },
 ]
 
 
-[tool.setuptools]
-py-modules = []
-
-
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["*"]
-
-
-[tool.setuptools.package-data]
-"*" = ["py.typed"]
-
-
-[tool.setuptools.dynamic]
-readme = { file = ["README.md"] }
-
-
-[tool.setuptools-git-versioning]
-enabled = true
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/README.rst", "/LICENSE"]
 
 
 [tool.pytest.ini_options]
-log_cli = 1
-log_cli_level = "INFO"
-log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
-log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+testpaths = ["tests"]
 
 
-[tool.flake8]
-ignore = ["D", "E1", "E2", "E3", "E5", "W2", "W3", "W5", "E203", "W504", "E712"]
-max-line-length = 80
-exclude = [
-  ".tox",
-  ".nox",
-  ".local",
-  ".git",
-  "__pycache__",
-  ".nox",
-  ".venv",
-  "venv",
-  "env",
-  "build",
-  "dist",
-  ".pytest_cache",
-  "scratch",
+[tool.coverage.run]
+source = ["samplepaths"]
+
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "B",   # flake8-bugbear
+  "UP",  # pyupgrade
+  "T20", # flake8-print
+  "D",   # pydocstyle
 ]
+ignore = [
+  "D105", # magic methods need no docstring
+  "D107", # constructor parameters are documented in the class docstring
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+"docs/conf.py" = ["D"]
+"docs/scripts/make_images.py" = ["T20"]
 
 
 [tool.mypy]
-
-# A
-allow_untyped_globals = false
-allow_redefinition = false
-
-# D
-disallow_any_unimported = true
-
-# N
-no_implicit_optional = true
-
-# S
-show_error_codes = true
-show_error_context = true
-show_column_numbers = true
-
 strict = true
-strict_optional = true
-
-# W
-warn_no_return = true
 warn_unreachable = true
+disallow_any_unimported = true
+show_error_codes = true

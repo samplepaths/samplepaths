@@ -1,12 +1,8 @@
 {
   "recommendations": [
-    "ms-python.autopep8",
-    "ms-python.black-formatter",
-    "ms-python.isort",
+    "charliermarsh.ruff",
     "ms-python.mypy-type-checker",
     "ms-python.python",
-    "ms-python.pylint",
-    "ms-python.flake8",
     "streetsidesoftware.code-spell-checker"
   ]
 }

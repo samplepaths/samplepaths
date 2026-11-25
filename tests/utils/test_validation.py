@@ -1,8 +1,9 @@
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import pytest
 
-from pystochastic.utils.validation import (
+from samplepaths.utils.validation import (
     check_increments,
     check_nonnegative_integer,
     check_nonnegative_number,

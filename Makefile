@@ -1,49 +1,52 @@
-.PHONY: create_venv
+.DEFAULT_GOAL := help
 
-create_venv:
-	uv sync --locked --dev --all-extras
+.PHONY: help install lint format typecheck test coverage check \
+	docs docs-live docs-images docs-clean build publish clean
 
-run_mypy:
+help:  ## Show the available targets
+	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "} {printf "  %-14s %s\n", $$1, $$2}'
+
+install:  ## Create the virtual environment and install all dependencies
+	uv sync --locked
+
+lint:  ## Check the code style and formatting with ruff
+	uv run ruff check src tests docs
+	uv run ruff format --check src tests docs
+
+format:  ## Format the code and apply the safe lint fixes
+	uv run ruff check --fix src tests docs
+	uv run ruff format src tests docs
+
+typecheck:  ## Check the types with mypy
 	uv run mypy src tests
 
-run_pyright:
-	uv run pyright src tests
+test:  ## Run the tests
+	uv run pytest
 
-run_pylint:
-	uv run pylint src tests
+coverage:  ## Run the tests in parallel with a coverage report
+	uv run pytest -n auto --cov --cov-report=term-missing:skip-covered --cov-report=xml
 
-run_ruff:
-	uv run ruff check src tests
+check: lint typecheck test docs  ## Run every check that CI runs
 
-run_tests:
-	uv run pytest tests
+docs:  ## Build the HTML documentation, treating warnings as errors
+	uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 
-run_coverage:
-	uv run pytest \
-		--disable-warnings \
-		--maxfail=1 \
-		--tb=short \
-		--cov=src \
-		--cov-report=term-missing:skip-covered \
-		--cov-report=html \
-		--cov-report=xml \
-		-n auto \
-		--dist=loadfile \
-		-rsx \
-		tests
+docs-live:  ## Serve the documentation and rebuild it on changes
+	uv run sphinx-autobuild docs docs/_build/html
 
-build:
+docs-images:  ## Regenerate the figures shown in the documentation
+	uv run python docs/scripts/make_images.py
+
+docs-clean:  ## Remove the built documentation
+	rm -rf docs/_build
+
+build:  ## Build the source distribution and the wheel
+	rm -rf dist
 	uv build
 
-publish:
-	uv publish --index pypi
+publish: build  ## Upload the built distributions to PyPI
+	uv publish
 
-docs:
-	poetry export --dev -f requirements.txt > docs/requirements.txt
-	cd docs && \
-	make html
-	open docs/_build/html/index.html
-
-clean:
-	rm -rf dist
-
+clean: docs-clean  ## Remove build, test and cache artifacts
+	rm -rf dist htmlcov coverage.xml .coverage .pytest_cache .mypy_cache .ruff_cache

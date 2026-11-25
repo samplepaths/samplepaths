@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pystochastic.utils import (
+from samplepaths.utils import (
     ensure_single_arg_constant_function,
     generate_times,
     single_arg_constant_function,

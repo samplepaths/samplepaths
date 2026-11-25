@@ -9,7 +9,7 @@
     "Liouville",
     "multifractional",
     "numpy",
-    "pystochastic",
+    "samplepaths",
     "rtol",
     "scipy"
   ],
@@ -38,9 +38,10 @@
   // P
   "[python]": {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
     }
   },
   "python.testing.pytestArgs": [
@@ -48,22 +49,10 @@
   ],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
-  "isort.args": [
-    "--profile",
-    "black"
-  ],
-  "isort.importStrategy": "fromEnvironment",
   "mypy-type-checker.importStrategy": "fromEnvironment",
-  "pylint.importStrategy": "fromEnvironment",
+  "ruff.importStrategy": "fromEnvironment",
   "notebook.formatOnSave.enabled": true,
-  "notebook.lineNumbers": "on",
-  "black-formatter.args": [
-    "--line-length",
-    "100"
-  ],
-  "flake8.args": [
-    "--max-line-length=100"
-  ]
+  "notebook.lineNumbers": "on"
   // Q
   // R
   // S
