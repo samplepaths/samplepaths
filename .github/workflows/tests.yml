@@ -21,6 +21,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
 
+    # make runs its commands with the shell it finds, so use bash on every
+    # system, Windows included.
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      # Run in the environment which make install-test created, without
+      # adding the other development tools to it.
+      UV_NO_SYNC: "1"
+
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
@@ -32,7 +43,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --locked --no-default-groups --group test
+        run: make install-test
 
       - name: Run the tests
-        run: uv run --no-sync pytest -n auto --cov --cov-report=term-missing:skip-covered
+        run: make coverage
