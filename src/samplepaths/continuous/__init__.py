@@ -8,6 +8,7 @@ from .brownian_motion import BrownianMotion
 from .cauchy_process import CauchyProcess
 from .compound_poisson_process import CompoundPoissonProcess
 from .fractional_brownian_motion import FractionalBrownianMotion
+from .fractional_geometric_brownian_motion import FractionalGeometricBrownianMotion
 from .gamma_process import GammaProcess
 from .geometric_brownian_motion import GeometricBrownianMotion
 from .hawkes_process import HawkesProcess
@@ -32,6 +33,7 @@ __all__ = [
     "CauchyProcess",
     "CompoundPoissonProcess",
     "FractionalBrownianMotion",
+    "FractionalGeometricBrownianMotion",
     "GammaProcess",
     "GeometricBrownianMotion",
     "HawkesProcess",

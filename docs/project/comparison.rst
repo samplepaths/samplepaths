@@ -17,7 +17,7 @@ Where it fits
      - What it is
      - Choose it when
    * - ``samplepaths``
-     - 56 named processes in Python on ``numpy``; typed; reproducible
+     - 61 named processes in Python on ``numpy``; typed; reproducible
        results checked between versions
      - you want readable, dependency-light code, exact reproducibility, or a
        maintained replacement for ``stochastic``
@@ -80,6 +80,10 @@ One realization of 4096 increments.
      - 0.065
      - 0.081
      - 1.3
+   * - Fractional Vasicek process
+     - 0.074
+     - 0.098
+     - 1.3
    * - AR(2) process
      - 0.024
      - 0.035
@@ -108,6 +112,10 @@ One realization of 4096 increments.
      - 0.092
      - 0.446
      - 4.8
+   * - Fractional Cox-Ingersoll-Ross process
+     - 0.087
+     - 0.702
+     - 8.1
    * - Vasicek process
      - 0.017
      - 0.212
@@ -176,6 +184,10 @@ Both packages can use all cores: ``stochastic-rs`` with ``sample_par()``,
      - 14.5
      - 14.9
      - 1.0
+   * - Fractional Vasicek process
+     - 15.0
+     - 15.6
+     - 1.0
    * - ARIMA(1, 1, 1) process
      - 8.2
      - 9.1
@@ -200,6 +212,10 @@ Both packages can use all cores: ``stochastic-rs`` with ``sample_par()``,
      - 19.3
      - 32.9
      - 1.7
+   * - Fractional Cox-Ingersoll-Ross process
+     - 17.0
+     - 33.0
+     - 1.9
    * - Cox-Ingersoll-Ross process
      - 9.9
      - 20.3
@@ -239,6 +255,10 @@ Both packages can use all cores: ``stochastic-rs`` with ``sample_par()``,
      - 19.3
      - 26.0
      - 1.3
+   * - Fractional Vasicek process
+     - 46.2
+     - 59.6
+     - 1.3
    * - Brownian motion
      - 15.8
      - 21.5
@@ -267,25 +287,30 @@ Both packages can use all cores: ``stochastic-rs`` with ``sample_par()``,
      - 55.3
      - 212.8
      - 3.9
+   * - Fractional Cox-Ingersoll-Ross process
+     - 52.8
+     - 404.4
+     - 7.7
    * - Cox-Ingersoll-Ross process
      - 27.2
      - 213.9
      - 7.9
 
 For large batches of short paths the two are close: ``samplepaths`` is
-between 0.6 and 1.4 times the time of ``stochastic-rs`` for 12 of the 14
+between 0.6 and 1.4 times the time of ``stochastic-rs`` for 13 of the 16
 processes, and faster for six of them.
 
 Long paths separate the processes by how they are computed. Those written as
-array operations over time stay between 0.8 and 1.4. The time series models
-generate their random numbers on all threads but advance on one, and take
-1.6 to 2.2 times as long. The CEV and the Cox-Ingersoll-Ross processes,
+array operations over time, the fractional Vasicek process among them, stay
+between 0.8 and 1.4. The time series models generate their random numbers on
+all threads but advance on one, and take 1.6 to 2.2 times as long. The CEV,
+the Cox-Ingersoll-Ross and the fractional Cox-Ingersoll-Ross processes,
 whose volatility depends on the value of the process, advance step by step
 in Python and are 4 to 8 times slower.
 
 For small batches the fixed cost of a call dominates. For 1000 realizations
-of 256 increments ``samplepaths`` takes 0.5 to 3.0 milliseconds and is 1.4 to
-4.9 times slower than ``stochastic-rs`` in parallel.
+of 256 increments ``samplepaths`` takes 0.5 to 4.2 milliseconds and is 1.4 to
+5.4 times slower than ``stochastic-rs`` in parallel.
 
 Do the two packages agree?
 --------------------------
@@ -316,173 +341,209 @@ Reproduce it with:
      - p-value
    * - Brownian motion
      - final value
-     - 0.000
+     - 0.006
      - -0.001
      - 1.00, 1.00
-     - 0.76
+     - 0.29
    * - Geometric Brownian motion
      - final value
-     - 1.052
+     - 1.050
      - 1.052
      - 0.21, 0.21
-     - 0.70
+     - 0.51
    * - Fractional Brownian motion
      - final value
-     - -0.008
+     - -0.001
      - 0.001
      - 1.00, 1.00
-     - 0.60
+     - 0.88
    * - Vasicek process
      - final value
      - 0.610
      - 0.609
      - 0.17, 0.17
-     - 0.22
+     - 0.86
    * - Cox-Ingersoll-Ross process
      - final value
      - 1.000
      - 1.002
      - 0.20, 0.20
-     - 0.31
+     - 0.19
    * - CEV process
      - final value
      - 1.104
      - 1.107
-     - 0.21, 0.22
-     - 0.010
+     - 0.22, 0.22
+     - 0.10
    * - Variance gamma process
      - final value
-     - 0.094
+     - 0.093
      - 0.105
      - 1.01, 1.01
-     - 0.38
+     - 0.34
    * - Poisson process
      - time of arrival 64
-     - 31.98
      - 32.04
-     - 4.03, 4.01
-     - 0.05
+     - 32.04
+     - 4.01, 4.01
+     - 0.95
    * - Jacobi process
      - final value
-     - 0.475
+     - 0.474
      - 0.473
      - 0.12, 0.12
-     - 0.06
+     - 0.30
    * - Verhulst process
      - final value
-     - 2.305
+     - 2.302
      - 2.302
      - 0.42, 0.42
-     - 0.49
+     - 0.63
    * - Gompertz process
      - final value
-     - 2.187
+     - 2.188
      - 2.191
      - 0.35, 0.35
-     - 0.65
+     - 0.25
    * - Kimura process
      - final value
-     - 0.510
+     - 0.509
      - 0.509
      - 0.24, 0.24
-     - 0.96
+     - 0.75
    * - Feller logistic process
      - final value
-     - 1.740
+     - 1.742
      - 1.741
      - 0.23, 0.23
-     - 0.57
+     - 0.30
    * - Normal inverse Gaussian process
      - final value
-     - 0.102
+     - 0.100
      - 0.102
      - 0.50, 0.51
-     - 0.11
+     - 0.45
    * - Merton jump diffusion
      - final logarithm
-     - -0.095
+     - -0.098
      - -0.081
      - 0.58, 0.59
-     - 0.26
+     - 0.11
    * - Compound Poisson process
      - value at time 2
-     - -0.809
+     - -0.808
      - -0.806
      - 0.88, 0.90
-     - 0.42
+     - 0.89
    * - Hawkes process
      - arrivals in [0, 20]
      - 79.0
      - 78.5
-     - 17.7, 17.4
-     - 0.29
+     - 17.5, 17.4
+     - 0.14
+   * - Fractional Vasicek process
+     - final value
+     - 0.609
+     - 0.610
+     - 0.16, 0.16
+     - 0.14
+   * - Fractional Ornstein-Uhlenbeck process
+     - final value
+     - 0.219
+     - 0.219
+     - 0.16, 0.16
+     - 0.42
+   * - Fractional Ornstein-Uhlenbeck process, H = 0.3
+     - final value
+     - 0.219
+     - 0.220
+     - 0.18, 0.18
+     - 0.78
+   * - Fractional Cox-Ingersoll-Ross process
+     - final value
+     - 1.010
+     - 1.010
+     - 0.19, 0.20
+     - 0.98
+   * - Fractional Jacobi process
+     - final value
+     - 0.476
+     - 0.475
+     - 0.11, 0.11
+     - 0.28
+   * - Fractional geometric Brownian motion
+     - final logarithm
+     - 0.049
+     - 0.048
+     - 0.20, 0.20
+     - 0.93
    * - AR(2) process
      - value 300
-     - 0.011
-     - -0.013
-     - 2.28, 2.28
-     - 0.06
+     - -0.012
+     - 0.005
+     - 2.26, 2.28
+     - 0.29
    * - MA(2) process
      - value 300
-     - -0.013
-     - 0.002
-     - 1.78, 1.76
-     - 0.17
+     - -0.005
+     - 0.009
+     - 1.78, 1.77
+     - 0.49
    * - ARIMA(1, 1, 1) process
      - value 300
-     - 0.0
-     - 0.2
-     - 44.5, 44.9
-     - 0.41
+     - -0.0
+     - -0.3
+     - 45.1, 45.2
+     - 0.29
    * - SARIMA(1, 0, 1)(1, 1, 1) process, period 4
      - value 300
-     - -0.1
-     - -0.0
-     - 22.2, 22.2
-     - 0.74
+     - 0.1
+     - 0.0
+     - 22.3, 22.3
+     - 0.44
    * - ARCH(1) process
      - value 300
-     - 0.006
-     - -0.000
-     - 0.99, 1.00
-     - 0.43
+     - 0.001
+     - 0.002
+     - 1.00, 1.01
+     - 0.51
    * - GARCH(1, 1) process
      - value 300
-     - -0.001
-     - -0.001
-     - 0.99, 1.01
-     - 0.39
+     - 0.003
+     - 0.008
+     - 0.99, 1.00
+     - 0.42
    * - GARCH(2, 2) process
      - value 300
-     - -0.002
-     - -0.002
+     - 0.001
+     - -0.001
      - 1.00, 1.00
-     - 0.99
+     - 0.80
    * - EGARCH(1, 1) process
      - value 300
-     - 0.003
-     - -0.004
-     - 0.63, 0.63
-     - 0.33
+     - -0.002
+     - 0.000
+     - 0.63, 0.62
+     - 0.24
    * - Threshold GARCH(1, 1) process
      - value 300
-     - 0.002
-     - 0.006
-     - 0.99, 1.00
-     - 0.43
+     - -0.005
+     - 0.001
+     - 1.00, 1.01
+     - 0.54
    * - AGARCH of ``stochastic-rs``, threshold GARCH here
      - value 300
-     - -0.007
-     - 0.001
-     - 0.99, 1.00
-     - 0.17
+     - -0.001
+     - -0.005
+     - 1.00, 1.00
+     - 0.77
 
-The test finds no difference in 26 of the 27 comparisons. The CEV process
-has a small p-value in this run; with 27 tests, one that small is not
-unusual. Repeated three times with 400,000 realizations, the same comparison
-gave p-values of 0.92, 0.72 and 0.19, with means of 1.1052 to 1.1056 from
-both packages against an exact mean of 1.1052. So the two packages agree for
-every process they share.
+The test finds no difference in any of the 33 comparisons: the smallest
+p-value of this run is 0.10. A run now and then gives one small p-value, as
+33 tests should: an earlier one gave 0.008 for the CEV process, which
+repeated three times with 400,000 realizations gave 0.92, 0.72 and 0.19,
+with means of 1.1052 to 1.1056 from both packages against an exact mean of
+1.1052. So the two packages agree for every process they share.
 
 The comparison was also useful in the other direction. Its first run showed
 two processes of ``samplepaths`` to be wrong, both inherited from the package
@@ -498,7 +559,9 @@ logarithm of a jump diffusion where ``samplepaths`` returns the price,
 writes the normal inverse Gaussian process with a variance of its clock where
 ``samplepaths`` uses the usual :math:`\alpha`, :math:`\beta` and
 :math:`\delta`, and calls AGARCH the model which ``samplepaths`` calls
-threshold GARCH.
+threshold GARCH. Its fractional geometric Brownian motion applies the Euler
+method to the equation, where ``samplepaths`` returns the exact solution
+with the Wick product; the logarithms of the two differ by a known term.
 
 What the numbers do not show
 ----------------------------
@@ -511,21 +574,20 @@ What the numbers do not show
   wherever ``numpy`` and ``scipy`` do. A package with a compiled core needs a
   wheel for the platform and the Python version, or a Rust toolchain.
 * **Reading the algorithm.** Every process is one Python module.
-* **Coverage.** ``stochastic-rs`` has about 50 models which ``samplepaths``
+* **Coverage.** ``stochastic-rs`` has about 45 models which ``samplepaths``
   does not have yet: further jump and Lévy processes, stochastic volatility
-  models, interest rate models, fractional diffusions and correlated
-  processes. ``samplepaths`` has the Chinese restaurant, the Dirichlet and
-  the Moran processes, the Markov chain, the Bessel processes, the Brownian
-  bridge, excursion and meander, the colored noises, the multifractional
-  Brownian motion and the asymmetric GARCH model with a shift, which
-  ``stochastic-rs`` does not list.
+  models, interest rate models and correlated processes. ``samplepaths`` has
+  the Chinese restaurant, the Dirichlet and the Moran processes, the Markov
+  chain, the Bessel processes, the Brownian bridge, excursion and meander,
+  the colored noises, the multifractional Brownian motion and the asymmetric
+  GARCH model with a shift, which ``stochastic-rs`` does not list.
 
 Planned
 -------
 
-Two batches of missing models are in: the jump processes and the diffusions
-on an interval or for a population, then the time series models. The others
-are being added in this order: fractional models, then stochastic volatility,
-interest rate and correlated models, which have several components. Exact
-sampling for the Cox-Ingersoll-Ross process, which would remove the
-step-by-step loop, is planned with them.
+Three batches of missing models are in: the jump processes and the
+diffusions on an interval or for a population, the time series models, and
+the fractional models. Next are the stochastic volatility, interest rate and
+correlated models, which have several components. Exact sampling for the
+Cox-Ingersoll-Ross process, which would remove the step-by-step loop, is
+planned with them.

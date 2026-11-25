@@ -43,7 +43,12 @@ from samplepaths import (  # noqa: E402
     EGARCHProcess,
     ExtendedVasicekProcess,
     FractionalBrownianMotion,
+    FractionalCoxIngersollRossProcess,
     FractionalGaussianNoise,
+    FractionalGeometricBrownianMotion,
+    FractionalJacobiProcess,
+    FractionalOrnsteinUhlenbeckProcess,
+    FractionalVasicekProcess,
     GammaProcess,
     GARCHProcess,
     GaussianNoise,
@@ -262,6 +267,36 @@ def make_diffusion(output: Path) -> None:
         OrnsteinUhlenbeckProcess(),
     )
     plot_paths(output, "vasicek_process", "Vasicek process", VasicekProcess())
+    plot_paths(
+        output,
+        "fractional_vasicek_process",
+        "Fractional Vasicek process (hurst=0.8)",
+        FractionalVasicekProcess(hurst=0.8, speed=3.0, mean=1.0, vol=0.5),
+    )
+    plot_paths(
+        output,
+        "fractional_ornstein_uhlenbeck_process",
+        "Fractional Ornstein-Uhlenbeck process (hurst=0.2)",
+        FractionalOrnsteinUhlenbeckProcess(hurst=0.2, speed=3.0, vol=0.5),
+    )
+    plot_paths(
+        output,
+        "fractional_cox_ingersoll_ross_process",
+        "Fractional CIR process (hurst=0.8)",
+        FractionalCoxIngersollRossProcess(hurst=0.8, speed=3.0, mean=1.0, vol=0.5),
+    )
+    plot_paths(
+        output,
+        "fractional_jacobi_process",
+        "Fractional Jacobi process (hurst=0.8)",
+        FractionalJacobiProcess(hurst=0.8, speed=3.0, mean=0.5, vol=0.6),
+    )
+    plot_paths(
+        output,
+        "fractional_geometric_brownian_motion",
+        "Fractional geometric Brownian motion (hurst=0.8)",
+        FractionalGeometricBrownianMotion(hurst=0.8, drift=0.5, volatility=0.5),
+    )
 
 
 def make_discrete(output: Path) -> None:

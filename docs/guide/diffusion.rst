@@ -154,6 +154,55 @@ zero, for example. For the Kimura and the Feller logistic processes the
 boundaries are absorbing, as in the processes they approximate: an allele
 which is lost stays lost, and a population which is extinct stays extinct.
 
+Fractional diffusions
+---------------------
+
+Four diffusion processes are driven by a
+:py:class:`fractional Brownian motion <samplepaths.continuous.FractionalBrownianMotion>`
+:math:`B^H_t` instead of a Wiener process. The Hurst parameter ``hurst``
+sets the memory of the noise: above 0.5 its increments are positively
+correlated and the process has a long memory, below 0.5 they are negatively
+correlated and the process is rough, as volatility is observed to be.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 44 56
+
+   * - Process
+     - Equation
+   * - :py:class:`~samplepaths.diffusion.FractionalOrnsteinUhlenbeckProcess`
+     - :math:`dX_t = -\theta X_t dt + \sigma dB^H_t`
+   * - :py:class:`~samplepaths.diffusion.FractionalVasicekProcess`
+     - :math:`dX_t = \theta (\mu - X_t) dt + \sigma dB^H_t`
+   * - :py:class:`~samplepaths.diffusion.FractionalCoxIngersollRossProcess`
+     - :math:`dX_t = \theta (\mu - X_t) dt + \sigma \sqrt{X_t} dB^H_t`
+   * - :py:class:`~samplepaths.diffusion.FractionalJacobiProcess`
+     - :math:`dX_t = \theta (\mu - X_t) dt + \sigma \sqrt{X_t (1 - X_t)} dB^H_t`
+
+.. image:: /_static/fractional_ornstein_uhlenbeck_process.png
+    :scale: 50%
+
+.. code-block:: python
+
+    from samplepaths import FractionalOrnsteinUhlenbeckProcess
+    from samplepaths import FractionalVasicekProcess
+
+    rough = FractionalOrnsteinUhlenbeckProcess(hurst=0.1, speed=0.5, vol=0.3)
+    log_volatility = rough.sample(1000)
+
+    rates = FractionalVasicekProcess(hurst=0.8, speed=1.0, mean=0.03, vol=0.01, t=10)
+    paths = rates.sample_paths_with_initial(1000, paths=5000, initial=0.02)
+
+Their parameters are numbers, and ``hurst`` can be changed after creation.
+The realizations use exact increments of the fractional Brownian motion,
+generated with the Davies-Harte method, in the Euler method. The method is
+known to converge for a Hurst parameter above 0.5. The two linear processes,
+Ornstein-Uhlenbeck and Vasicek, are computed for all steps at once, and use
+every thread given by ``workers``.
+
+The fractional counterpart of the geometric Brownian motion is exact and is
+described with the :doc:`continuous-time processes <continuous>`.
+
 The initial value
 -----------------
 

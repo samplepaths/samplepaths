@@ -10,7 +10,7 @@ Kolmogorov-Smirnov test::
     uv run --with stochastic-rs python docs/scripts/compare_rust_outputs.py
 
 A p-value which is not small means that the test finds no difference between
-the two distributions. With 27 comparisons, one p-value below 0.05 is
+the two distributions. With 33 comparisons, one p-value below 0.05 is
 expected by chance.
 """
 
@@ -228,6 +228,67 @@ def cases(rng: np.random.Generator, count: int) -> list[tuple[str, str, Array, A
         "arrivals in [0, 20]",
         looped(lambda: len(rs.PyHawkes(2.0, 1.5, 3.0, None, 20.0).sample()) - 1, few),
         looped(lambda: len(hawkes.sample_with_length(20.0)) - 2, few),
+    )
+
+    # Fractional models, with a Hurst parameter of 0.7. stochastic-rs writes
+    # the Jacobi drift as alpha - beta x.
+    hurst = 0.7
+    add(
+        "Fractional Vasicek",
+        final,
+        final_values(rs.PyFVasicek(hurst, 1.5, 0.5, 0.3, POINTS, 1.0, 1.0), count),
+        sp.FractionalVasicekProcess(
+            hurst=hurst, speed=1.5, mean=0.5, vol=0.3, rng=rng
+        ).sample_paths(n, count)[:, -1],
+    )
+    add(
+        "Fractional Ornstein-Uhlenbeck",
+        final,
+        final_values(rs.PyFou(hurst, 1.5, 0.0, 0.3, POINTS, 1.0, 1.0), count),
+        sp.FractionalOrnsteinUhlenbeckProcess(
+            hurst=hurst, speed=1.5, vol=0.3, rng=rng
+        ).sample_paths(n, count)[:, -1],
+    )
+    add(
+        "Rough Ornstein-Uhlenbeck",
+        "final value, H = 0.3",
+        final_values(rs.PyFou(0.3, 1.5, 0.0, 0.3, POINTS, 1.0, 1.0), count),
+        sp.FractionalOrnsteinUhlenbeckProcess(hurst=0.3, speed=1.5, vol=0.3, rng=rng).sample_paths(
+            n, count
+        )[:, -1],
+    )
+    add(
+        "Fractional Cox-Ingersoll-Ross",
+        final,
+        final_values(rs.PyFcir(hurst, 1.0, 1.0, 0.3, POINTS, 1.0, 1.0), count),
+        sp.FractionalCoxIngersollRossProcess(
+            hurst=hurst, speed=1.0, mean=1.0, vol=0.3, rng=rng
+        ).sample_paths(n, count)[:, -1],
+    )
+    add(
+        "Fractional Jacobi",
+        final,
+        final_values(rs.PyFJacobi(hurst, 1.0, 2.0, 0.5, POINTS, 0.3, 1.0), count),
+        sp.FractionalJacobiProcess(
+            hurst=hurst, speed=2.0, mean=0.5, vol=0.5, rng=rng
+        ).sample_paths_with_initial(n, count, initial=0.3)[:, -1],
+    )
+
+    # Fractional geometric Brownian motion: stochastic-rs applies the Euler
+    # method to the equation, which for a Hurst parameter above 1/2 tends to
+    # exp(mu t + sigma B). samplepaths returns the solution with the Wick
+    # product, whose logarithm is lower by sigma^2 t^(2H) / 2. The Euler
+    # method needs a fine grid, so stochastic-rs gets 1024 increments.
+    add(
+        "Fractional geometric BM",
+        "final logarithm",
+        np.log(final_values(rs.PyFgbm(hurst, 0.05, 0.2, 1025, 1.0, 1.0), count)),
+        np.log(
+            sp.FractionalGeometricBrownianMotion(
+                hurst=hurst, drift=0.05, volatility=0.2, rng=rng
+            ).sample_paths(n, count)[:, -1]
+        )
+        + 0.2**2 / 2,
     )
 
     # Time series: the last of SERIES values. The parameters have the same
