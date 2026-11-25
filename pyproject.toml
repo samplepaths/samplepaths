@@ -1,13 +1,13 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 
 [project]
 name = "samplepaths"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Generate realizations of stochastic processes"
-readme = "README.rst"
+readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -67,8 +67,13 @@ dev = [
 ]
 
 
+# The version is the git tag of the release, for example v0.2.0 gives 0.2.0.
+[tool.hatch.version]
+source = "vcs"
+
+
 [tool.hatch.build.targets.sdist]
-include = ["/src", "/tests", "/README.rst", "/LICENSE"]
+include = ["/src", "/tests", "/README.md", "/LICENSE"]
 
 
 [tool.pytest.ini_options]

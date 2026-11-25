@@ -19,12 +19,23 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # the version is read from the git tags
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
       - name: Build the distributions
         run: uv build
+
+      - name: Check that the version matches the release tag
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version="${TAG#v}"
+          ls dist
+          test -f "dist/samplepaths-${version}.tar.gz"
+          test -f "dist/samplepaths-${version}-py3-none-any.whl"
 
       - name: Publish to PyPI
         run: uv publish
