@@ -36,8 +36,8 @@ where :math:`W_t` is a Wiener process. Its parameters are:
      - :math:`\gamma_t`
      - the exponent applied to the process in the volatility term
 
-Each parameter is either a number or a function of one argument, for
-parameters that change over time.
+Each parameter is either a number or a function of one argument, the time,
+for parameters that change over time.
 Give a constant parameter as a number: a function is called at every step,
 which makes sampling slower.
 

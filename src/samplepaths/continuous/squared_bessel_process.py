@@ -1,10 +1,9 @@
 """Squared Bessel process."""
 
-from typing import override
-
 import numpy as np
 import numpy.typing as npt
 
+from .._compat import override
 from ..utils.validation import check_positive_integer
 from .bessel_process import BesselProcess
 

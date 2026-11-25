@@ -111,7 +111,7 @@ def _euler_maruyama(
             t += delta_t
             x = x + (
                 instance.speed(t) * (instance.mean(t) - x) * delta_t
-                + instance.vol(t) * x ** instance.volexp(float(x)) * noise[k]
+                + instance.vol(t) * x ** instance.volexp(t) * noise[k]
             )
             values.append(float(x))
     return values
@@ -132,7 +132,7 @@ def _euler_maruyama(
                 "speed": lambda t: 1 + t,
                 "mean": lambda t: np.float64(t * t),
                 "vol": lambda t: 0.2 + 0.1 * t,
-                "volexp": lambda x: 0.5 if x > 1 else 1.0,
+                "volexp": lambda t: 0.5 if t > 1 else 1.0,
             },
             1.2,
         ),

@@ -2,12 +2,12 @@
 
 from bisect import bisect_right
 from itertools import accumulate
-from typing import override
 
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
 from ..base import BaseSequenceProcess
 from ..utils.validation import check_numeric, check_positive_integer
 

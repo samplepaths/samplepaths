@@ -1,16 +1,12 @@
 """Brownian motion."""
 
-from typing import override
-
-import numpy as np
-import numpy.typing as npt
 from numpy.random import Generator
 
-from ..noise.gaussian_noise import GaussianNoise
 from ..utils.validation import check_numeric, check_positive_number
+from .brownian_base import BrownianBase
 
 
-class BrownianMotion(GaussianNoise):
+class BrownianMotion(BrownianBase):
     """Brownian motion.
 
     .. image:: /_static/brownian_motion.png
@@ -74,60 +70,3 @@ class BrownianMotion(GaussianNoise):
         check_positive_number(value=value, name="Scale")
 
         self._scale = value
-
-    def _sample_brownian_motion(self, n: int) -> npt.NDArray[np.float64]:
-        """Generate a realization of Brownian Motion.
-
-        Generate a Brownian motion realization with n increments. If zero is
-        True then include W_0 = 0.
-        """
-        bm = np.cumsum(self.scale * self._sample_gaussian_noise(n))
-        bm = np.insert(bm, [0], 0)
-
-        if self.drift != 0:
-            return self.drift * self.times + bm
-
-        return bm
-
-    @override
-    def sample(self, n: int) -> npt.NDArray[np.float64]:
-        return self._sample_brownian_motion(n)
-
-    def _sample_brownian_motion_at(
-        self,
-        times: npt.NDArray[np.float64],
-    ) -> npt.NDArray[np.float64]:
-        """Generate a Brownian motion at specified times."""
-        bm = np.cumsum(self.scale * self._sample_gaussian_noise_at(times))
-
-        if times[0] == 0:
-            bm = np.insert(bm, 0, [0])
-
-        if self.drift != 0:
-            bm += self.drift * np.asarray(times, dtype=np.float64)
-
-        return bm
-
-    @override
-    def sample_at(
-        self,
-        times: npt.NDArray[np.float64],
-    ) -> npt.NDArray[np.float64]:
-        return self._sample_brownian_motion_at(times)
-
-    def _sample_brownian_motion_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
-        """Generate several realizations of Brownian motion, one per row."""
-        noise = self._sample_gaussian_noise_paths(n, paths)
-
-        bm = np.concatenate(
-            (np.zeros((paths, 1)), np.cumsum(self.scale * noise, axis=1)),
-            axis=1,
-        )
-        if self.drift != 0:
-            bm += self.drift * self.times
-
-        return bm
-
-    @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
-        return self._sample_brownian_motion_paths(n, paths)

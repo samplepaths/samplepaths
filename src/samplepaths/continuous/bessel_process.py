@@ -1,18 +1,17 @@
 """Bessel process."""
 
-from typing import override
-
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
 from ..utils.validation import (
     check_positive_integer,
 )
-from .brownian_motion import BrownianMotion
+from .brownian_base import BrownianBase
 
 
-class BesselProcess(BrownianMotion):
+class BesselProcess(BrownianBase):
     r"""Bessel process.
 
     .. image:: /_static/bessel_process.png

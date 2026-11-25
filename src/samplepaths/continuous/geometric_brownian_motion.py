@@ -1,20 +1,19 @@
 """Geometric Brownian motion process."""
 
-from typing import override
-
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
+from ..noise.gaussian_noise import GaussianNoise
 from ..utils.validation import (
     check_numeric,
     check_positive_integer,
     check_positive_number,
 )
-from .brownian_motion import BrownianMotion
 
 
-class GeometricBrownianMotion(BrownianMotion):
+class GeometricBrownianMotion(GaussianNoise):
     r"""Geometric Brownian motion process.
 
     .. image:: /_static/geometric_brownian_motion.png

@@ -1,12 +1,13 @@
 """Fractional Gaussian noise process."""
 
 from functools import lru_cache
-from typing import Literal, override
+from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
 from ..base import BaseTimeProcess
 from ..utils.validation import check_positive_integer
 

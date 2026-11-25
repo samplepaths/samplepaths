@@ -119,5 +119,6 @@ Where to go next
 * :doc:`/guide/continuous`, :doc:`/guide/diffusion`, :doc:`/guide/discrete`
   and :doc:`/guide/noise`
   describe every process
+* :doc:`/gallery/index` shows an example with its figure for every process
 * :doc:`/guide/performance` gives measured sampling times
 * :doc:`/reference/index` documents every class, method and function

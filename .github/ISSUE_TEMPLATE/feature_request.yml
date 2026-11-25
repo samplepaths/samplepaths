@@ -1,0 +1,16 @@
+name: Feature request
+description: A new process, algorithm or capability
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What would you like?
+      description: The process, algorithm or capability, and what you would use it for.
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: References
+      description: A paper, book or implementation which describes it, if any.

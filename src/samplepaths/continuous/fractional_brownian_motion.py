@@ -1,10 +1,9 @@
 """Fractional Brownian motion process."""
 
-from typing import override
-
 import numpy as np
 import numpy.typing as npt
 
+from .._compat import override
 from ..noise import FractionalGaussianNoise
 
 
@@ -43,19 +42,22 @@ class FractionalBrownianMotion(FractionalGaussianNoise):
     def __repr__(self) -> str:
         return f"FractionalBrownianMotion(hurst={self.hurst}, t={self.t})"
 
-    def _sample_fractional_brownian_motion(
-        self,
-        n: int,
-    ) -> npt.NDArray[np.float64]:
-        """Generate a realization of fractional Brownian motion."""
-        fgn = self.sample_davies_harte(n)
-        fbm = fgn.cumsum()
-        fbm = np.insert(fbm, [0], 0)
-        return fbm
+    @staticmethod
+    def _accumulate(fgn: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+        """Turn the increments into the motion, which starts at zero."""
+        return np.insert(fgn.cumsum(), [0], 0)
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:
-        return self._sample_fractional_brownian_motion(n)
+        return self.sample_davies_harte(n)
+
+    @override
+    def sample_davies_harte(self, n: int) -> npt.NDArray[np.float64]:
+        return self._accumulate(self._sample_fractional_gaussian_noise(n, "davies-harte"))
+
+    @override
+    def sample_hosking(self, n: int) -> npt.NDArray[np.float64]:
+        return self._accumulate(self._sample_fractional_gaussian_noise(n, "hosking"))
 
     @override
     def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:

@@ -1,16 +1,15 @@
 """Brownian bridge."""
 
-from typing import override
-
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
 from ..utils.validation import check_numeric
-from .brownian_motion import BrownianMotion
+from .brownian_base import BrownianBase
 
 
-class BrownianBridge(BrownianMotion):
+class BrownianBridge(BrownianBase):
     """Brownian bridge.
 
     .. image:: /_static/brownian_bridge.png
@@ -32,12 +31,7 @@ class BrownianBridge(BrownianMotion):
         t: float = 1.0,
         rng: Generator | None = None,
     ) -> None:
-        super().__init__(
-            drift=0.0,
-            scale=1.0,
-            t=t,
-            rng=rng,
-        )
+        super().__init__(t=t, rng=rng)
 
         self.b = b
 

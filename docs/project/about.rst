@@ -21,8 +21,8 @@ The original package supported Python 3.8 to 3.10 and ``numpy`` 1.x, which
 prevents installing it next to current releases of the scientific Python
 stack.
 
-``samplepaths`` requires Python 3.12 or newer, ``numpy`` 2.2 or newer and
-``scipy`` 1.15 or newer, and is tested on Python 3.12, 3.13 and 3.14 on
+``samplepaths`` requires Python 3.11 or newer, ``numpy`` 2.2 or newer and
+``scipy`` 1.15 or newer, and is tested on Python 3.11, 3.12, 3.13 and 3.14 on
 Linux, macOS and Windows.
 
 **What you get:** the library installs into a modern environment without
@@ -161,7 +161,8 @@ Corrected defects
 
 Rewriting the tests and comparing results between versions uncovered defects
 inherited from the original package, among them a drift which ignored the end
-time ``t`` in Brownian motion and a sampling failure of the Cauchy process.
+time ``t`` in Brownian motion, a sampling failure of the Cauchy process and
+an interval length which had no effect on colored noise.
 They are listed in :doc:`migration` and :doc:`changelog`.
 
 **What you get:** results you can rely on, with a test for each fix.
@@ -171,9 +172,10 @@ Stronger quality checks
 
 The test suite was rewritten as parametrized tests with one test module per
 process, covering valid and invalid parameters as well as sampling. Every
-pull request runs the tests on three operating systems and three Python
-versions, together with ``ruff``, ``mypy`` and a build of this
-documentation. Dependencies are locked with ``uv`` so that builds are
+pull request runs the tests on three operating systems and four Python
+versions, together with ``ruff``, ``mypy``, a build of this documentation,
+which runs every example of the gallery, and a comparison of the sampling
+times with the base branch. Dependencies are locked with ``uv`` so that builds are
 reproducible.
 
 **What you get:** changes to the library are verified on the platforms and

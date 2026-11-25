@@ -1,12 +1,12 @@
 """Generalized diffusion process."""
 
 from collections.abc import Callable
-from typing import override
 
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
 from ..noise import GaussianNoise
 from ..utils import ensure_single_arg_constant_function
 from ..utils.validation import (
@@ -204,7 +204,7 @@ class DiffusionProcess(GaussianNoise):
             a = speed if speed is not None else float(speed_function(t))
             m = mean if mean is not None else float(mean_function(t))
             v = vol if vol is not None else float(vol_function(t))
-            g = volexp if volexp is not None else float(volexp_function(x))
+            g = volexp if volexp is not None else float(volexp_function(t))
             x += a * (m - x) * delta_t + v * _power(x, g) * gn
             s.append(x)
 
@@ -222,10 +222,8 @@ class DiffusionProcess(GaussianNoise):
         vol = self.__vol_value
         volexp = self.__volexp_value
 
-        if paths < _VECTORIZE_FROM_PATHS or volexp is None:
-            # Few realizations, or a volatility exponent which is a function
-            # of the value of each realization: step through each of them in
-            # turn.
+        if paths < _VECTORIZE_FROM_PATHS:
+            # Few realizations: step through each of them in turn.
             return np.array(
                 [self._euler_maruyama(gns, float(initial), delta_t) for gns in noise.tolist()]
             )
@@ -234,6 +232,7 @@ class DiffusionProcess(GaussianNoise):
         speed_function = self.__speed
         mean_function = self.__mean
         vol_function = self.__vol
+        volexp_function = self.__volexp
 
         x = np.full(paths, float(initial))
         realizations = np.empty((paths, n + 1))
@@ -245,12 +244,13 @@ class DiffusionProcess(GaussianNoise):
             a = speed if speed is not None else float(speed_function(t))
             m = mean if mean is not None else float(mean_function(t))
             v = vol if vol is not None else float(vol_function(t))
-            if volexp == 0:
+            g = volexp if volexp is not None else float(volexp_function(t))
+            if g == 0:
                 x = x + a * (m - x) * delta_t + v * gn
-            elif volexp == 1:
+            elif g == 1:
                 x = x + a * (m - x) * delta_t + v * x * gn
             else:
-                x = x + a * (m - x) * delta_t + v * np.power(x, volexp) * gn
+                x = x + a * (m - x) * delta_t + v * np.power(x, g) * gn
             realizations[:, k + 1] = x
 
         return realizations

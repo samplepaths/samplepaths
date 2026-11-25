@@ -1,12 +1,12 @@
 """Base class of the processes defined on a time interval."""
 
 from abc import abstractmethod
-from typing import override
 
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
 from ..utils import generate_times
 from ..utils.validation import check_positive_integer, check_positive_number
 from .base_process import BaseProcess

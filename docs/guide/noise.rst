@@ -118,4 +118,7 @@ colors are the same process with a fixed exponent.
     signal = ColoredNoise(beta=1.5, t=1).sample(4096)
 
 Realizations are generated in the frequency domain by the method of Timmer
-and Koenig.
+and Koenig. A realization has a zero mean and is scaled so that its variance
+is close to ``t / n``, the variance of Gaussian noise with the same number of
+increments on the same interval, whatever the exponent. It needs at least
+two increments.

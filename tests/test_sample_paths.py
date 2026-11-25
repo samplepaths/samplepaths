@@ -42,7 +42,7 @@ CASES: list[tuple[str, dict[str, Any]]] = [
     ("CoxIngersollRossProcess", {"speed": 1.0, "mean": 1.0, "vol": 0.3, "t": 2.0}),
     ("DiffusionProcess", {"speed": 2.0, "mean": lambda t: 1 + t, "vol": 0.3, "t": 2.0}),
     ("DiffusionProcess", {"speed": 1.0, "mean": 1.0, "vol": 0.2, "volexp": 1.0, "t": 2.0}),
-    ("DiffusionProcess", {"vol": 0.2, "volexp": lambda x: 0.5 if x > 1 else 1.0}),
+    ("DiffusionProcess", {"vol": 0.2, "volexp": lambda t: 0.5 if t > 0.5 else 1.0}),
     ("ExtendedVasicekProcess", {"speed": lambda t: 1 + t, "mean": 0.5, "vol": 0.3, "t": 2.0}),
     ("OrnsteinUhlenbeckProcess", {"speed": 1.5, "vol": 0.3, "t": 2.0}),
     ("VasicekProcess", {"speed": 1.5, "mean": 0.5, "vol": 0.3, "t": 2.0}),
@@ -113,6 +113,12 @@ def test_cases_cover_every_process() -> None:
 @pytest.mark.parametrize("name, kwargs", CASES, ids=IDS)
 def test_sample_paths_shape(name: str, kwargs: dict[str, Any], n: int, paths: int) -> None:
     process = make(name, kwargs, seed=1)
+    if n == 1 and isinstance(process, samplepaths.ColoredNoise):
+        # Colored noise has a zero mean, which leaves nothing for one value.
+        with pytest.raises(ValueError):
+            process.sample_paths(n, paths)
+        return
+
     single = process.sample(n)
 
     realizations = process.sample_paths(n, paths)

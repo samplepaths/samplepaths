@@ -1,11 +1,10 @@
 """Poisson process."""
 
-from typing import override
-
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
 from ..base import BaseProcess
 from ..utils.validation import (
     check_nonnegative_number,

@@ -38,8 +38,8 @@ docs-live:  ## Serve the documentation and rebuild it on changes
 docs-images:  ## Regenerate the figures shown in the documentation
 	uv run python docs/scripts/make_images.py
 
-docs-clean:  ## Remove the built documentation
-	rm -rf docs/_build
+docs-clean:  ## Remove the built and generated documentation
+	rm -rf docs/_build docs/gallery docs/reference/api docs/sg_execution_times.rst
 
 benchmark:  ## Measure the time of the sampling methods
 	uv run python docs/scripts/benchmark.py

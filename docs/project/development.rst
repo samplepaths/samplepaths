@@ -76,11 +76,15 @@ Project layout
        random.py      default random number generator
    tests/             one test module per source module, in the same layout
    docs/              this documentation
-   notebooks/         notebooks comparing the processes with ``stochastic``
+       guide/         the user guide
+       examples/      the examples of the gallery, run at build time
+       scripts/       the benchmark and the script which draws the figures
+
+Every class lives in its own module, named after the class.
 
 Dependencies are declared in ``pyproject.toml``. The development
-dependencies are split into the groups ``test``, ``lint``, ``docs`` and
-``notebooks``, and the group ``dev`` includes all of them.
+dependencies are split into the groups ``test``, ``lint`` and ``docs``, and
+the group ``dev`` includes all of them.
 
 Code style
 ----------
@@ -92,6 +96,8 @@ Code style
   ``:raises Error:``). Types are not repeated in the docstrings; they are
   taken from the type hints.
 * The parameters of a class are documented in the class docstring.
+* ``typing.override`` is imported from ``samplepaths._compat``, which provides
+  it on Python 3.11.
 
 Adding a process
 ----------------
@@ -109,7 +115,8 @@ Adding a process
    representations, the shape of the realizations and their values for a
    seeded generator.
 5. Add the process to the guide of its family in ``docs/guide`` and a figure
-   to ``docs/scripts/make_images.py``. The API reference is generated
+   to ``docs/scripts/make_images.py``. Add an example to the folder of the
+   family in ``docs/examples``. The API reference is generated
    automatically.
 6. Override ``sample_paths(n, paths)`` when the process can generate many
    realizations in one pass, and add the process to the cases of
@@ -121,12 +128,15 @@ Documentation
 -------------
 
 The documentation is built with Sphinx. The pages in ``docs/reference/api``
-are generated from the docstrings at build time and are not committed.
+are generated from the docstrings at build time, and the pages in
+``docs/gallery`` from the examples in ``docs/examples``, which are run.
+Neither is committed.
 
 Keep the documentation in step with the code. A change to the behavior or to
 the interface of the library updates, in the same pull request:
 
 * the guide page of the feature in ``docs/guide``, including its examples
+* the gallery in ``docs/examples`` when an example shows the change best
 * ``docs/guide/performance.rst`` when sampling times change, with times
   measured by ``make benchmark``
 * the "Unreleased" section of ``docs/project/changelog.rst``
@@ -136,6 +146,28 @@ the interface of the library updates, in the same pull request:
 
    make docs       # build into docs/_build/html
    make docs-live  # serve at http://127.0.0.1:8000 and rebuild on changes
+
+Continuous integration
+----------------------
+
+Every pull request to ``master`` runs these workflows:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Workflow
+     - What it does
+   * - Tests
+     - the tests on Linux, macOS and Windows with Python 3.11 to 3.14
+   * - Quality
+     - ``ruff``, ``mypy`` and a build of the documentation, which runs the
+       examples of the gallery
+   * - Benchmarks
+     - measures the sampling times on the base branch and on the pull
+       request, and fails when a method becomes more than two times slower
+   * - CodeQL
+     - static analysis of the code and of the workflows
 
 Releasing
 ---------

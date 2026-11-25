@@ -149,9 +149,6 @@ Notes on specific processes
   rows of ``n`` values and fills the rest of a row with the state in which
   the process was absorbed, where it stays.
 * **Mixed Poisson process.** Every realization draws its own rate.
-* **Diffusion processes with a volatility exponent given as a function.** The
-  function is called with the value of each realization separately, so the
-  realizations are generated one after the other.
 * **Chinese restaurant, Dirichlet, Moran and mixed Poisson processes.** These
   are generated one realization after the other, in the time of a loop.
 * **Memory.** The result holds ``paths * (n + 1)`` values of 8 bytes: 100,000
