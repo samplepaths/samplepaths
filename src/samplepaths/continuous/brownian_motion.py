@@ -114,3 +114,20 @@ class BrownianMotion(GaussianNoise):
         times: npt.NDArray[np.float64],
     ) -> npt.NDArray[np.float64]:
         return self._sample_brownian_motion_at(times)
+
+    def _sample_brownian_motion_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        """Generate several realizations of Brownian motion, one per row."""
+        noise = self._sample_gaussian_noise_paths(n, paths)
+
+        bm = np.concatenate(
+            (np.zeros((paths, 1)), np.cumsum(self.scale * noise, axis=1)),
+            axis=1,
+        )
+        if self.drift != 0:
+            bm += self.drift * self.times
+
+        return bm
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        return self._sample_brownian_motion_paths(n, paths)

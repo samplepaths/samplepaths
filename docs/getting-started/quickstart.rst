@@ -86,10 +86,9 @@ See :doc:`/guide/random` for details.
 A Monte Carlo simulation
 ------------------------
 
-Because every process has the same ``sample(n)`` method, simulation code
-does not depend on the process it simulates. This example estimates the mean
-of a geometric Brownian motion at time ``t``, which is
-:math:`S_0 e^{\mu t}`:
+``sample_paths(n, paths)`` generates many realizations in one call, as the
+rows of a two-dimensional array. This example estimates the mean of a
+geometric Brownian motion at time ``t``, which is :math:`S_0 e^{\mu t}`:
 
 .. code-block:: python
 
@@ -103,15 +102,22 @@ of a geometric Brownian motion at time ``t``, which is
         rng=np.random.default_rng(1),
     )
 
-    finals = np.array([gbm.sample_with_initial(64, initial=100.0)[-1] for _ in range(10_000)])
+    prices = gbm.sample_paths_with_initial(64, paths=10_000, initial=100.0)
 
-    print(finals.mean())  # close to 100 * exp(0.05) = 105.13
+    print(prices.shape)
+    # (10000, 65)
+    print(prices[:, -1].mean())  # close to 100 * exp(0.05) = 105.13
+
+Every process has the same ``sample()`` and ``sample_paths()`` methods, so
+simulation code does not depend on the process it simulates.
 
 Where to go next
 ----------------
 
 * :doc:`/guide/usage` describes the sampling methods in detail
+* :doc:`/guide/paths` describes simulating many realizations
 * :doc:`/guide/continuous`, :doc:`/guide/diffusion`, :doc:`/guide/discrete`
   and :doc:`/guide/noise`
   describe every process
+* :doc:`/guide/performance` gives measured sampling times
 * :doc:`/reference/index` documents every class, method and function

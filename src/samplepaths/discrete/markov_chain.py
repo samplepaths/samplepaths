@@ -16,6 +16,10 @@ DEFAULT_TRANSITION: npt.NDArray[np.float64] = np.array(
     dtype=np.float64,
 )
 
+#: Number of realizations from which sample_paths advances all of them
+#: together instead of one after the other.
+_VECTORIZE_FROM_PATHS = 32
+
 
 def _cumulative(probabilities: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """Compute a normalized cumulative distribution, as Generator.choice does."""
@@ -144,3 +148,37 @@ class MarkovChain(BaseSequenceProcess):
             markov_chain.append(state)
 
         return np.array(markov_chain, dtype=np.int64)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.int64]:
+        check_positive_integer(n=n)
+        check_positive_integer(n=paths, name="Number of paths")
+
+        initial = _cumulative(self.initial)
+        transition = np.array([_cumulative(row) for row in self.transition])
+        uniforms = self.rng.random((paths, n))
+
+        realizations = np.empty((paths, n), dtype=np.int64)
+        if paths < _VECTORIZE_FROM_PATHS:
+            # Few realizations: step through each of them in turn.
+            initial_list = initial.tolist()
+            transition_list = transition.tolist()
+            for row, row_uniforms in zip(realizations, uniforms.tolist(), strict=True):
+                state = bisect_right(initial_list, row_uniforms[0])
+                states = [state]
+                for uniform in row_uniforms[1:]:
+                    state = bisect_right(transition_list[state], uniform)
+                    states.append(state)
+                row[:] = states
+            return realizations
+
+        # Many realizations: advance all of them together, one step at a time.
+        # The next state is the number of cumulative probabilities which do
+        # not exceed the uniform variate.
+        current = np.searchsorted(initial, uniforms[:, 0], side="right")
+        realizations[:, 0] = current
+        for k in range(1, n):
+            current = np.sum(uniforms[:, k, np.newaxis] >= transition[current], axis=1)
+            realizations[:, k] = current
+
+        return realizations

@@ -97,6 +97,26 @@ Calling it without an argument restores the original default.
 Both functions take keyword arguments only. See
 :py:mod:`samplepaths.random` in the API reference.
 
+Many realizations
+-----------------
+
+``sample_paths()`` uses the generator of the process as well, and is
+reproducible in the same way. It draws the random numbers of all realizations
+together, in a different order from ``sample()``. With the same seed, its
+rows are therefore not the realizations which repeated calls to ``sample()``
+would return, although they have the same distribution.
+
+.. code-block:: python
+
+    import numpy as np
+    from samplepaths import BrownianMotion
+
+    first = BrownianMotion(rng=np.random.default_rng(42)).sample_paths(8, paths=3)
+    second = BrownianMotion(rng=np.random.default_rng(42)).sample_paths(8, paths=3)
+
+    print(np.array_equal(first, second))
+    # True
+
 Which one to use
 ----------------
 

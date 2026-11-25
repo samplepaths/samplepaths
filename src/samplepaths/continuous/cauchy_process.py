@@ -116,3 +116,26 @@ class CauchyProcess(BrownianMotion):
         times: npt.NDArray[np.float64],
     ) -> npt.NDArray[np.float64]:
         return self._sample_cauchy_process_at(times)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        check_positive_integer(n=n, name="Number of increments")
+        check_positive_integer(n=paths, name="Number of paths")
+        self.set_times(n)
+
+        delta_t = 1.0 * self.t / n
+        levys = np.asarray(
+            levy.rvs(
+                loc=0,
+                scale=delta_t**2 / 2,
+                size=(paths, n),
+                random_state=self.rng,
+            ),
+            dtype=np.float64,
+        )
+
+        samples = np.cumsum(self.scale * self.rng.normal(scale=np.sqrt(levys)), axis=1)
+        if self.drift != 0:
+            samples += self.drift * np.cumsum(levys, axis=1)
+
+        return np.concatenate((np.zeros((paths, 1)), samples), axis=1)

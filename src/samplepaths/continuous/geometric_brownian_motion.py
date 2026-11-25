@@ -164,3 +164,38 @@ class GeometricBrownianMotion(BrownianMotion):
         :returns: the realization
         """
         return self._sample_geometric_brownian_motion_at(times, initial)
+
+    def _sample_geometric_brownian_motion_paths(
+        self,
+        n: int,
+        paths: int,
+        initial: float,
+    ) -> npt.NDArray[np.float64]:
+        """Generate several realizations of geometric Brownian motion."""
+        check_positive_number(value=initial, name="Initial")
+
+        noise = self._sample_gaussian_noise_paths(n, paths)
+        wiener = np.concatenate((np.zeros((paths, 1)), np.cumsum(noise, axis=1)), axis=1)
+
+        line = (self.drift - self.volatility**2 / 2.0) * self.times
+        realizations: npt.NDArray[np.float64] = initial * np.exp(line + self.volatility * wiener)
+        return realizations
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        return self._sample_geometric_brownian_motion_paths(n, paths, 1.0)
+
+    def sample_paths_with_initial(
+        self,
+        n: int,
+        paths: int,
+        initial: float = 1.0,
+    ) -> npt.NDArray[np.float64]:
+        """Generate several realizations starting from an initial value.
+
+        :param n: the number of increments of each realization
+        :param paths: the number of realizations
+        :param initial: the initial value of the process :math:`S_0`
+        :returns: a two-dimensional array with one realization per row
+        """
+        return self._sample_geometric_brownian_motion_paths(n, paths, initial)

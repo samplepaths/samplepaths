@@ -114,3 +114,14 @@ class RandomWalk(BaseSequenceProcess):
         :returns: the increments
         """
         return self._sample_random_walk_increments(n)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        check_positive_integer(n=n)
+        check_positive_integer(n=paths, name="Number of paths")
+
+        increments = self.rng.choice(self.steps, p=self.p, size=(paths, n))
+        return np.concatenate(
+            (np.zeros((paths, 1), dtype=increments.dtype), np.cumsum(increments, axis=1)),
+            axis=1,
+        )

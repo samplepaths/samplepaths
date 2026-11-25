@@ -4,7 +4,6 @@ from collections.abc import Callable
 
 from numpy.random import Generator
 
-from ..utils import ensure_single_arg_constant_function
 from ..utils.validation import check_numeric
 from .diffusion_process import DiffusionProcess
 
@@ -78,4 +77,4 @@ class ConstantElasticityVarianceProcess(DiffusionProcess):
     @drift.setter
     def drift(self, value: float) -> None:
         check_numeric(value=value, name="Drift coefficient.")
-        self.speed = ensure_single_arg_constant_function(value=-value)
+        self.speed = -value

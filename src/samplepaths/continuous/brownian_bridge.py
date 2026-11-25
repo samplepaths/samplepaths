@@ -91,3 +91,14 @@ class BrownianBridge(BrownianMotion):
         times: npt.NDArray[np.float64],
     ) -> npt.NDArray[np.float64]:
         return self._sample_brownian_bridge_at(times)
+
+    def _sample_brownian_bridge_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        """Generate several realizations of a Brownian bridge, one per row."""
+        bm = self._sample_brownian_motion_paths(n, paths)
+
+        bridges: npt.NDArray[np.float64] = bm + self.times * (self.b - bm[:, -1:]) / self.t
+        return bridges
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        return self._sample_brownian_bridge_paths(n, paths)

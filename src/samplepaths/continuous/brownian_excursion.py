@@ -89,3 +89,17 @@ class BrownianExcursion(BrownianBridge):
         times: npt.NDArray[np.float64],
     ) -> npt.NDArray[np.float64]:
         return self._sample_brownian_excursion_at(times)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        bridges = self._sample_brownian_bridge_paths(n, paths)
+
+        # Rotate every bridge to start at its minimum.
+        idx_min = np.argmin(bridges, axis=1)
+        indices = (idx_min[:, np.newaxis] + np.arange(n + 1)) % n
+        minimums = bridges[np.arange(paths), idx_min][:, np.newaxis]
+
+        excursions: npt.NDArray[np.float64] = (
+            np.take_along_axis(bridges, indices, axis=1) - minimums
+        )
+        return excursions

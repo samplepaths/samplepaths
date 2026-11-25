@@ -70,13 +70,12 @@ class ColoredNoise(BaseTimeProcess):
 
         self.__beta = value
 
-    def _sample_colored_noise(self, n: int) -> npt.NDArray[np.float64]:
-        """Generate colored noise increments at specified times from zero."""
-        check_positive_integer(n=n, name="Number of increments")
-        self.set_times(n)
+    def _update_spectrum(self, n: int) -> None:
+        """Compute the frequencies and their scale for n increments.
 
-        # The frequencies and their scale depend on n, beta and t only, so
-        # they are reused by consecutive realizations.
+        They depend on n, beta and t only, so they are reused by consecutive
+        realizations.
+        """
         key = (n, self.beta, self.t)
         if self.__key != key:
             self.__key = key
@@ -85,6 +84,12 @@ class ColoredNoise(BaseTimeProcess):
             self.__half = (n + 1) // 2
             self.__frequencies = frequencies
             self.__scale = np.sqrt(0.5 * (1 / frequencies[1 : self.__half]) ** self.beta)
+
+    def _sample_colored_noise(self, n: int) -> npt.NDArray[np.float64]:
+        """Generate colored noise increments at specified times from zero."""
+        check_positive_integer(n=n, name="Number of increments")
+        self.set_times(n)
+        self._update_spectrum(n)
 
         assert self.__frequencies is not None
         assert self.__half is not None
@@ -114,3 +119,32 @@ class ColoredNoise(BaseTimeProcess):
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:
         return self._sample_colored_noise(n)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        check_positive_integer(n=n, name="Number of increments")
+        check_positive_integer(n=paths, name="Number of paths")
+        self.set_times(n)
+        self._update_spectrum(n)
+
+        assert self.__frequencies is not None
+        assert self.__half is not None
+
+        gn_real = self.rng.normal(size=(paths, self.__half - 1))
+        gn_imag = self.rng.normal(size=(paths, self.__half - 1))
+        fft = self.__scale * (gn_real + 1j * gn_imag)
+
+        zeros = np.zeros((paths, 1))
+        mirrored = np.conj(fft)[:, ::-1]
+        if n % 2 == 0:
+            middle = np.sqrt(
+                0.5 * (1 / -self.__frequencies[self.__half]) ** self.beta
+            ) * self.rng.normal(size=(paths, 1))
+            f = np.concatenate((zeros, fft, middle, mirrored), axis=1)
+        else:
+            f = np.concatenate((zeros, fft, mirrored), axis=1)
+
+        realizations: npt.NDArray[np.float64] = np.fft.ifft(f, axis=1).real / np.std(
+            f, axis=1, keepdims=True
+        )
+        return realizations

@@ -8,6 +8,10 @@ or directly, optionally saving the results or comparing with saved ones::
 
     uv run python docs/scripts/benchmark.py --save results.json
     uv run python docs/scripts/benchmark.py --compare results.json
+
+Measure many realizations, generated one by one and together::
+
+    uv run python docs/scripts/benchmark.py --paths
 """
 
 import argparse
@@ -29,6 +33,11 @@ STEPS = 4096
 
 #: Smaller numbers of increments for the algorithms with a quadratic cost.
 QUADRATIC_STEPS = {"MultifractionalBrownianMotion": 512, "sample_hosking": 1024}
+
+#: Number of realizations and of increments for the comparison of sample_paths
+#: with repeated calls to sample.
+PATHS = 1000
+PATHS_STEPS = 256
 
 #: Arguments of the processes without default parameters.
 REQUIRED_KWARGS: dict[str, dict[str, Any]] = {
@@ -94,14 +103,52 @@ def run() -> dict[str, float]:
     return results
 
 
+def _one_by_one(process: BaseProcess) -> list[object]:
+    """Generate many realizations with one call to sample for each."""
+    return [process.sample(PATHS_STEPS) for _ in range(PATHS)]
+
+
+def run_paths() -> dict[str, tuple[float, float]]:
+    """Measure many realizations, generated one by one and together.
+
+    :returns: for every process, the times in milliseconds of repeated calls
+        to sample and of one call to sample_paths
+    """
+    results: dict[str, tuple[float, float]] = {}
+    names = [name for name in samplepaths.__all__ if isinstance(getattr(samplepaths, name), type)]
+
+    for name in names:
+        process = make(name)
+        one_by_one = measure(partial(_one_by_one, process), minimum_time=0.5)
+        together = measure(partial(process.sample_paths, PATHS_STEPS, PATHS), minimum_time=0.5)
+        results[name] = (one_by_one, together)
+
+    return results
+
+
 def main() -> None:
     """Run the benchmark and print the results."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--save", type=Path, help="write the results to a JSON file")
     parser.add_argument("--compare", type=Path, help="compare with a saved JSON file")
+    parser.add_argument(
+        "--paths",
+        action="store_true",
+        help="measure many realizations with sample and with sample_paths instead",
+    )
     args = parser.parse_args()
 
     warnings.simplefilter("ignore")
+
+    if args.paths:
+        print(f"{PATHS} realizations of {PATHS_STEPS} increments")
+        print(f"{'sample ms':>10} {'paths ms':>10} {'speedup':>9}  process")
+        rows = run_paths()
+        for name in sorted(rows, key=lambda c: rows[c][0] / rows[c][1], reverse=True):
+            one_by_one, together = rows[name]
+            print(f"{one_by_one:10.2f} {together:10.2f} {one_by_one / together:8.1f}x  {name}")
+        return
+
     results = run()
 
     if args.save:

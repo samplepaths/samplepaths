@@ -113,6 +113,9 @@ of them, the realization ends. A realization can therefore be shorter than
     sizes = mp.sample(100)  # starts from 1
     sizes = mp.sample_with_start(100, start=10)
 
+``sample_paths()`` returns rows of equal length: the rest of a row is filled
+with the state in which the process was absorbed, where it stays.
+
 Chinese restaurant process
 --------------------------
 

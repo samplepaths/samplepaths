@@ -7,6 +7,7 @@ import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from ..utils.validation import check_positive_integer
 from .poisson_process import PoissonProcess
 
 
@@ -112,3 +113,9 @@ class MixedPoissonProcess(PoissonProcess):
     ) -> npt.NDArray[np.float64]:
         self.rate = self._sample_rate()
         return self._sample_poisson_process(length=length)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        # Every realization draws its own random rate.
+        check_positive_integer(n=paths, name="Number of paths")
+        return np.array([self.sample(n) for _ in range(paths)], dtype=np.float64)

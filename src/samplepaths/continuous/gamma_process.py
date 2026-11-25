@@ -159,3 +159,17 @@ class GammaProcess(BaseTimeProcess):
     @override
     def sample_at(self, times: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         return self._sample_gamma_process_at(times)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        check_positive_integer(n=n, name="Number of increments")
+        check_positive_integer(n=paths, name="Number of paths")
+        self.set_times(n)
+
+        delta_t = 1.0 * self.t / n
+
+        shape = 1.0 * self.mean**2 * delta_t / self.variance
+        scale = 1.0 * self.variance / self.mean
+
+        increments = self.rng.gamma(shape=shape, scale=scale, size=(paths, n))
+        return np.concatenate((np.zeros((paths, 1)), np.cumsum(increments, axis=1)), axis=1)

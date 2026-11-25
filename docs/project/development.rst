@@ -111,12 +111,26 @@ Adding a process
 5. Add the process to the guide of its family in ``docs/guide`` and a figure
    to ``docs/scripts/make_images.py``. The API reference is generated
    automatically.
+6. Override ``sample_paths(n, paths)`` when the process can generate many
+   realizations in one pass, and add the process to the cases of
+   ``tests/test_sample_paths.py``, which compares the result with repeated
+   calls to ``sample()``. A process which derives from another process must
+   override it, or it would inherit the realizations of its parent.
 
 Documentation
 -------------
 
 The documentation is built with Sphinx. The pages in ``docs/reference/api``
 are generated from the docstrings at build time and are not committed.
+
+Keep the documentation in step with the code. A change to the behavior or to
+the interface of the library updates, in the same pull request:
+
+* the guide page of the feature in ``docs/guide``, including its examples
+* ``docs/guide/performance.rst`` when sampling times change, with times
+  measured by ``make benchmark``
+* the "Unreleased" section of ``docs/project/changelog.rst``
+* ``README.md`` when the change affects what a first-time reader should know
 
 .. code-block:: bash
 
@@ -129,8 +143,9 @@ Releasing
 The version of the package is not written in any file. It is read from the
 git tag of the release: the tag ``v0.2.0`` gives the version ``0.2.0``.
 
-To release, create a GitHub release on ``master`` with a new tag of the form
-``vX.Y.Z``. Publishing the release runs the ``Publish`` workflow, which
+To release, rename the "Unreleased" section of ``docs/project/changelog.rst``
+to the new version and its date, merge that change, and create a GitHub
+release on ``master`` with a new tag of the form ``vX.Y.Z``. Publishing the release runs the ``Publish`` workflow, which
 builds the distributions, checks that their version matches the tag and
 uploads them to PyPI using trusted publishing.
 
