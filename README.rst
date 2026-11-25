@@ -1,13 +1,16 @@
 samplepaths
 ============
 
-|tests| |docs| |license|
+|tests| |docs| |pypi| |license|
 
 .. |tests| image:: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml/badge.svg
     :target: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml
 
 .. |docs| image:: https://readthedocs.org/projects/samplepaths/badge/?version=latest
     :target: https://samplepaths.readthedocs.io/
+
+.. |pypi| image:: https://img.shields.io/pypi/v/samplepaths.svg
+    :target: https://pypi.org/project/samplepaths/
 
 .. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://github.com/samplepaths/samplepaths/blob/master/LICENSE
@@ -23,11 +26,11 @@ with type hints. It is maintained by `Bassem Girgis <https://girgis.me>`_.
 Installation
 ------------
 
-Install ``samplepaths`` from its GitHub repository using pip
+Install ``samplepaths`` from PyPI using pip
 
 .. code-block:: shell
 
-    pip install git+https://github.com/samplepaths/samplepaths.git
+    pip install samplepaths
 
 ``samplepaths`` requires Python 3.12 or newer.
 
