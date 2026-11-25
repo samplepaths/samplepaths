@@ -146,7 +146,7 @@ class VarianceGammaProcess(GaussianNoise):
         return self._sample_variance_gamma_process_at(times)
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         check_positive_integer(n=n, name="n")
         check_positive_integer(n=paths, name="Number of paths")
 

@@ -40,6 +40,8 @@ class InverseGaussianProcess(BaseTimeProcess):
     :param rng: a custom random number generator
     """
 
+    _parallel_paths = True
+
     def __init__(
         self,
         *,
@@ -188,7 +190,7 @@ class InverseGaussianProcess(BaseTimeProcess):
         return self._sample_inverse_gaussian_process_at(times)
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         check_positive_integer(n=paths, name="Number of paths")
         self._update_mean_increments(n)
 
@@ -206,3 +208,7 @@ class InverseGaussianProcess(BaseTimeProcess):
         ign = np.where(zs <= ms / (ms + xs), xs, ms**2 / xs)
 
         return np.concatenate((np.zeros((paths, 1)), np.cumsum(ign, axis=1)), axis=1)
+
+    @override
+    def _prepare_paths(self, n: int) -> None:
+        self._update_mean_increments(n)

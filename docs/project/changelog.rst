@@ -4,6 +4,36 @@ Changelog
 All notable changes to ``samplepaths``, most recent first. Times were
 measured as described in :doc:`/guide/performance`.
 
+Unreleased
+----------
+
+Added
+~~~~~
+
+* ``sample_paths(n, paths, workers=...)`` and ``sample_paths_with_initial()``
+  generate the realizations on several threads. With 14 threads, 100,000
+  realizations of 64 increments take 5.7 instead of 33.8 milliseconds for a
+  Brownian motion and 11.3 instead of 81.2 for a fractional Brownian motion.
+  The result is reproducible for a given seed and number of workers. See
+  :doc:`/guide/paths`.
+* A :doc:`comparison with other packages <comparison>`, with times measured
+  against ``stochastic-rs``, and ``docs/scripts/compare_rust.py`` to
+  reproduce them.
+
+Faster
+~~~~~~
+
+* ``sample_paths()`` of the diffusion processes with a constant speed and no
+  volatility exponent, such as the Vasicek and the Ornstein-Uhlenbeck
+  processes, computes all steps with array operations instead of a loop over
+  the steps. With threads, 20,000 realizations of 1024 increments take 26
+  instead of 197 milliseconds. For 32 realizations or more, the values agree
+  with those of version 0.4.0 to a relative difference of 1e-9 instead of
+  being identical.
+
+Realizations of ``sample()`` and ``sample_at()`` for a given seed are
+identical bit for bit to those of version 0.4.0 in all 906 compared cases.
+
 0.4.0 (2026-11-25)
 ------------------
 

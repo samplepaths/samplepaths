@@ -37,7 +37,8 @@ samplepaths
     :width: 100%
 
 ``samplepaths`` is a Python package for generating realizations (sample
-paths) of stochastic processes as ``numpy`` arrays.
+paths) of stochastic processes as ``numpy`` arrays. It is pure Python on
+``numpy``, and for large simulations as fast as compiled code.
 
 .. code-block:: python
 
@@ -46,6 +47,7 @@ paths) of stochastic processes as ``numpy`` arrays.
     bm = BrownianMotion(drift=1, scale=2, t=10)
     path = bm.sample(1000)  # 1001 values on [0, 10]
     paths = bm.sample_paths(1000, paths=5000)  # 5000 realizations at once
+    paths = bm.sample_paths(1000, paths=50_000, workers=8)  # on 8 threads
 
 It provides 37 processes in four families, all sharing one small interface:
 
@@ -100,6 +102,7 @@ with type hints. See :doc:`project/about` for what the fork adds and
    :caption: Project
 
    project/about
+   project/comparison
    project/changelog
    project/migration
    project/development

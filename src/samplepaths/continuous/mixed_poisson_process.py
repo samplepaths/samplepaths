@@ -33,6 +33,8 @@ class MixedPoissonProcess(PoissonProcess):
     :param rng: a custom random number generator
     """
 
+    _parallel_paths = False
+
     def __init__(
         self,
         *,
@@ -116,7 +118,7 @@ class MixedPoissonProcess(PoissonProcess):
         return self._sample_poisson_process(length=length)
 
     @override
-    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+    def _sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
         # Every realization draws its own random rate.
         check_positive_integer(n=paths, name="Number of paths")
         return np.array([self.sample(n) for _ in range(paths)], dtype=np.float64)

@@ -8,7 +8,7 @@
 [![Total downloads](https://img.shields.io/pepy/dt/samplepaths?label=total%20downloads)](https://pepy.tech/projects/samplepaths)
 [![License](https://img.shields.io/pypi/l/samplepaths)](https://github.com/samplepaths/samplepaths/blob/master/LICENSE)
 
-Generate realizations (sample paths) of stochastic processes as NumPy arrays.
+Generate realizations (sample paths) of stochastic processes as NumPy arrays. Pure Python, and for large simulations as fast as compiled code.
 
 ![Realizations of a Brownian motion with drift and their quantile bands](https://raw.githubusercontent.com/samplepaths/samplepaths/master/docs/_static/banner.png)
 
@@ -22,7 +22,7 @@ paths = bm.sample_paths(1000, paths=5000)  # 5000 realizations at once
 
 - **37 processes** in four families: continuous-time, diffusion, discrete-time and noise
 - **One interface**: every process is a class with `sample(n)` and `sample_paths(n, paths)` methods
-- **Fast**: vectorized with NumPy; 1000 Vasicek realizations of 256 steps take about 2 ms
+- **Pure Python, and fast**: vectorized with NumPy and multi-threaded; 100,000 Brownian paths of 64 steps take 6 ms on 14 cores, level with a Rust implementation ([comparison](https://samplepaths.readthedocs.io/en/latest/project/comparison.html))
 - **Reproducible**: built on `numpy.random.Generator`, per process or through a seedable default
 - **Typed**: type hints throughout, checked with mypy in strict mode
 - **Light**: depends only on NumPy and SciPy
@@ -97,7 +97,7 @@ noise = FractionalGaussianNoise(hurst=0.6).sample_hosking(32)
 ### Many realizations at once
 
 `sample_paths(n, paths)` returns a two-dimensional array with one realization per row.
-For most processes it is 2 to 13 times faster than a loop over `sample()`.
+For most processes it is 2 to 13 times faster than a loop over `sample()`, and `workers=8` spreads a large batch over 8 threads.
 
 ```python
 import numpy as np
