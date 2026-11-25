@@ -14,3 +14,9 @@ Bibliographical Sources
 * Vervaat, Wim. "A relation between Brownian bridge and Brownian excursion." The Annals of Probability (1979): 143-149.
 * Williams, David. "Decomposing the Brownian path." Bulletin of the American Mathematical Society 76, no. 4 (1970): 871-873.
 * Wood, Andrew TA, and Grace Chan. "Simulation of stationary Gaussian processes in [0, 1] d." Journal of computational and graphical statistics 3, no. 4 (1994): 409-432.
+* Box, George EP, Gwilym M. Jenkins, Gregory C. Reinsel, and Greta M. Ljung. Time series analysis: forecasting and control. John Wiley & Sons, 2015.
+* Engle, Robert F. "Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation." Econometrica 50, no. 4 (1982): 987-1007.
+* Bollerslev, Tim. "Generalized autoregressive conditional heteroskedasticity." Journal of econometrics 31, no. 3 (1986): 307-327.
+* Engle, Robert F. "Discussion: Stock volatility and the crash of '87." The Review of Financial Studies 3, no. 1 (1990): 103-106.
+* Nelson, Daniel B. "Conditional heteroskedasticity in asset returns: A new approach." Econometrica 59, no. 2 (1991): 347-370.
+* Glosten, Lawrence R., Ravi Jagannathan, and David E. Runkle. "On the relation between the expected value and the volatility of the nominal excess return on stocks." The Journal of Finance 48, no. 5 (1993): 1779-1801.

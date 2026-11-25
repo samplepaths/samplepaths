@@ -262,6 +262,70 @@ Discrete-time
      - 304
      - 1.0x
 
+Time series
+~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 15 15 15 15
+
+   * - Process
+     - ``sample()``
+     - ``sample_at()``
+     - ``sample_paths()``
+     - Gain
+   * - ``MovingAverageProcess``
+     - 0.026
+     - —
+     - 1.04
+     - 8.8x
+   * - ``ARIMAProcess``
+     - 0.028
+     - —
+     - 0.94
+     - 11.5x
+   * - ``AutoregressiveProcess``
+     - 0.029
+     - —
+     - 1.14
+     - 4.7x
+   * - ``SARIMAProcess``
+     - 0.031
+     - —
+     - 0.95
+     - 15.0x
+   * - ``ARCHProcess``
+     - 1.50
+     - —
+     - 1.89
+     - 52x
+   * - ``GARCHProcess``
+     - 2.23
+     - —
+     - 2.11
+     - 68x
+   * - ``AGARCHProcess``
+     - 2.37
+     - —
+     - 2.42
+     - 63x
+   * - ``TGARCHProcess``
+     - 2.53
+     - —
+     - 2.57
+     - 62x
+   * - ``EGARCHProcess``
+     - 2.80
+     - —
+     - 3.39
+     - 51x
+
+The linear models filter white noise in compiled code and cost little more
+than the noise itself. The models with a changing variance advance one value
+at a time in Python, at about half a microsecond per value, so one
+realization is slow and ``sample_paths()``, which advances all realizations
+together, gains the most of all processes.
+
 
 Noise
 ~~~~~
@@ -379,6 +443,9 @@ Getting the most out of it
 * **Use** ``workers`` **for large batches.** With 14 threads, 100,000
   realizations of 64 increments of a Brownian motion take 5.7 instead of 33.8
   milliseconds. See :doc:`paths`.
+* **Simulate the models with a changing variance in batches.** One
+  realization of 4096 values of a GARCH process takes 2.2 milliseconds, and
+  1000 realizations of 256 values take 2.1.
 * **Reuse instances.** Several processes keep values which depend only on
   the parameters and on ``n``: the two above, the frequencies of a colored
   noise and the mean increments of an inverse Gaussian process. Create the

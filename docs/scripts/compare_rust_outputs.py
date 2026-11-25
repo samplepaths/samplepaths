@@ -10,7 +10,7 @@ Kolmogorov-Smirnov test::
     uv run --with stochastic-rs python docs/scripts/compare_rust_outputs.py
 
 A p-value which is not small means that the test finds no difference between
-the two distributions. With 17 comparisons, one p-value below 0.05 is
+the two distributions. With 27 comparisons, one p-value below 0.05 is
 expected by chance.
 """
 
@@ -32,6 +32,11 @@ STEPS = 64
 
 #: stochastic-rs counts the points of a realization, not its increments.
 POINTS = STEPS + 1
+
+#: Number of values of the time series. stochastic-rs starts a series from
+#: zeros and samplepaths from the long-run distribution, so the series are
+#: long enough for the start to be forgotten.
+SERIES = 300
 
 
 def final_values(process: object, count: int) -> Array:
@@ -223,6 +228,88 @@ def cases(rng: np.random.Generator, count: int) -> list[tuple[str, str, Array, A
         "arrivals in [0, 20]",
         looped(lambda: len(rs.PyHawkes(2.0, 1.5, 3.0, None, 20.0).sample()) - 1, few),
         looped(lambda: len(hawkes.sample_with_length(20.0)) - 2, few),
+    )
+
+    # Time series: the last of SERIES values. The parameters have the same
+    # meaning in both packages.
+    last = f"value {SERIES}"
+    add(
+        "AR(2)",
+        last,
+        final_values(rs.PyARp([0.5, -0.3], 2.0, SERIES), count),
+        sp.AutoregressiveProcess(coefficients=[0.5, -0.3], scale=2.0, rng=rng).sample_paths(
+            SERIES, count
+        )[:, -1],
+    )
+    add(
+        "MA(2)",
+        last,
+        final_values(rs.PyMAq([0.6, 0.2], 1.5, SERIES), count),
+        sp.MovingAverageProcess(coefficients=[0.6, 0.2], scale=1.5, rng=rng).sample_paths(
+            SERIES, count
+        )[:, -1],
+    )
+    add(
+        "ARIMA(1, 1, 1)",
+        last,
+        final_values(rs.PyArima([0.5], [0.3], 1, 1.0, SERIES), count),
+        sp.ARIMAProcess(ar=0.5, ma=0.3, d=1, rng=rng).sample_paths(SERIES, count)[:, -1],
+    )
+    add(
+        "SARIMA(1, 0, 1)(1, 1, 1)4",
+        last,
+        final_values(rs.PySarima([0.5], [0.3], [0.2], [0.4], 0, 1, 4, 1.0, SERIES), count),
+        sp.SARIMAProcess(
+            ar=0.5, ma=0.3, seasonal_ar=0.2, seasonal_ma=0.4, seasonal_d=1, period=4, rng=rng
+        ).sample_paths(SERIES, count)[:, -1],
+    )
+    add(
+        "ARCH(1)",
+        last,
+        final_values(rs.PyArch(0.5, [0.5], SERIES), count),
+        sp.ARCHProcess(omega=0.5, alpha=0.5, rng=rng).sample_paths(SERIES, count)[:, -1],
+    )
+    add(
+        "GARCH(1, 1)",
+        last,
+        final_values(rs.PyGarch(0.1, [0.1], [0.8], SERIES), count),
+        sp.GARCHProcess(omega=0.1, alpha=0.1, beta=0.8, rng=rng).sample_paths(SERIES, count)[:, -1],
+    )
+    add(
+        "GARCH(2, 2)",
+        last,
+        final_values(rs.PyGarch(0.1, [0.05, 0.05], [0.5, 0.3], SERIES), count),
+        sp.GARCHProcess(omega=0.1, alpha=[0.05, 0.05], beta=[0.5, 0.3], rng=rng).sample_paths(
+            SERIES, count
+        )[:, -1],
+    )
+    add(
+        "EGARCH(1, 1)",
+        last,
+        final_values(rs.PyEgarch(-0.1, [0.2], [-0.1], [0.9], SERIES), count),
+        sp.EGARCHProcess(omega=-0.1, alpha=0.2, gamma=-0.1, beta=0.9, rng=rng).sample_paths(
+            SERIES, count
+        )[:, -1],
+    )
+    add(
+        "TGARCH(1, 1)",
+        last,
+        final_values(rs.PyTgarch(0.1, [0.05], [0.1], [0.8], SERIES), count),
+        sp.TGARCHProcess(omega=0.1, alpha=0.05, gamma=0.1, beta=0.8, rng=rng).sample_paths(
+            SERIES, count
+        )[:, -1],
+    )
+
+    # What stochastic-rs calls AGARCH adds a term for the negative values,
+    # which is the threshold model here. The AGARCHProcess of samplepaths
+    # shifts the value instead, and has no counterpart in stochastic-rs.
+    add(
+        "AGARCH of stochastic-rs",
+        last,
+        final_values(rs.PyAgarch(0.1, [0.05], [0.1], [0.8], SERIES), count),
+        sp.TGARCHProcess(omega=0.1, alpha=0.05, gamma=0.1, beta=0.8, rng=rng).sample_paths(
+            SERIES, count
+        )[:, -1],
     )
 
     return results
