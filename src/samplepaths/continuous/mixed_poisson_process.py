@@ -1,12 +1,13 @@
 """Mixed poisson process."""
 
 from collections.abc import Callable
-from typing import Any, override
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
 from ..utils.validation import check_positive_integer
 from .poisson_process import PoissonProcess
 

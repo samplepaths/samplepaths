@@ -1,11 +1,10 @@
 """Colored noise processes."""
 
-from typing import override
-
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from ..._compat import override
 from ...base import BaseTimeProcess
 from ...utils.validation import check_numeric, check_positive_integer
 
@@ -26,7 +25,9 @@ class ColoredNoise(BaseTimeProcess):
     * Timmer, J., and M. Koenig. "On generating power law noise."
       Astronomy and Astrophysics 300 (1995): 707.
 
-    Generates a normalized power-law spectral noise.
+    A realization is scaled so that its variance is close to :math:`t/n`, the
+    variance of Gaussian noise with the same number of increments :math:`n`
+    on the same interval, whatever the exponent. Its mean is zero.
 
     :param beta: the power law exponent for the spectral density, with 0
         being white noise, 1 being pink noise, 2 being red noise (Brownian
@@ -76,6 +77,9 @@ class ColoredNoise(BaseTimeProcess):
         They depend on n, beta and t only, so they are reused by consecutive
         realizations.
         """
+        if n < 2:
+            raise ValueError(f"Number of increments must be at least 2; got {n}.")
+
         key = (n, self.beta, self.t)
         if self.__key != key:
             self.__key = key
@@ -114,7 +118,8 @@ class ColoredNoise(BaseTimeProcess):
         else:
             f = np.concatenate(([0], fft, np.conj(fft)[::-1]))
 
-        return np.fft.ifft(f).real / np.std(f)
+        realization: npt.NDArray[np.float64] = np.sqrt(self.t) * np.fft.ifft(f).real / np.std(f)
+        return realization
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:
@@ -144,7 +149,7 @@ class ColoredNoise(BaseTimeProcess):
         else:
             f = np.concatenate((zeros, fft, mirrored), axis=1)
 
-        realizations: npt.NDArray[np.float64] = np.fft.ifft(f, axis=1).real / np.std(
-            f, axis=1, keepdims=True
+        realizations: npt.NDArray[np.float64] = (
+            np.sqrt(self.t) * np.fft.ifft(f, axis=1).real / np.std(f, axis=1, keepdims=True)
         )
         return realizations

@@ -85,6 +85,7 @@ with type hints. See :doc:`project/about` for what the fork adds and
    guide/diffusion
    guide/discrete
    guide/noise
+   gallery/index
    guide/performance
 
 .. toctree::

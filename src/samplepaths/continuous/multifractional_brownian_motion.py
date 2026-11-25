@@ -2,13 +2,13 @@
 
 import inspect
 from collections.abc import Callable
-from typing import override
 
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 from scipy.special import gamma
 
+from .._compat import override
 from ..base import BaseTimeProcess
 from ..utils.validation import check_positive_integer
 

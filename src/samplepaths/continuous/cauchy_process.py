@@ -1,17 +1,16 @@
 """Symmetric Cauchy process."""
 
-from typing import override
-
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 from scipy.stats import levy
 
+from .._compat import override
 from ..utils.validation import check_positive_integer, times_to_increments
-from .brownian_motion import BrownianMotion
+from .brownian_base import BrownianBase
 
 
-class CauchyProcess(BrownianMotion):
+class CauchyProcess(BrownianBase):
     """Symmetric Cauchy process.
 
     .. image:: /_static/cauchy_process.png
@@ -31,12 +30,7 @@ class CauchyProcess(BrownianMotion):
         t: float = 1.0,
         rng: Generator | None = None,
     ) -> None:
-        super().__init__(
-            drift=0.0,
-            scale=1.0,
-            t=t,
-            rng=rng,
-        )
+        super().__init__(t=t, rng=rng)
 
     def __str__(self) -> str:
         return f"Cauchy process on [0, {self.t}]"
@@ -70,10 +64,7 @@ class CauchyProcess(BrownianMotion):
         subordinator directly. Accumulating the subordinator first and taking
         differences loses the small increments next to a large one.
         """
-        samples = np.cumsum(self.scale * self.rng.normal(scale=np.sqrt(levys)))
-        if self.drift != 0:
-            samples += self.drift * np.cumsum(levys)
-
+        samples: npt.NDArray[np.float64] = np.cumsum(self.rng.normal(scale=np.sqrt(levys)))
         return samples
 
     def _sample_cauchy_process_at(
@@ -134,8 +125,6 @@ class CauchyProcess(BrownianMotion):
             dtype=np.float64,
         )
 
-        samples = np.cumsum(self.scale * self.rng.normal(scale=np.sqrt(levys)), axis=1)
-        if self.drift != 0:
-            samples += self.drift * np.cumsum(levys, axis=1)
+        samples = np.cumsum(self.rng.normal(scale=np.sqrt(levys)), axis=1)
 
         return np.concatenate((np.zeros((paths, 1)), samples), axis=1)

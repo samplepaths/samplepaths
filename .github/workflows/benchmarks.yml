@@ -1,0 +1,57 @@
+name: Benchmarks
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmarks:
+    name: Compare with the base branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out the pull request
+        uses: actions/checkout@v4
+        with:
+          path: head
+
+      - name: Check out the base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # Both versions are measured in the same job, so they run on the same
+      # machine and their times can be compared.
+      - name: Measure the base branch
+        working-directory: base
+        run: |
+          uv sync --locked --no-default-groups
+          uv run --no-sync python docs/scripts/benchmark.py --save ../base.json
+
+      - name: Measure the pull request and compare
+        working-directory: head
+        run: |
+          uv sync --locked --no-default-groups
+          uv run --no-sync python docs/scripts/benchmark.py \
+            --compare ../base.json --max-slowdown 2 | tee ../comparison.txt
+
+      - name: Add the comparison to the job summary
+        if: always()
+        run: |
+          {
+            echo "### Sampling times: base branch and pull request (milliseconds)"
+            echo
+            echo '```'
+            cat comparison.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

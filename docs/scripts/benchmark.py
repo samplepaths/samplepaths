@@ -8,6 +8,7 @@ or directly, optionally saving the results or comparing with saved ones::
 
     uv run python docs/scripts/benchmark.py --save results.json
     uv run python docs/scripts/benchmark.py --compare results.json
+    uv run python docs/scripts/benchmark.py --compare results.json --max-slowdown 2
 
 Measure many realizations, generated one by one and together::
 
@@ -132,6 +133,11 @@ def main() -> None:
     parser.add_argument("--save", type=Path, help="write the results to a JSON file")
     parser.add_argument("--compare", type=Path, help="compare with a saved JSON file")
     parser.add_argument(
+        "--max-slowdown",
+        type=float,
+        help="with --compare, fail when a case is slower than the saved one by this factor",
+    )
+    parser.add_argument(
         "--paths",
         action="store_true",
         help="measure many realizations with sample and with sample_paths instead",
@@ -161,6 +167,18 @@ def main() -> None:
             if case in before:
                 ratio = before[case] / results[case]
                 print(f"{before[case]:10.3f} {results[case]:10.3f} {ratio:8.1f}x  {case}")
+
+        if args.max_slowdown:
+            slower = [
+                case
+                for case in results
+                if case in before and results[case] > args.max_slowdown * before[case]
+            ]
+            if slower:
+                print(f"\nSlower than before by more than {args.max_slowdown:g}x:")
+                for case in slower:
+                    print(f"  {case}: {before[case]:.3f} ms -> {results[case]:.3f} ms")
+                raise SystemExit(1)
     else:
         print(f"{'ms':>10}  case")
         for case in sorted(results, key=lambda c: results[c], reverse=True):

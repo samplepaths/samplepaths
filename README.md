@@ -35,7 +35,7 @@ Full documentation: **https://samplepaths.readthedocs.io/**
 pip install samplepaths
 ```
 
-`samplepaths` requires Python 3.12 or newer, NumPy 2.2 or newer and SciPy 1.15 or newer.
+`samplepaths` requires Python 3.11 or newer, NumPy 2.2 or newer and SciPy 1.15 or newer.
 
 ## Quickstart
 
@@ -151,6 +151,7 @@ The documentation at https://samplepaths.readthedocs.io/ contains:
 
 - a [quickstart](https://samplepaths.readthedocs.io/en/latest/getting-started/quickstart.html)
 - a user guide for [sampling](https://samplepaths.readthedocs.io/en/latest/guide/usage.html), [simulating many realizations](https://samplepaths.readthedocs.io/en/latest/guide/paths.html), [random number generation](https://samplepaths.readthedocs.io/en/latest/guide/random.html) and every family of processes
+- a [gallery of examples](https://samplepaths.readthedocs.io/en/latest/gallery/index.html) with their figures
 - measured [sampling times](https://samplepaths.readthedocs.io/en/latest/guide/performance.html) and a [changelog](https://samplepaths.readthedocs.io/en/latest/project/changelog.html)
 - an [API reference](https://samplepaths.readthedocs.io/en/latest/reference/index.html) for every class, method and function
 
@@ -182,7 +183,7 @@ make install  # create the environment
 make check    # lint, type check, test and build the docs
 ```
 
-Run `make` to list all targets. Bug reports and pull requests are welcome on [GitHub](https://github.com/samplepaths/samplepaths/issues).
+Run `make` to list all targets. Bug reports and pull requests are welcome on [GitHub](https://github.com/samplepaths/samplepaths/issues); see [CONTRIBUTING.md](https://github.com/samplepaths/samplepaths/blob/master/CONTRIBUTING.md).
 
 ## License
 

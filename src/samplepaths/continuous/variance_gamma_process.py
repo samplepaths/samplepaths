@@ -1,11 +1,10 @@
 """Variance Gamma process."""
 
-from typing import override
-
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
 from ..noise import GaussianNoise
 from ..utils.validation import (
     check_numeric,

@@ -1,7 +1,5 @@
 """Gamma process."""
 
-from typing import override
-
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
@@ -12,6 +10,7 @@ from samplepaths.utils.validation import (
     times_to_increments,
 )
 
+from .._compat import override
 from ..base import BaseTimeProcess
 
 

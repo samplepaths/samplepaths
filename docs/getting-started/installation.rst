@@ -4,13 +4,13 @@ Installation
 Requirements
 ------------
 
-``samplepaths`` requires Python 3.12 or newer. It depends on two packages,
+``samplepaths`` requires Python 3.11 or newer. It depends on two packages,
 which are installed automatically:
 
 * ``numpy`` 2.2 or newer, used for most calculations
 * ``scipy`` 1.15 or newer, used to generate certain random variables
 
-It is tested on Python 3.12, 3.13 and 3.14 on Linux, macOS and Windows.
+It is tested on Python 3.11, 3.12, 3.13 and 3.14 on Linux, macOS and Windows.
 
 Installing from PyPI
 --------------------

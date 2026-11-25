@@ -1,10 +1,11 @@
-from typing import Any, override
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
 import pytest
 
 from samplepaths import random
+from samplepaths._compat import override
 from samplepaths.base import BaseProcess
 
 

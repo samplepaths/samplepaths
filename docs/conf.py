@@ -1,7 +1,12 @@
 """Sphinx configuration for the samplepaths documentation."""
 
+import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as _dist_version
+from pathlib import Path
+
+from docutils import nodes
+from packaging.version import Version
 
 # -- Project information ------------------------------------------------------
 
@@ -10,14 +15,25 @@ author = "Bassem Girgis"
 copyright = "2018-2020 Christopher Flynn, 2026 Bassem Girgis"
 
 try:
-    release = _dist_version("samplepaths")
+    _installed = Version(_dist_version("samplepaths"))
 except PackageNotFoundError as exc:  # pragma: no cover
     raise RuntimeError(
-        "samplepaths must be installed to build the documentation; "
-        "run `uv sync --dev` (or `pip install .`) first."
+        "samplepaths must be installed to build the documentation; run `make install` first."
     ) from exc
 
-version = ".".join(release.split(".")[:2])
+# The package version is derived from the git tags. A build of a release tag
+# shows that version. Any other build, such as the one of the main branch, is
+# labeled as the development version instead of the derived version (for
+# example 0.4.1.dev3+g1a2b3c4), which reads like a release which does not
+# exist.
+if _installed.is_devrelease or _installed.local:
+    release = "dev"
+    version = "dev"
+    _title_version = "(development version)"
+else:
+    release = str(_installed)
+    version = f"{_installed.major}.{_installed.minor}"
+    _title_version = release
 
 # -- General configuration ----------------------------------------------------
 
@@ -27,12 +43,19 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
+    "sphinx_gallery.gen_gallery",
 ]
 
 source_suffix = {".rst": "restructuredtext"}
 master_doc = "index"
 language = "en"
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "examples/**/README.rst",
+    "examples/README.rst",
+]
 
 # Report every broken cross-reference.
 nitpicky = True
@@ -42,10 +65,29 @@ nitpick_ignore = [
     ("py:class", "numpy.float64"),
     ("py:class", "numpy.int64"),
     ("py:class", "numpy.object_"),
+    # numpy documents NDArray as data, not as a class.
+    ("py:class", "numpy.typing.NDArray"),
+    # Internal base class of the processes built on Brownian motion.
+    ("py:class", "samplepaths.continuous.brownian_base.BrownianBase"),
 ]
 
 autodoc_member_order = "bysource"
 autodoc_typehints = "description"
+
+# The examples in docs/examples are run at build time and rendered as a
+# gallery. Their figures use the plot style of the documentation.
+sys.path.insert(0, str(Path(__file__).parent / "scripts"))
+sphinx_gallery_conf = {
+    "examples_dirs": "examples",
+    "gallery_dirs": "gallery",
+    "filename_pattern": r"plot_",
+    "within_subsection_order": "FileNameSortKey",
+    "reset_modules": ("matplotlib", "plot_style.reset_style"),
+    "abort_on_example_error": True,
+    "download_all_examples": False,
+    "show_signature": False,
+    "backreferences_dir": None,
+}
 
 # Generate the API reference pages from the autosummary directives.
 autosummary_generate = True
@@ -59,12 +101,41 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy", None),
 }
 
+# -- Readable array types ------------------------------------------------------
+
+#: How the array types of the package are written in the API reference. The
+#: type hints are expanded by autodoc to their full generic form, which is
+#: hard to read.
+_ARRAY_TYPES = {
+    f"~numpy.ndarray[tuple[~typing.Any, ...], ~numpy.dtype[~numpy.{name}]]": (
+        f"~numpy.typing.NDArray[~numpy.{name}]"
+    )
+    for name in ("float64", "int64", "object_")
+}
+
+
+def _shorten_array_types(app, domain, objtype, contentnode):  # type: ignore[no-untyped-def]
+    """Rewrite the array types in the parameter and return type fields."""
+    for node in contentnode.findall(nodes.Text):
+        text = str(node)
+        for long, short in _ARRAY_TYPES.items():
+            text = text.replace(long, short)
+        if text != str(node):
+            node.parent.replace(node, nodes.Text(text))
+
+
+def setup(app):  # type: ignore[no-untyped-def]
+    """Register the hooks of this configuration."""
+    # Run after autodoc has merged the type hints into the description.
+    app.connect("object-description-transform", _shorten_array_types, priority=900)
+
+
 # -- Options for HTML output --------------------------------------------------
 
 # Furo follows the system color scheme and lets the reader switch between the
 # light and dark themes.
 html_theme = "furo"
-html_title = f"samplepaths {release}"
+html_title = f"samplepaths {_title_version}"
 html_static_path = ["_static"]
 html_logo = "_static/logo.svg"
 html_favicon = "_static/logo.svg"

@@ -25,7 +25,7 @@ Code written for ``stochastic`` needs the following changes to run on
       from samplepaths.continuous import BrownianMotion
       from samplepaths import BrownianMotion  # also possible
 
-* Python 3.12 or newer is required, together with ``numpy`` 2.2 and
+* Python 3.11 or newer is required, together with ``numpy`` 2.2 and
   ``scipy`` 1.15 or newer.
 * Only :py:class:`numpy.random.Generator` is supported for random number
   generation. Support for the legacy ``numpy.random.RandomState`` and the
@@ -72,3 +72,20 @@ defects:
 * ``sample_partition()`` of
   :py:class:`~samplepaths.discrete.ChineseRestaurantProcess` numbers the
   first customer 0 instead of 1, consistently with the other customers.
+* ``sample_davies_harte()`` and ``sample_hosking()`` of
+  :py:class:`~samplepaths.continuous.FractionalBrownianMotion` return the
+  motion, like ``sample()``, instead of its increments.
+* The parameter ``t`` of the colored noises scales the realization, which
+  has a variance close to ``t / n``. It used to have no effect.
+* A volatility exponent of a diffusion process given as a function is called
+  with the time instead of the value of the process.
+* The processes built on Brownian motion, such as the Wiener and the Bessel
+  processes, no longer carry the ``drift`` and ``scale`` attributes of
+  :py:class:`~samplepaths.continuous.BrownianMotion`, which changed their
+  realizations when set.
+* :py:class:`~samplepaths.continuous.InverseGaussianProcess` follows a
+  change of its ``mean`` function on an instance.
+* ``CauchyProcess.sample_at()`` no longer fails when its random time change
+  makes a very large jump.
+
+See the :doc:`changelog` for the version in which each fix was made.

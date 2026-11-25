@@ -1,10 +1,9 @@
 """Gaussian noise process."""
 
-from typing import override
-
 import numpy as np
 import numpy.typing as npt
 
+from .._compat import override
 from ..base import BaseTimeProcess
 from ..utils.validation import check_positive_integer, times_to_increments
 

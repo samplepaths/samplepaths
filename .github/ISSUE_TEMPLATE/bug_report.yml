@@ -1,0 +1,27 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: Code to reproduce
+      description: A short piece of code which shows the problem. Seed the generator when random results are involved.
+      render: python
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Versions of samplepaths, Python, NumPy and SciPy, and the operating system.
+      placeholder: samplepaths 0.3.0, Python 3.13, NumPy 2.4, SciPy 1.17, macOS
+    validations:
+      required: true

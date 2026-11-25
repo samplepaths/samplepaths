@@ -2,12 +2,12 @@
 
 import inspect
 from collections.abc import Callable
-from typing import override
 
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
 from ..base import BaseTimeProcess
 from ..utils.validation import check_positive_integer, check_positive_number
 
@@ -54,6 +54,7 @@ class InverseGaussianProcess(BaseTimeProcess):
         self.scale = scale
 
         self.__ms: npt.NDArray[np.float64] | None = None
+        self.__ms_key: tuple[int, float, Callable[[float], float]] | None = None
 
     def __str__(self) -> str:
         return (
@@ -106,7 +107,12 @@ class InverseGaussianProcess(BaseTimeProcess):
 
     def _update_mean_increments(self, n: int) -> None:
         """Compute the increments of the mean function for n increments."""
-        if self.set_times(n):
+        self.set_times(n)
+
+        key = (n, self.t, self.mean)
+        cached = self.__ms_key
+        if cached is None or cached[:2] != key[:2] or cached[2] is not key[2]:
+            self.__ms_key = key
             self.__ms = np.zeros(n)
             for k in range(n):
                 self.__ms[k] = self._check_mean(

@@ -1,12 +1,12 @@
 """Dirichlet process."""
 
 from collections.abc import Callable
-from typing import override
 
 import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
+from .._compat import override
 from ..base import BaseSequenceProcess
 from ..utils.validation import check_positive_number
 

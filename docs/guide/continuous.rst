@@ -72,8 +72,9 @@ Brownian motion and its relatives
     :scale: 50%
 
 A :py:class:`~samplepaths.continuous.WienerProcess` is a standard Brownian
-motion. :py:class:`~samplepaths.continuous.BrownianMotion` adds a ``drift``
-and a ``scale``, so that its value at time :math:`s` is normally distributed
+motion, without parameters other than ``t``.
+:py:class:`~samplepaths.continuous.BrownianMotion` adds a ``drift`` and a
+``scale``, so that its value at time :math:`s` is normally distributed
 with mean ``drift * s`` and variance ``scale**2 * s``.
 
 .. code-block:: python
@@ -163,6 +164,10 @@ correlated increments, controlled by the Hurst parameter ``hurst`` in
     fbm = FractionalBrownianMotion(hurst=0.7, t=1)
     path = fbm.sample(1024)  # Davies-Harte method
     path = fbm.sample_hosking(256)  # Hosking's method
+
+All of its sampling methods return the motion, which starts at zero. The
+increments alone are a
+:py:class:`~samplepaths.noise.FractionalGaussianNoise`.
 
 In a :py:class:`~samplepaths.continuous.MultifractionalBrownianMotion` the
 Hurst parameter is a function of time with values in ``(0, 1)``, so the
