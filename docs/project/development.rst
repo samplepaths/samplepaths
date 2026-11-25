@@ -171,7 +171,8 @@ than one command is a Python script in ``.github/scripts``, with a make target o
 Every pull request to ``master`` runs these workflows. The tests and CodeQL
 also run on ``master`` once a day, which catches a new release of a
 dependency that breaks the package; they do not run again when a pull
-request is merged.
+request is merged. A new commit on a pull request cancels the runs of the
+previous one.
 
 .. list-table::
    :header-rows: 1

@@ -4,6 +4,12 @@ on:
   pull_request:
     branches: [master]
 
+# A new commit on a pull request replaces the runs of the previous one, which
+# would otherwise wait for runners ahead of it. Runs on master are kept.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
