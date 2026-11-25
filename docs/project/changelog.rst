@@ -31,6 +31,9 @@ Added
   ``stochastic-rs``. With 14 threads, 100,000 realizations of 64 values take
   8 milliseconds for an AR(2) process and 16 for a GARCH(1, 1) process,
   against 11 and 11 for ``stochastic-rs``; see :doc:`comparison`.
+* The :doc:`gallery </gallery/index>` has an example for every process: 42
+  were added, one for each process which was only shown together with
+  others or not at all.
 * Interest rate models:
 
   * :py:class:`~samplepaths.diffusion.HoLeeProcess`, with a drift which can
