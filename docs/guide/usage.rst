@@ -247,5 +247,5 @@ Performance
 -----------
 
 Sampling is fast, and making it faster does not change seeded results.
-:doc:`performance` gives measured times for every process and explains how
+:doc:`/guide/performance/timings` gives measured times for every process, and :doc:`performance` explains how
 to get the most out of the library.

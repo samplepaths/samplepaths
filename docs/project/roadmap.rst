@@ -5,31 +5,6 @@ The work which is open, most useful first within each part. This page is
 the list of record: when an item is done, remove it and add the change to
 the :doc:`changelog`; when new work is found or put off, add it here.
 
-Next
-----
-
-* **Release 0.6.0.** The changelog section is written. Merge the pull
-  request which prepares it, then create the release ``v0.6.0`` on
-  ``master``; see :doc:`development`.
-* **Check the daily job with the latest dependencies.** It runs on a
-  schedule or by hand only, so its first run is after the merge. Start it
-  once from the Actions tab and read the result.
-* **Split the files over 300 lines.** Files stay under 300 lines; these were
-  longer before the rule and are split when next changed, or in a change of
-  their own:
-
-  * ``docs/project/comparison.rst``: the speed tables, the agreement table
-    and the discussion can be three pages
-  * ``docs/guide/performance.rst``: one page of tables per family, or the
-    tables generated from the benchmark
-  * ``docs/project/changelog.rst``: one page per minor version
-  * ``docs/guide/continuous.rst``: the jump processes can have their own page
-  * ``docs/scripts/make_images.py`` and
-    ``docs/scripts/compare_rust_outputs.py``: one module per family
-  * ``tests/test_sample_paths.py``: the cases apart from the tests
-  * ``src/samplepaths/diffusion/diffusion_process.py``: the two loops of
-    the Euler-Maruyama method can move to a private module
-
 Sampling
 --------
 

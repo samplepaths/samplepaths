@@ -111,7 +111,7 @@ ignore-decorators = ["samplepaths._compat.override", "typing.override"]
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D"]
 "docs/conf.py" = ["D"]
-"docs/scripts/*.py" = ["T20"]
+"docs/scripts/**" = ["T20"]
 ".github/scripts/*.py" = ["T20"]
 "docs/examples/**" = ["D", "T20", "E501"]
 

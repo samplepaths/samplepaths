@@ -1,0 +1,55 @@
+Version 0.6
+===========
+
+0.6.0 (2026-11-25)
+------------------
+
+Realizations of ``sample()`` and ``sample_at()`` for a given seed are
+identical bit for bit to those of version 0.5.0.
+
+Added
+~~~~~
+
+* **Exact sampling of the Vasicek family.** ``sample_exact()`` and
+  ``sample_paths_exact()`` of
+  :py:class:`~samplepaths.diffusion.VasicekProcess`,
+  :py:class:`~samplepaths.diffusion.OrnsteinUhlenbeckProcess` and
+  :py:class:`~samplepaths.diffusion.ExtendedVasicekProcess` draw every value
+  from its normal distribution given the previous one, when the parameters
+  are numbers. One realization of 4096 increments takes 0.06 instead of 0.21
+  milliseconds, and the result does not depend on the number of steps. See
+  the new guide page :doc:`/guide/exact`.
+* **Sampling at chosen times.** ``sample_at()`` works for the Vasicek,
+  Ornstein-Uhlenbeck, Cox-Ingersoll-Ross and Ho-Lee processes, which also
+  get ``sample_at_with_initial()``, and for
+  :py:class:`~samplepaths.multivariate.CorrelatedBrownianMotions`,
+  :py:class:`~samplepaths.multivariate.HestonModel`,
+  :py:class:`~samplepaths.multivariate.BatesModel` and
+  :py:class:`~samplepaths.multivariate.TwoFactorCoxIngersollRossModel`. It
+  used to raise ``NotImplementedError`` for all of them.
+
+Faster
+~~~~~~
+
+* **One realization of the models with a changing variance.** For a model
+  with one previous value, the usual case, ``sample()`` is 4 to 5 times
+  faster: 4096 values of a GARCH(1, 1) process take 0.42 instead of 2.1
+  milliseconds. Compared with ``stochastic-rs`` that is 10 instead of 53
+  times its time.
+* **One realization of the diffusions on a domain.** ``sample()`` of the
+  Jacobi, Kimura, Verhulst, Gompertz and Feller logistic processes and of the
+  fractional Cox-Ingersoll-Ross and Jacobi processes is about twice as fast:
+  0.35 instead of 0.75 milliseconds for 4096 increments.
+
+Project
+~~~~~~~
+
+* The tests also run once a day with the newest release of every dependency,
+  where the other jobs use the versions of ``uv.lock``. ``make
+  install-latest`` installs them locally.
+* ``make check-seeded`` compares the results for a given seed with those of
+  the last release, and every pull request runs it.
+* :doc:`/project/maintenance` records what was learned about keeping results,
+  performance and the comparison with ``stochastic-rs``, the :doc:`/project/roadmap`
+  lists the open work, and :doc:`/project/decisions` the choices made and their
+  reasons.

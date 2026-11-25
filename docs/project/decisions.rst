@@ -133,6 +133,16 @@ The project
    The package is one module per process, and small files keep each of them
    readable.
 
+**What a split produces gets a place of its own.**
+   A file which is split keeps its name and its place. Its parts go into a
+   private subpackage for code, such as ``_diffusion_process`` beside
+   ``diffusion_process.py`` or ``_images`` beside ``make_images.py``, and
+   into a subdirectory for pages and tests, such as ``comparison/`` beside
+   ``comparison.rst``. The folder then shows what belongs together, and
+   the parts do not crowd the folder of the files they came from. Tables
+   with many rows are written as CSV tables, one line per row, which keeps
+   the pages short.
+
 **The docs are rewritten, not appended to.**
    Every change updates the pages it affects in the same pull request, and
    reorganizes them when needed, so that the documentation reads as a guide

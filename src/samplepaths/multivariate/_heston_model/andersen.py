@@ -6,7 +6,7 @@ import numpy as np
 import numpy.typing as npt
 
 if TYPE_CHECKING:
-    from .heston_model import HestonModel
+    from ..heston_model import HestonModel
 
 
 def log_price_changes(

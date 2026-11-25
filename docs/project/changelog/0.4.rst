@@ -1,0 +1,73 @@
+Version 0.4
+===========
+
+0.4.0 (2026-11-25)
+------------------
+
+This version corrects behavior inherited from the original package. Some
+results and parts of the interface change; each change is listed below.
+Realizations for a given seed are otherwise identical bit for bit to those
+of version 0.3.0.
+
+Changed
+~~~~~~~
+
+* **Fractional Brownian motion.** ``sample_davies_harte()`` and
+  ``sample_hosking()`` of
+  :py:class:`~samplepaths.continuous.FractionalBrownianMotion` return the
+  motion, ``n + 1`` values starting at zero, like ``sample()``. They used to
+  return the ``n`` increments. Use
+  :py:class:`~samplepaths.noise.FractionalGaussianNoise` for the increments.
+* **Colored noise.** A realization of
+  :py:class:`~samplepaths.noise.ColoredNoise` and of the named colors is
+  scaled by the square root of ``t``, so that its variance is close to
+  ``t / n``, the variance of Gaussian noise on the same interval. The
+  parameter ``t`` used to have no effect. Results for the default ``t = 1``
+  do not change.
+* **Colored noise needs two increments.** ``sample(1)`` raises ``ValueError``
+  instead of returning ``nan``.
+* **Volatility exponent of the diffusion processes.** A ``volexp`` given as a
+  function is called with the time, as documented and like the other
+  parameters. It used to be called with the value of the process.
+* **Processes built on Brownian motion.**
+  :py:class:`~samplepaths.continuous.WienerProcess`,
+  :py:class:`~samplepaths.continuous.BrownianBridge`,
+  :py:class:`~samplepaths.continuous.BrownianExcursion`,
+  :py:class:`~samplepaths.continuous.BrownianMeander`,
+  :py:class:`~samplepaths.continuous.BesselProcess`,
+  :py:class:`~samplepaths.continuous.SquaredBesselProcess` and
+  :py:class:`~samplepaths.continuous.CauchyProcess` no longer have the
+  attributes ``drift`` and ``scale`` and are no longer instances of
+  :py:class:`~samplepaths.continuous.BrownianMotion`. The attributes were
+  not parameters of these processes, but setting them changed the
+  realizations. :py:class:`~samplepaths.continuous.GeometricBrownianMotion`
+  keeps its own ``drift`` and loses ``scale``.
+
+Fixed
+~~~~~
+
+* :py:class:`~samplepaths.continuous.InverseGaussianProcess` computes the
+  increments of its mean again when ``mean`` is changed on an instance. It
+  used to keep those of the previous function.
+
+Added
+~~~~~
+
+* Support for Python 3.11. The package used to require Python 3.12.
+* A :doc:`gallery of examples </gallery/index>`, one for every process and
+  three on Monte Carlo simulation. The examples are run when the
+  documentation is built.
+
+Documentation and project
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* The API reference writes array types as ``NDArray[float64]``.
+* Documentation built from a commit which is not a release is titled
+  "development version" instead of a version number derived from the commit.
+* The notebooks which compared the package with ``stochastic`` during the
+  port were removed. Seeded tests cover the comparison between versions, and
+  the gallery replaces the notebooks as examples.
+* Every pull request compares the sampling times with those of the base
+  branch and fails when a method becomes more than two times slower.
+* A contributing guide, issue templates and automated dependency updates
+  were added.
