@@ -1,10 +1,13 @@
 samplepaths
 ============
 
-|tests| |license|
+|tests| |docs| |license|
 
 .. |tests| image:: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml/badge.svg
     :target: https://github.com/samplepaths/samplepaths/actions/workflows/tests.yml
+
+.. |docs| image:: https://readthedocs.org/projects/samplepaths/badge/?version=latest
+    :target: https://samplepaths.readthedocs.io/
 
 .. |license| image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://github.com/samplepaths/samplepaths/blob/master/LICENSE
@@ -99,9 +102,11 @@ method.
 Documentation
 -------------
 
-The documentation lives in the ``docs`` directory. Build it with
-``make docs`` and open ``docs/_build/html/index.html``. It contains a user
-guide for every family of processes and an API reference.
+The documentation is at https://samplepaths.readthedocs.io/. It contains a
+user guide for every family of processes and an API reference.
+
+To build it locally, run ``make docs`` and open
+``docs/_build/html/index.html``.
 
 Development
 -----------
