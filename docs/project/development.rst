@@ -34,6 +34,8 @@ Run ``make`` without arguments to list the targets.
      - Description
    * - ``make install``
      - create the virtual environment and install all dependencies
+   * - ``make install-test``
+     - install the package with what the tests need only
    * - ``make lint``
      - check the code style and formatting with ``ruff``
    * - ``make format``
@@ -54,10 +56,16 @@ Run ``make`` without arguments to list the targets.
      - regenerate the figures shown in the documentation
    * - ``make benchmark``
      - measure the time of the sampling methods
+   * - ``make benchmark-compare BASE=../base``
+     - compare the sampling times with those of another checkout
    * - ``make version``
      - show the version derived from the git tags
    * - ``make build``
      - build the source distribution and the wheel
+   * - ``make check-release TAG=v1.2.3``
+     - check that the built distributions have the version of a tag
+   * - ``make publish``
+     - upload the built distributions to PyPI
    * - ``make clean``
      - remove build, test and cache artifacts
 
@@ -81,6 +89,9 @@ Project layout
        guide/         the user guide
        examples/      the examples of the gallery, run at build time
        scripts/       the benchmark and the script which draws the figures
+   .github/
+       workflows/     the workflows of continuous integration
+       scripts/       the scripts run by the workflows
 
 Every class lives in its own module, named after the class.
 
@@ -153,10 +164,15 @@ the interface of the library updates, in the same pull request:
 Continuous integration
 ----------------------
 
+The workflows in ``.github/workflows`` call the make targets above, so what
+runs in CI can be run locally with the same command. A step which needs more
+than one command is a Python script in ``.github/scripts``, with a make target of its own.
+
 Every pull request to ``master`` runs these workflows. The tests and CodeQL
 also run on ``master`` once a day, which catches a new release of a
 dependency that breaks the package; they do not run again when a pull
-request is merged.
+request is merged. A new commit on a pull request cancels the runs of the
+previous one.
 
 .. list-table::
    :header-rows: 1

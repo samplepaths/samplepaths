@@ -4,6 +4,12 @@ on:
   pull_request:
     branches: [master]
 
+# A new commit on a pull request replaces the runs of the previous one, which
+# would otherwise wait for runners ahead of it. Runs on master are kept.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
@@ -32,26 +38,5 @@ jobs:
 
       # Both versions are measured in the same job, so they run on the same
       # machine and their times can be compared.
-      - name: Measure the base branch
-        working-directory: base
-        run: |
-          uv sync --locked --no-default-groups
-          uv run --no-sync python docs/scripts/benchmark.py --save ../base.json
-
-      - name: Measure the pull request and compare
-        working-directory: head
-        run: |
-          uv sync --locked --no-default-groups
-          uv run --no-sync python docs/scripts/benchmark.py \
-            --compare ../base.json --max-slowdown 2 | tee ../comparison.txt
-
-      - name: Add the comparison to the job summary
-        if: always()
-        run: |
-          {
-            echo "### Sampling times: base branch and pull request (milliseconds)"
-            echo
-            echo '```'
-            cat comparison.txt
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Measure both and compare
+        run: make -C head benchmark-compare BASE=../base
