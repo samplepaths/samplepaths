@@ -87,6 +87,29 @@ def cases(n: int) -> list[tuple[str, object, sp.base.BaseProcess]]:
             rs.PyFcir(0.7, 1.0, 1.0, 0.3, n, 1.0, 1.0),
             sp.FractionalCoxIngersollRossProcess(hurst=0.7, speed=1.0, mean=1.0, vol=0.3, rng=rng),
         ),
+        (
+            "Correlated Brownian motions",
+            rs.PyCbms(0.6, n, 1.0),
+            sp.CorrelatedBrownianMotions(correlation=0.6, rng=rng),
+        ),
+        (
+            "Heston",
+            rs.PyHeston(2.0, 0.04, 0.3, -0.7, 0.05, n, 1.0, 0.09, 1.0),
+            sp.HestonModel(
+                drift=0.05,
+                speed=2.0,
+                mean=0.04,
+                vol=0.3,
+                correlation=-0.7,
+                initial_variance=0.09,
+                rng=rng,
+            ),
+        ),
+        (
+            "SABR",
+            rs.PySabr(0.4, 0.5, -0.3, n, 1.0, 0.2, 1.0),
+            sp.SABRModel(volvol=0.4, beta=0.5, correlation=-0.3, initial_volatility=0.2, rng=rng),
+        ),
         # Time series: n is the number of values in both packages.
         (
             "AR(2)",

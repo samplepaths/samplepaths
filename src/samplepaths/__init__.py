@@ -51,6 +51,12 @@ from .discrete import (
     MoranProcess,
     RandomWalk,
 )
+from .multivariate import (
+    BatesModel,
+    CorrelatedBrownianMotions,
+    HestonModel,
+    SABRModel,
+)
 from .noise import (
     BlueNoise,
     BrownianNoise,
@@ -124,6 +130,11 @@ __all__ = [
     "MarkovChain",
     "MoranProcess",
     "RandomWalk",
+    # multivariate
+    "BatesModel",
+    "CorrelatedBrownianMotions",
+    "HestonModel",
+    "SABRModel",
     # noise
     "BlueNoise",
     "BrownianNoise",

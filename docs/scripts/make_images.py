@@ -28,6 +28,7 @@ from samplepaths import (  # noqa: E402
     ARCHProcess,
     ARIMAProcess,
     AutoregressiveProcess,
+    BatesModel,
     BernoulliProcess,
     BesselProcess,
     BrownianBridge,
@@ -38,6 +39,7 @@ from samplepaths import (  # noqa: E402
     ChineseRestaurantProcess,
     ColoredNoise,
     ConstantElasticityVarianceProcess,
+    CorrelatedBrownianMotions,
     CoxIngersollRossProcess,
     DirichletProcess,
     EGARCHProcess,
@@ -53,6 +55,7 @@ from samplepaths import (  # noqa: E402
     GARCHProcess,
     GaussianNoise,
     GeometricBrownianMotion,
+    HestonModel,
     InverseGaussianProcess,
     MarkovChain,
     MixedPoissonProcess,
@@ -62,6 +65,7 @@ from samplepaths import (  # noqa: E402
     OrnsteinUhlenbeckProcess,
     PoissonProcess,
     RandomWalk,
+    SABRModel,
     SARIMAProcess,
     SquaredBesselProcess,
     TGARCHProcess,
@@ -71,6 +75,7 @@ from samplepaths import (  # noqa: E402
     random,  # noqa: E402
 )
 from samplepaths.base import BaseProcess, BaseTimeProcess  # noqa: E402
+from samplepaths.multivariate import VectorProcess  # noqa: E402
 
 DEFAULT_OUTPUT = Path(__file__).parent.parent / "_static"
 
@@ -375,6 +380,70 @@ def make_timeseries(output: Path) -> None:
     plot_series(output, "egarch_process", "Exponential GARCH process", EGARCHProcess(), n=1000)
 
 
+def plot_components(
+    output: Path,
+    name: str,
+    title: str,
+    process: VectorProcess,
+    *,
+    n: int = 1024,
+    together: bool = False,
+) -> None:
+    """Plot one realization of a process with several components.
+
+    :param together: draw the components on the same axes, for components of
+        the same nature; otherwise each gets its own axes
+    """
+    realization = process.sample(n)
+    count = 1 if together else len(realization)
+    fig, axes = plt.subplots(count, 1, figsize=(8, 4), sharex=True, squeeze=False)
+    for index, (component, values) in enumerate(zip(process.components, realization, strict=True)):
+        ax = axes[0 if together else index, 0]
+        ax.plot(process.times, values, color=PALETTE[index % len(PALETTE)], label=component)
+        if not together:
+            ax.set_ylabel(component.capitalize())
+    if together:
+        axes[0, 0].set_ylabel("Value")
+        axes[0, 0].legend()
+    axes[0, 0].set_title(title)
+    axes[-1, 0].set_xlabel("Time")
+    fig.tight_layout()
+    fig.savefig(output / f"{name}.png")
+    plt.close(fig)
+    print(f"{name}.png saved")
+
+
+def make_multivariate(output: Path) -> None:
+    """Generate the figures of the processes with several components."""
+    plot_components(
+        output,
+        "correlated_brownian_motions",
+        "Correlated Brownian motions (correlation=0.8)",
+        CorrelatedBrownianMotions(correlation=0.8),
+        together=True,
+    )
+    plot_components(
+        output,
+        "heston_model",
+        "Heston model",
+        HestonModel(drift=0.05, speed=3.0, mean=0.04, vol=0.5, correlation=-0.7),
+    )
+    plot_components(
+        output,
+        "bates_model",
+        "Bates model",
+        BatesModel(
+            drift=0.05, speed=3.0, mean=0.04, vol=0.5, correlation=-0.7, rate=4.0, jump_mean=-0.08
+        ),
+    )
+    plot_components(
+        output,
+        "sabr_model",
+        "SABR model (beta=0.5)",
+        SABRModel(volvol=0.8, beta=0.5, correlation=-0.5, initial_volatility=0.2),
+    )
+
+
 def make_noise(output: Path) -> None:
     """Generate the figures of the noise processes."""
     plot_noise(output, "gaussian_noise", "Gaussian noise", GaussianNoise(), n=2**8)
@@ -445,8 +514,8 @@ def make_guides(output: Path) -> None:
     """Generate the explanatory figures of the user guide."""
     rng = np.random.default_rng(11)
 
-    # The five families of processes: three panels above two.
-    fig, panels = plt.subplot_mosaic("AABBCC;.DDEE.", figsize=(11, 5))
+    # The six families of processes.
+    fig, panels = plt.subplot_mosaic("ABC;DFE", figsize=(11, 5))
     ax = panels["A"]
     process: BaseTimeProcess = BrownianMotion(rng=rng)
     for _ in range(3):
@@ -465,6 +534,14 @@ def make_guides(output: Path) -> None:
     ax = panels["D"]
     ax.plot(GARCHProcess(omega=0.05, alpha=0.15, beta=0.8, rng=rng).sample(500), linewidth=0.8)
     ax.set_title("Time series: GARCH process")
+    ax = panels["F"]
+    price, variance = HestonModel(speed=3.0, mean=0.04, vol=0.5, correlation=-0.7, rng=rng).sample(
+        512
+    )
+    ax.plot(np.linspace(0, 1, 513), price, label="price")
+    ax.plot(np.linspace(0, 1, 513), 1 + np.sqrt(variance), label="1 + volatility")
+    ax.legend(loc="upper left", fontsize=7)
+    ax.set_title("Several components: Heston model")
     ax = panels["E"]
     for offset, beta in ((3.0, 0), (0.0, 1), (-3.0, 2)):
         noise = ColoredNoise(beta=beta, rng=rng).sample(512)
@@ -585,6 +662,7 @@ def main() -> None:
     make_diffusion(args.output)
     make_discrete(args.output)
     make_timeseries(args.output)
+    make_multivariate(args.output)
     make_noise(args.output)
 
 

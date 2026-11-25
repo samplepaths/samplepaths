@@ -72,6 +72,7 @@ Project layout
        diffusion/     diffusion processes
        discrete/      discrete-time processes
        timeseries/    time series models
+       multivariate/  processes with several components
        noise/         noise processes
        utils/         helper and validation functions
        random.py      default random number generator
