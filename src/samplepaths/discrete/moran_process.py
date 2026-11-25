@@ -131,3 +131,17 @@ class MoranProcess(BaseSequenceProcess):
         :returns: the realization
         """
         return self._sample_moran_process(n, start)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.int64]:
+        check_positive_integer(n=paths, name="Number of paths")
+
+        # A realization which reaches zero or the maximum value ends early.
+        # The process stays in that state, which fills the rest of its row.
+        realizations = np.empty((paths, n), dtype=np.int64)
+        for row in realizations:
+            sample = self.sample(n)
+            row[: len(sample)] = sample
+            row[len(sample) :] = sample[-1]
+
+        return realizations

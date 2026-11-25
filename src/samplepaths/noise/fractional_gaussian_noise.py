@@ -32,6 +32,12 @@ def _fgn_dh_sqrt_eigen_vals(
     return np.fft.irfft(_fgn_auto_covariance(hurst, n))[:n] ** (1 / 2)
 
 
+#: Largest number of increments for which the coefficients of Hosking's method
+#: are kept between realizations. They take 4 n squared bytes: 17 MB at this
+#: limit.
+_HOSKING_CACHE_MAX_INCREMENTS = 2048
+
+
 class FractionalGaussianNoise(BaseTimeProcess):
     """Fractional Gaussian noise process.
 
@@ -68,6 +74,10 @@ class FractionalGaussianNoise(BaseTimeProcess):
 
         self.hurst = hurst
 
+        self.__hosking_key: tuple[float, int] | None = None
+        self.__hosking_coefficients: tuple[
+            list[npt.NDArray[np.float64]], npt.NDArray[np.float64]
+        ] = ([], np.zeros(0))
         self.__auto_covariance = lru_cache(1)(_fgn_auto_covariance)
         self.__dh_sqrt_eigen_vals = lru_cache(1)(_fgn_dh_sqrt_eigen_vals)
 
@@ -151,34 +161,61 @@ class FractionalGaussianNoise(BaseTimeProcess):
         if self.hurst == 0.5:
             fgn = gn
         else:
-            # Initializations
+            coefficients, deviations = self._hosking_coefficients(n)
+
+            # Generates fgn realization with n increments of size 1. The
+            # first increment comes from the stationary distribution, and
+            # each of the others is predicted from the previous ones,
+            # fgn[i - 1], ..., fgn[0], plus an innovation.
             fgn = np.zeros(n)
-            phi = np.zeros(n)
-            psi = np.zeros(n)
-            cov = self.__auto_covariance(self.hurst, n)
-
-            # First increment from stationary distribution
             fgn[0] = gn[0]
-            v = 1
-            phi[0] = 0
-
-            # Generates fgn realization with n increments of size 1. Each
-            # step of the Durbin-Levinson recursion updates the partial
-            # autocorrelations phi with vector operations.
             for i in range(1, n):
-                psi[: i - 1] = phi[: i - 1]
-                # cov[i - 1], ..., cov[1] and psi[i - 2], ..., psi[0]
-                reflection = (cov[i] - psi[: i - 1] @ cov[i - 1 : 0 : -1]) / v
-                phi[: i - 1] = psi[: i - 1] - reflection * psi[i - 2 :: -1][: i - 1]
-                phi[i - 1] = reflection
-                v *= 1 - reflection * reflection
-                # fgn[i - 1], ..., fgn[0]
-                fgn[i] = phi[:i] @ fgn[i - 1 :: -1][:i] + np.sqrt(v) * gn[i]
+                fgn[i] = coefficients[i] @ fgn[i - 1 :: -1][:i] + deviations[i] * gn[i]
 
         # Scale to interval [0, T]
         fgn *= scale
 
         return fgn
+
+    def _hosking_coefficients(
+        self,
+        n: int,
+    ) -> tuple[list[npt.NDArray[np.float64]], npt.NDArray[np.float64]]:
+        """Run the Durbin-Levinson recursion of Hosking's method.
+
+        Entry i of the first result holds the coefficients which predict
+        increment i from the i previous ones, and entry i of the second the
+        standard deviation of its innovation. They depend on the Hurst
+        parameter and on the number of increments only, so they are kept for
+        the next realization unless they would take too much memory.
+        """
+        key = (self.hurst, n)
+        if self.__hosking_key == key:
+            return self.__hosking_coefficients
+
+        phi = np.zeros(n)
+        psi = np.zeros(n)
+        cov = self.__auto_covariance(self.hurst, n)
+
+        coefficients = [np.zeros(0)]
+        deviations = np.ones(n)
+        v = 1
+        for i in range(1, n):
+            psi[: i - 1] = phi[: i - 1]
+            # cov[i - 1], ..., cov[1] and psi[i - 2], ..., psi[0]
+            reflection = (cov[i] - psi[: i - 1] @ cov[i - 1 : 0 : -1]) / v
+            phi[: i - 1] = psi[: i - 1] - reflection * psi[i - 2 :: -1][: i - 1]
+            phi[i - 1] = reflection
+            v *= 1 - reflection * reflection
+            coefficients.append(phi[:i].copy())
+            deviations[i] = np.sqrt(v)
+
+        result = (coefficients, deviations)
+        if n <= _HOSKING_CACHE_MAX_INCREMENTS:
+            self.__hosking_key = key
+            self.__hosking_coefficients = result
+
+        return result
 
     def _sample_fractional_gaussian_noise(
         self,
@@ -216,3 +253,31 @@ class FractionalGaussianNoise(BaseTimeProcess):
         n: int,
     ) -> npt.NDArray[np.float64]:
         return self.sample_davies_harte(n)
+
+    def _davies_harte_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        """Generate several realizations with the Davies-Harte method."""
+        check_positive_integer(n=n, name="Number of increments")
+        check_positive_integer(n=paths, name="Number of paths")
+        self.set_times(n)
+
+        # For scaling to interval [0, T]
+        increment = self.t / n
+        scale = increment**self.hurst
+
+        if self.hurst == 0.5:
+            return self.rng.normal(scale=scale, size=(paths, n))
+
+        m = 2 ** (n - 2).bit_length() + 1
+        sqrt_eigen_vals = self.__dh_sqrt_eigen_vals(self.hurst, m)
+        scale *= 2 ** (1 / 2) * (m - 1)
+
+        w = self.rng.normal(scale=scale, size=(paths, 2 * m)).view(complex)
+        w[:, 0] = w[:, 0].real * 2 ** (1 / 2)
+        w[:, -1] = w[:, -1].real * 2 ** (1 / 2)
+
+        realizations: npt.NDArray[np.float64] = np.fft.irfft(sqrt_eigen_vals * w, axis=1)[:, :n]
+        return realizations
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        return self._davies_harte_paths(n, paths)

@@ -69,3 +69,10 @@ class BernoulliProcess(BaseSequenceProcess):
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:
         return self._sample_bernoulli(n)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        check_positive_integer(n=n)
+        check_positive_integer(n=paths, name="Number of paths")
+
+        return (self.rng.uniform(size=(paths, n)) < self.p).astype(np.float64)

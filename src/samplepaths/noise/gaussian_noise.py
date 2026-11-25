@@ -67,3 +67,15 @@ class GaussianNoise(BaseTimeProcess):
         times: npt.NDArray[np.float64],
     ) -> npt.NDArray[np.float64]:
         return self._sample_gaussian_noise_at(times)
+
+    def _sample_gaussian_noise_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        """Generate several realizations of Gaussian noise, one per row."""
+        check_positive_integer(n=n, name="Number of increments")
+        check_positive_integer(n=paths, name="Number of paths")
+        self.set_times(n)
+
+        return self.rng.normal(scale=np.sqrt(1.0 * self.t / n), size=(paths, n))
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        return self._sample_gaussian_noise_paths(n, paths)

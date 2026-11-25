@@ -145,3 +145,19 @@ class VarianceGammaProcess(GaussianNoise):
     @override
     def sample_at(self, times: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         return self._sample_variance_gamma_process_at(times)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        check_positive_integer(n=n, name="n")
+        check_positive_integer(n=paths, name="Number of paths")
+
+        delta_t = 1.0 * self.t / n
+        shape = delta_t / self.variance
+        scale = self.variance
+
+        gammas = self.rng.gamma(shape=shape, scale=scale, size=(paths, n))
+        gn = self._sample_gaussian_noise_paths(n, paths)
+
+        increments = self.drift * gammas + self.scale * np.sqrt(gammas) * gn
+
+        return np.concatenate((np.zeros((paths, 1)), np.cumsum(increments, axis=1)), axis=1)

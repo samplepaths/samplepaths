@@ -6,7 +6,7 @@ import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
-from ..utils.validation import check_nonnegative_number
+from ..utils.validation import check_nonnegative_number, check_positive_integer
 from .brownian_bridge import BrownianBridge
 
 
@@ -146,3 +146,20 @@ class BrownianMeander(BrownianBridge):
         :returns: the realization
         """
         return self._sample_brownian_meander_at(times, b)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        check_positive_integer(n=n, name="Number of increments")
+        check_positive_integer(n=paths, name="Number of paths")
+
+        # One random endpoint per realization.
+        b = np.sqrt(2 * self.t * self.rng.exponential(size=(paths, 1)))
+
+        bridge_1 = self._sample_brownian_bridge_paths(n, paths)
+        bridge_2 = self._sample_brownian_bridge_paths(n, paths)
+        bridge_3 = self._sample_brownian_bridge_paths(n, paths)
+
+        meanders: npt.NDArray[np.float64] = np.sqrt(
+            (b * self.times / self.t + bridge_1) ** 2 + bridge_2**2 + bridge_3**2
+        )
+        return meanders

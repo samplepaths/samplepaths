@@ -61,3 +61,10 @@ class SquaredBesselProcess(BesselProcess):
     @override
     def sample_at(self, times: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         return self._sample_squared_bessel_process_at(times)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        samples = np.array([self._sample_brownian_motion_paths(n, paths) for _ in range(self.dim)])
+
+        squares: npt.NDArray[np.float64] = np.sum(np.square(samples), axis=0)
+        return squares

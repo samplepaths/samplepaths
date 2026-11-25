@@ -17,10 +17,12 @@ from samplepaths import BrownianMotion
 
 bm = BrownianMotion(drift=1, scale=2, t=10)
 path = bm.sample(1000)  # 1001 values on [0, 10]
+paths = bm.sample_paths(1000, paths=5000)  # 5000 realizations at once
 ```
 
 - **37 processes** in four families: continuous-time, diffusion, discrete-time and noise
-- **One interface**: every process is a class with a `sample(n)` method
+- **One interface**: every process is a class with `sample(n)` and `sample_paths(n, paths)` methods
+- **Fast**: vectorized with NumPy; 1000 Vasicek realizations of 256 steps take about 2 ms
 - **Reproducible**: built on `numpy.random.Generator`, per process or through a seedable default
 - **Typed**: type hints throughout, checked with mypy in strict mode
 - **Light**: depends only on NumPy and SciPy
@@ -92,6 +94,22 @@ arrivals = PoissonProcess(rate=2.0).sample_with_length(10.0)
 noise = FractionalGaussianNoise(hurst=0.6).sample_hosking(32)
 ```
 
+### Many realizations at once
+
+`sample_paths(n, paths)` returns a two-dimensional array with one realization per row.
+For most processes it is 2 to 13 times faster than a loop over `sample()`.
+
+```python
+import numpy as np
+from samplepaths import GeometricBrownianMotion
+
+gbm = GeometricBrownianMotion(drift=0.05, volatility=0.2, rng=np.random.default_rng(1))
+prices = gbm.sample_paths_with_initial(n=64, paths=100_000, initial=100.0)
+
+payoffs = np.maximum(prices[:, -1] - 105.0, 0.0)
+print(np.exp(-0.05) * payoffs.mean())  # a European call price, close to 8.02
+```
+
 ### Generic simulation code
 
 Because the interface is shared, simulation code does not depend on the process it simulates.
@@ -105,7 +123,7 @@ from samplepaths.base import BaseTimeProcess
 
 def final_values(process: BaseTimeProcess, n: int, paths: int) -> np.ndarray:
     """Simulate a number of paths and collect the last value of each."""
-    return np.array([process.sample(n)[-1] for _ in range(paths)])
+    return process.sample_paths(n, paths)[:, -1]
 
 
 final_values(GeometricBrownianMotion(drift=0.05, volatility=0.2), n=64, paths=1000)
@@ -132,7 +150,8 @@ Diffusion processes are approximated with the Euler-Maruyama method.
 The documentation at https://samplepaths.readthedocs.io/ contains:
 
 - a [quickstart](https://samplepaths.readthedocs.io/en/latest/getting-started/quickstart.html)
-- a user guide for [sampling](https://samplepaths.readthedocs.io/en/latest/guide/usage.html), [random number generation](https://samplepaths.readthedocs.io/en/latest/guide/random.html) and every family of processes
+- a user guide for [sampling](https://samplepaths.readthedocs.io/en/latest/guide/usage.html), [simulating many realizations](https://samplepaths.readthedocs.io/en/latest/guide/paths.html), [random number generation](https://samplepaths.readthedocs.io/en/latest/guide/random.html) and every family of processes
+- measured [sampling times](https://samplepaths.readthedocs.io/en/latest/guide/performance.html) and a [changelog](https://samplepaths.readthedocs.io/en/latest/project/changelog.html)
 - an [API reference](https://samplepaths.readthedocs.io/en/latest/reference/index.html) for every class, method and function
 
 ## Coming from stochastic

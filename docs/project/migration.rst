@@ -4,8 +4,8 @@ Migrating from stochastic
 ``samplepaths`` is a fork of
 `stochastic <https://github.com/crflynn/stochastic>`_ version 0.7.0, written
 by Christopher Flynn. The fork keeps the original processes and algorithms
-and is developed independently of the original package. See :doc:`refactor`
-for what the fork changed and why.
+and is developed independently of the original package. See :doc:`about`
+for what the fork adds and why.
 
 Changes from stochastic 0.7.0
 -----------------------------

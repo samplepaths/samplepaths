@@ -110,3 +110,11 @@ class PoissonProcess(BaseProcess):
             arrival after ``length``
         """
         return self._sample_poisson_process(length=length)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        check_positive_integer(n=n)
+        check_positive_integer(n=paths, name="Number of paths")
+
+        exponentials = self.rng.exponential(scale=1.0 / self.rate, size=(paths, n))
+        return np.concatenate((np.zeros((paths, 1)), np.cumsum(exponentials, axis=1)), axis=1)

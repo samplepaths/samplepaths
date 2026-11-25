@@ -29,6 +29,7 @@ paths) of stochastic processes as ``numpy`` arrays.
 
     bm = BrownianMotion(drift=1, scale=2, t=10)
     path = bm.sample(1000)  # 1001 values on [0, 10]
+    paths = bm.sample_paths(1000, paths=5000)  # 5000 realizations at once
 
 It provides 37 processes in four families, all sharing one small interface:
 
@@ -45,7 +46,7 @@ It provides 37 processes in four families, all sharing one small interface:
 ``samplepaths`` is an independently maintained fork of
 `stochastic <https://github.com/crflynn/stochastic>`_ by Christopher Flynn,
 modernized for current Python, ``numpy`` and ``scipy`` releases and shipped
-with type hints. See :doc:`project/refactor` for what the fork improves and
+with type hints. See :doc:`project/about` for what the fork adds and
 :doc:`project/migration` for the changes needed to port existing code.
 
 ``samplepaths`` is maintained by `Bassem Girgis <https://girgis.me>`_.
@@ -62,11 +63,13 @@ with type hints. See :doc:`project/refactor` for what the fork improves and
    :caption: User guide
 
    guide/usage
+   guide/paths
    guide/random
    guide/continuous
    guide/diffusion
    guide/discrete
    guide/noise
+   guide/performance
 
 .. toctree::
    :maxdepth: 2
@@ -79,8 +82,8 @@ with type hints. See :doc:`project/refactor` for what the fork improves and
    :maxdepth: 2
    :caption: Project
 
-   project/refactor
-   project/performance
+   project/about
+   project/changelog
    project/migration
    project/development
    project/license

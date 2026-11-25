@@ -8,9 +8,8 @@ import numpy as np
 import numpy.typing as npt
 from numpy.random import Generator
 
-from samplepaths.utils.validation import check_positive_number
-
 from ..base import BaseTimeProcess
+from ..utils.validation import check_positive_integer, check_positive_number
 
 
 class InverseGaussianProcess(BaseTimeProcess):
@@ -105,6 +104,16 @@ class InverseGaussianProcess(BaseTimeProcess):
 
         return delta
 
+    def _update_mean_increments(self, n: int) -> None:
+        """Compute the increments of the mean function for n increments."""
+        if self.set_times(n):
+            self.__ms = np.zeros(n)
+            for k in range(n):
+                self.__ms[k] = self._check_mean(
+                    self.times[k],
+                    self.times[k + 1],
+                )
+
     def _sample_inverse_gaussian_process(
         self,
         n: int,
@@ -113,13 +122,7 @@ class InverseGaussianProcess(BaseTimeProcess):
 
         Generate an inverse Gaussian process realization with n increments.
         """
-        if self.set_times(n):
-            self.__ms = np.zeros(n)
-            for k in range(n):
-                self.__ms[k] = self._check_mean(
-                    self.times[k],
-                    self.times[k + 1],
-                )
+        self._update_mean_increments(n)
 
         assert self.__ms is not None
         ls = self.scale * self.__ms**2
@@ -177,3 +180,23 @@ class InverseGaussianProcess(BaseTimeProcess):
         times: npt.NDArray[np.float64],
     ) -> npt.NDArray[np.float64]:
         return self._sample_inverse_gaussian_process_at(times)
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        check_positive_integer(n=paths, name="Number of paths")
+        self._update_mean_increments(n)
+
+        ms = self.__ms
+        assert ms is not None
+        ls = self.scale * ms**2
+
+        gn = self.rng.normal(size=(paths, n))
+        ys = gn**2
+
+        xs = ms + ms**2 * ys / 2 / ls - ms / 2 / ys * np.sqrt(4 * ms * ls * ys + ms**2 * ys**2)
+
+        zs = self.rng.uniform(size=(paths, n))
+
+        ign = np.where(zs <= ms / (ms + xs), xs, ms**2 / xs)
+
+        return np.concatenate((np.zeros((paths, 1)), np.cumsum(ign, axis=1)), axis=1)

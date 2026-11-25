@@ -1,6 +1,7 @@
 """Base class of the processes defined on a time interval."""
 
 from abc import abstractmethod
+from typing import override
 
 import numpy as np
 import numpy.typing as npt
@@ -122,3 +123,12 @@ class BaseTimeProcess(BaseProcess):
             f"{type(self).__name__} cannot be sampled at specified times. "
             "Use the sample method with a number of increments."
         )
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        return self._stack_paths(n, paths)
+
+    def _stack_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        """Generate several realizations with one call to sample for each."""
+        check_positive_integer(n=paths, name="Number of paths")
+        return np.array([self.sample(n) for _ in range(paths)], dtype=np.float64)

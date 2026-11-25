@@ -5,6 +5,9 @@ Every process in ``samplepaths`` is a class. You create an instance with the
 parameters of the process and call its sampling methods to generate
 realizations as ``numpy`` arrays.
 
+This page covers one realization at a time. :doc:`paths` covers many
+realizations in one call.
+
 Creating a process
 ------------------
 
@@ -125,11 +128,27 @@ processes, the fractional and multifractional Brownian motions, and the
 fractional Gaussian and colored noises. Their ``sample_at()`` raises
 ``NotImplementedError``.
 
+The ``sample_paths()`` method
+-----------------------------
+
+Every process has a ``sample_paths(n, paths)`` method which generates
+``paths`` independent realizations of ``n`` steps and returns them as the rows
+of a two-dimensional array. It is the method to use for Monte Carlo
+simulation. See :doc:`paths`.
+
+.. code-block:: python
+
+    from samplepaths import BrownianMotion
+
+    bm = BrownianMotion(drift=1, scale=1)
+    realizations = bm.sample_paths(64, paths=1000)  # shape (1000, 65)
+
 Sampling with additional parameters
 -----------------------------------
 
-``sample(n)`` has the same signature on every process. Processes whose
-realizations depend on an additional value have dedicated methods:
+``sample(n)`` and ``sample_paths(n, paths)`` have the same signature on every
+process. Processes whose realizations depend on an additional value have
+dedicated methods:
 
 .. list-table::
    :header-rows: 1
@@ -142,6 +161,9 @@ realizations depend on an additional value have dedicated methods:
        diffusion processes
    * - ``sample_at_with_initial(times, initial)``
      - :py:class:`~samplepaths.continuous.GeometricBrownianMotion`
+   * - ``sample_paths_with_initial(n, paths, initial)``
+     - :py:class:`~samplepaths.continuous.GeometricBrownianMotion` and all
+       diffusion processes
    * - ``sample_with_endpoint(n, b)`` and
        ``sample_at_with_endpoint(times, b)``
      - :py:class:`~samplepaths.continuous.BrownianMeander`
@@ -186,7 +208,8 @@ Writing generic code
 --------------------
 
 All processes derive from :py:class:`~samplepaths.base.BaseProcess`, which
-defines ``sample(n)``. Processes on a time interval derive from
+defines ``sample(n)`` and ``sample_paths(n, paths)``. Processes on a time
+interval derive from
 :py:class:`~samplepaths.base.BaseTimeProcess`, which adds ``t``, ``times``
 and ``sample_at()``. Use these classes to annotate code which works with any
 process.
@@ -201,7 +224,7 @@ process.
 
     def envelope(process: BaseTimeProcess, n: int, paths: int) -> tuple[np.ndarray, np.ndarray]:
         """Estimate the 5% and 95% quantiles of a process over time."""
-        samples = np.array([process.sample(n) for _ in range(paths)])
+        samples = process.sample_paths(n, paths)
         return np.quantile(samples, 0.05, axis=0), np.quantile(samples, 0.95, axis=0)
 
 
@@ -211,9 +234,6 @@ process.
 Performance
 -----------
 
-``samplepaths`` uses ``numpy`` and ``scipy`` wherever possible. Some
-processes store the results of intermediate computations which depend only
-on ``n`` and on the parameters, so generating many realizations with the same
-``n`` from one instance is faster than creating a new instance each time.
-
-See :doc:`/project/performance` for measured sampling times.
+Sampling is fast, and making it faster does not change seeded results.
+:doc:`performance` gives measured times for every process and explains how
+to get the most out of the library.

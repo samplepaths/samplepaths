@@ -38,6 +38,8 @@ where :math:`W_t` is a Wiener process. Its parameters are:
 
 Each parameter is either a number or a function of one argument, for
 parameters that change over time.
+Give a constant parameter as a number: a function is called at every step,
+which makes sampling slower.
 
 .. code-block:: python
 
@@ -104,6 +106,31 @@ The initial value
 
 ``sample(n)`` starts every diffusion process from an initial value of 1.
 Use ``sample_with_initial(n, initial)`` to choose the initial value.
+
+An initial value outside the domain of the volatility term gives a
+realization of ``nan`` values, with a ``RuntimeWarning``. This is the case
+for a negative initial value with a fractional exponent ``volexp``.
+
+Many realizations
+-----------------
+
+``sample_paths(n, paths)`` and ``sample_paths_with_initial(n, paths,
+initial)`` advance all realizations together, one time step at a time. This
+is the fastest way to simulate a diffusion process: 1000 realizations of 256
+increments of a Vasicek process take 1.8 milliseconds, instead of 14.6 with
+a loop over ``sample()``.
+
+.. code-block:: python
+
+    from samplepaths import CoxIngersollRossProcess
+
+    cir = CoxIngersollRossProcess(speed=1.0, mean=0.05, vol=0.1, t=10)
+    rates = cir.sample_paths_with_initial(n=1000, paths=5000, initial=0.03)
+
+    print(rates.shape)
+    # (5000, 1001)
+
+See :doc:`paths`.
 
 Accuracy
 --------

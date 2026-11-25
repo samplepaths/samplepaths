@@ -15,6 +15,34 @@ from ..utils.validation import (
     check_positive_integer,
 )
 
+#: Number of realizations from which sample_paths advances all of them
+#: together instead of one after the other.
+_VECTORIZE_FROM_PATHS = 32
+
+
+def _constant(value: Callable[[float], float] | float | int) -> float | None:
+    """Return the value of a constant parameter, or None for a function."""
+    return None if callable(value) else float(value)
+
+
+def _power(base: float, exponent: float) -> float:
+    """Raise a float to a power with the semantics of NumPy scalars.
+
+    A negative base with a fractional exponent gives ``nan`` with a warning
+    and an overflow gives ``inf``, where Python floats would return a complex
+    number or raise an exception.
+    """
+    if exponent == 0:
+        return 1.0
+    if exponent == 1:
+        return base
+    if base > 0.0:
+        try:
+            return float(base**exponent)
+        except OverflowError:
+            pass
+    return float(np.float64(base) ** exponent)
+
 
 class DiffusionProcess(GaussianNoise):
     r"""Generalized diffusion process.
@@ -86,8 +114,8 @@ class DiffusionProcess(GaussianNoise):
     @speed.setter
     def speed(self, value: Callable[[float], float] | float | int) -> None:
         check_numeric_or_single_arg_callable(value=value, name="speed")
-
         self.__speed = ensure_single_arg_constant_function(value=value)
+        self.__speed_value = _constant(value)
 
     @property
     def mean(self) -> Callable[[float], float]:
@@ -98,6 +126,7 @@ class DiffusionProcess(GaussianNoise):
     def mean(self, value: Callable[[float], float] | float | int) -> None:
         check_numeric_or_single_arg_callable(value=value, name="mean")
         self.__mean = ensure_single_arg_constant_function(value=value)
+        self.__mean_value = _constant(value)
 
     @property
     def vol(self) -> Callable[[float], float]:
@@ -108,6 +137,7 @@ class DiffusionProcess(GaussianNoise):
     def vol(self, value: Callable[[float], float] | float | int) -> None:
         check_numeric_or_single_arg_callable(value=value, name="vol")
         self.__vol = ensure_single_arg_constant_function(value=value)
+        self.__vol_value = _constant(value)
 
     @property
     def volexp(self) -> Callable[[float], float]:
@@ -121,6 +151,7 @@ class DiffusionProcess(GaussianNoise):
     ) -> None:
         check_numeric_or_single_arg_callable(value=value, name="volexp")
         self.__volexp = ensure_single_arg_constant_function(value=value)
+        self.__volexp_value = _constant(value)
 
     def _sample(self, n: int, initial: float = 1.0) -> npt.NDArray[np.float64]:
         """Generate a realization of a diffusion process using Euler-Maruyama."""
@@ -128,19 +159,120 @@ class DiffusionProcess(GaussianNoise):
         check_numeric(value=initial, name="Initial")
 
         delta_t = 1.0 * self.t / n
-        gns = self._sample_gaussian_noise(n)
+        # Plain Python floats make the loop several times faster than NumPy
+        # scalars, with the same arithmetic.
+        gns: list[float] = self._sample_gaussian_noise(n).tolist()
 
-        s = [initial]
+        return np.array(self._euler_maruyama(gns, float(initial), delta_t))
+
+    def _euler_maruyama(self, gns: list[float], x: float, delta_t: float) -> list[float]:
+        """Apply the Euler-Maruyama method to one realization of the noise."""
+        speed = self.__speed_value
+        mean = self.__mean_value
+        vol = self.__vol_value
+        volexp = self.__volexp_value
+
+        s = [x]
+
+        if speed is not None and mean is not None and vol is not None and volexp is not None:
+            # Constant parameters: no function calls inside the loop.
+            if volexp == 0:
+                for gn in gns:
+                    x += speed * (mean - x) * delta_t + vol * gn
+                    s.append(x)
+            elif volexp == 1:
+                for gn in gns:
+                    x += speed * (mean - x) * delta_t + vol * x * gn
+                    s.append(x)
+            else:
+                for gn in gns:
+                    x += speed * (mean - x) * delta_t + vol * _power(x, volexp) * gn
+                    s.append(x)
+
+            return s
+
+        # At least one parameter is a function. The functions are called at
+        # every step, in the order speed, mean, vol and volexp.
+        speed_function = self.__speed
+        mean_function = self.__mean
+        vol_function = self.__vol
+        volexp_function = self.__volexp
+
         t = 0.0
-        for k in range(n):
+        for gn in gns:
             t += delta_t
-            initial += (
-                self.__speed(t) * (self.__mean(t) - initial) * delta_t
-                + self.__vol(t) * initial ** self.__volexp(initial) * gns[k]
-            )
-            s.append(initial)
+            a = speed if speed is not None else float(speed_function(t))
+            m = mean if mean is not None else float(mean_function(t))
+            v = vol if vol is not None else float(vol_function(t))
+            g = volexp if volexp is not None else float(volexp_function(x))
+            x += a * (m - x) * delta_t + v * _power(x, g) * gn
+            s.append(x)
 
-        return np.array(s)
+        return s
+
+    def _sample_paths(self, n: int, paths: int, initial: float) -> npt.NDArray[np.float64]:
+        """Generate several realizations of a diffusion process."""
+        check_numeric(value=initial, name="Initial")
+
+        delta_t = 1.0 * self.t / n
+        noise = self._sample_gaussian_noise_paths(n, paths)
+
+        speed = self.__speed_value
+        mean = self.__mean_value
+        vol = self.__vol_value
+        volexp = self.__volexp_value
+
+        if paths < _VECTORIZE_FROM_PATHS or volexp is None:
+            # Few realizations, or a volatility exponent which is a function
+            # of the value of each realization: step through each of them in
+            # turn.
+            return np.array(
+                [self._euler_maruyama(gns, float(initial), delta_t) for gns in noise.tolist()]
+            )
+
+        # Many realizations: advance all of them together, one step at a time.
+        speed_function = self.__speed
+        mean_function = self.__mean
+        vol_function = self.__vol
+
+        x = np.full(paths, float(initial))
+        realizations = np.empty((paths, n + 1))
+        realizations[:, 0] = x
+
+        t = 0.0
+        for k, gn in enumerate(np.ascontiguousarray(noise.T)):
+            t += delta_t
+            a = speed if speed is not None else float(speed_function(t))
+            m = mean if mean is not None else float(mean_function(t))
+            v = vol if vol is not None else float(vol_function(t))
+            if volexp == 0:
+                x = x + a * (m - x) * delta_t + v * gn
+            elif volexp == 1:
+                x = x + a * (m - x) * delta_t + v * x * gn
+            else:
+                x = x + a * (m - x) * delta_t + v * np.power(x, volexp) * gn
+            realizations[:, k + 1] = x
+
+        return realizations
+
+    @override
+    def sample_paths(self, n: int, paths: int) -> npt.NDArray[np.float64]:
+        return self._sample_paths(n, paths, 1.0)
+
+    def sample_paths_with_initial(
+        self,
+        n: int,
+        paths: int,
+        initial: float,
+    ) -> npt.NDArray[np.float64]:
+        """Generate several realizations starting from an initial value.
+
+        :param n: the number of increments of each realization
+        :param paths: the number of realizations
+        :param initial: the initial value of the process
+        :returns: a two-dimensional array with one realization per row
+        """
+        return self._sample_paths(n, paths, initial)
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:

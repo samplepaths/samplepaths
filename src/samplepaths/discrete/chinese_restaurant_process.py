@@ -11,6 +11,9 @@ from numpy.random import Generator
 from ..base import BaseSequenceProcess
 from ..utils.validation import check_numeric, check_positive_integer
 
+#: Number of tables from which the table of a customer is looked up with NumPy.
+_MANY_TABLES = 48
+
 
 def _to_partition_array(partition: list[list[int]]) -> npt.NDArray[np.object_]:
     """Convert the customers of each table to an array of integer arrays."""
@@ -133,7 +136,8 @@ class ChineseRestaurantProcess(BaseSequenceProcess):
         # Each customer inverts the cumulative distribution over the tables at
         # a uniform variate, which is what Generator.choice does, without its
         # overhead per call.
-        for k in range(2, n + 1):
+        k = 2
+        while k <= n and num_tables < _MANY_TABLES:
             denominator = k - 1 + strength
             cumulative = list(accumulate(1.0 * (size - discount) / denominator for size in sizes))
             cumulative.append(
@@ -148,6 +152,35 @@ class ChineseRestaurantProcess(BaseSequenceProcess):
                 c.append([])
             sizes[table] += 1
             c[table].append(k - 1)
+            s.append(table)
+            k += 1
+
+        if k > n:
+            return s, c
+
+        # With many tables the same computation is faster in NumPy. The
+        # arithmetic and its order are unchanged, so the result is the same.
+        counts = np.zeros(n + 1)
+        counts[:num_tables] = sizes
+        buffer = np.empty(n + 1)
+        for customer in range(k, n + 1):
+            denominator = customer - 1 + strength
+            lookup = buffer[: num_tables + 1]
+            np.cumsum(
+                1.0 * (counts[:num_tables] - discount) / denominator,
+                out=lookup[:num_tables],
+            )
+            lookup[num_tables] = (
+                lookup[num_tables - 1] + 1.0 * (strength + num_tables * discount) / denominator
+            )
+            lookup /= lookup[num_tables]
+
+            table = int(np.searchsorted(lookup, random(), side="right"))
+            if table == num_tables:
+                num_tables += 1
+                c.append([])
+            counts[table] += 1
+            c[table].append(customer - 1)
             s.append(table)
 
         return s, c
