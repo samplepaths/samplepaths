@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 
 .PHONY: help install lint format typecheck test coverage check \
-	docs docs-live docs-images docs-clean build publish clean
+	docs docs-live docs-images docs-clean version build clean
 
 help:  ## Show the available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
@@ -41,12 +41,12 @@ docs-images:  ## Regenerate the figures shown in the documentation
 docs-clean:  ## Remove the built documentation
 	rm -rf docs/_build
 
+version:  ## Show the version derived from the git tags
+	@uv run python -c "import samplepaths; print(samplepaths.__version__)"
+
 build:  ## Build the source distribution and the wheel
 	rm -rf dist
 	uv build
-
-publish: build  ## Upload the built distributions to PyPI
-	uv publish
 
 clean: docs-clean  ## Remove build, test and cache artifacts
 	rm -rf dist htmlcov coverage.xml .coverage .pytest_cache .mypy_cache .ruff_cache
