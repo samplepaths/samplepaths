@@ -7,7 +7,7 @@ import numpy.typing as npt
 from numpy.random import Generator
 from scipy.stats import levy
 
-from ..utils.validation import check_positive_integer
+from ..utils.validation import check_positive_integer, times_to_increments
 from .brownian_motion import BrownianMotion
 
 
@@ -51,17 +51,30 @@ class CauchyProcess(BrownianMotion):
 
         delta_t = 1.0 * self.t / n
 
-        times = np.cumsum(
+        levys = np.asarray(
             levy.rvs(
                 loc=0,
                 scale=delta_t**2 / 2,
                 size=n,
                 random_state=self.rng,
-            )
+            ),
+            dtype=np.float64,
         )
 
-        times = np.insert(times, 0, [0])
-        return self._sample_brownian_motion_at(times)
+        return np.insert(self._subordinate(levys), 0, 0.0)
+
+    def _subordinate(self, levys: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+        """Evaluate the Brownian motion over the increments of the subordinator.
+
+        The Brownian increments are generated from the increments of the Levy
+        subordinator directly. Accumulating the subordinator first and taking
+        differences loses the small increments next to a large one.
+        """
+        samples = np.cumsum(self.scale * self.rng.normal(scale=np.sqrt(levys)))
+        if self.drift != 0:
+            samples += self.drift * np.cumsum(levys)
+
+        return samples
 
     def _sample_cauchy_process_at(
         self,
@@ -74,25 +87,24 @@ class CauchyProcess(BrownianMotion):
         else:
             zero = True
 
-        deltas = np.diff(times)
-        levys = [
+        deltas = times_to_increments(times=times)
+        # Standard Levy variates, scaled per increment.
+        standard = np.asarray(
             levy.rvs(
                 loc=0,
-                scale=d**2 / 2,
-                size=1,
+                scale=1.0,
+                size=len(deltas),
                 random_state=self.rng,
-            )
-            for d in deltas
-        ]
-
-        ts: npt.NDArray[np.float64] = np.cumsum(
-            levys,  # type: ignore[arg-type]
+            ),
+            dtype=np.float64,
         )
+        levys = standard * (deltas**2 / 2)
 
+        samples = self._subordinate(levys)
         if zero:
-            ts = np.insert(ts, 0, [0])
+            samples = np.insert(samples, 0, 0.0)
 
-        return self._sample_brownian_motion_at(ts)
+        return samples
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:

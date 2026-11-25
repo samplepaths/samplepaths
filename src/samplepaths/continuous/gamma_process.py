@@ -138,20 +138,19 @@ class GammaProcess(BaseTimeProcess):
 
     def _sample_gamma_process_at(self, times: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
         """Sample a Gamma process at specific times."""
-        s = []
-        if times[0] != 0:
+        zero = times[0] == 0
+        if not zero:
             times = np.insert(times, 0, [0])
-        else:
-            s.append(0)
         increments = times_to_increments(times=times)
 
         scale = self.variance / self.mean
         shape_coef = self.mean**2 / self.variance
 
-        for inc in increments:
-            s.append(self.rng.gamma(shape=shape_coef * inc, scale=scale))
+        samples = np.cumsum(self.rng.gamma(shape=shape_coef * increments, scale=scale))
+        if zero:
+            samples = np.concatenate(([0.0], samples))
 
-        return np.cumsum(s)
+        return samples
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:

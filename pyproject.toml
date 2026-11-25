@@ -110,7 +110,7 @@ convention = "pep257"
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D"]
 "docs/conf.py" = ["D"]
-"docs/scripts/make_images.py" = ["T20"]
+"docs/scripts/*.py" = ["T20"]
 
 
 [tool.mypy]

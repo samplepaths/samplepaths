@@ -162,19 +162,18 @@ class FractionalGaussianNoise(BaseTimeProcess):
             v = 1
             phi[0] = 0
 
-            # Generates fgn realization with n increments of size 1
+            # Generates fgn realization with n increments of size 1. Each
+            # step of the Durbin-Levinson recursion updates the partial
+            # autocorrelations phi with vector operations.
             for i in range(1, n):
-                phi[i - 1] = cov[i]
-                for j in range(i - 1):
-                    psi[j] = phi[j]
-                    phi[i - 1] -= psi[j] * cov[i - j - 1]
-                phi[i - 1] /= v
-                for j in range(i - 1):
-                    phi[j] = psi[j] - phi[i - 1] * psi[i - j - 2]
-                v *= 1 - phi[i - 1] * phi[i - 1]
-                for j in range(i):
-                    fgn[i] += phi[j] * fgn[i - j - 1]
-                fgn[i] += np.sqrt(v) * gn[i]
+                psi[: i - 1] = phi[: i - 1]
+                # cov[i - 1], ..., cov[1] and psi[i - 2], ..., psi[0]
+                reflection = (cov[i] - psi[: i - 1] @ cov[i - 1 : 0 : -1]) / v
+                phi[: i - 1] = psi[: i - 1] - reflection * psi[i - 2 :: -1][: i - 1]
+                phi[i - 1] = reflection
+                v *= 1 - reflection * reflection
+                # fgn[i - 1], ..., fgn[0]
+                fgn[i] = phi[:i] @ fgn[i - 1 :: -1][:i] + np.sqrt(v) * gn[i]
 
         # Scale to interval [0, T]
         fgn *= scale

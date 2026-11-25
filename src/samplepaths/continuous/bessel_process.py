@@ -63,17 +63,20 @@ class BesselProcess(BrownianMotion):
         """Generate a realization of a Bessel process."""
         check_positive_integer(n=n, name="Number of increments")
 
-        samples = [self._sample_brownian_motion(n) for _ in range(self.dim)]
+        samples = np.array([self._sample_brownian_motion(n) for _ in range(self.dim)])
 
-        return np.array([np.linalg.norm(coord) for coord in zip(*samples, strict=True)])
+        norms: npt.NDArray[np.float64] = np.sqrt(np.sum(np.square(samples), axis=0))
+        return norms
 
     def _sample_bessel_process_at(
         self,
         times: npt.NDArray[np.float64],
     ) -> npt.NDArray[np.float64]:
         """Generate a realization of a Bessel process."""
-        samples = [self._sample_brownian_motion_at(times) for _ in range(self.dim)]
-        return np.array([np.linalg.norm(coord) for coord in zip(*samples, strict=True)])
+        samples = np.array([self._sample_brownian_motion_at(times) for _ in range(self.dim)])
+
+        norms: npt.NDArray[np.float64] = np.sqrt(np.sum(np.square(samples), axis=0))
+        return norms
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:

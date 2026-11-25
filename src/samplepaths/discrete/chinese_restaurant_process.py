@@ -1,5 +1,7 @@
 """Chinese restaurant process."""
 
+from bisect import bisect_right
+from itertools import accumulate
 from typing import override
 
 import numpy as np
@@ -121,20 +123,30 @@ class ChineseRestaurantProcess(BaseSequenceProcess):
 
         c: list[list[int]] = [[0]]
         s = [0]
+        sizes = [1]
         num_tables = 1
-        table_range = [0, 1]
 
+        discount = self.discount
+        strength = self.strength
+        random = self.rng.random
+
+        # Each customer inverts the cumulative distribution over the tables at
+        # a uniform variate, which is what Generator.choice does, without its
+        # overhead per call.
         for k in range(2, n + 1):
-            p = [
-                1.0 * (len(c[t]) - self.discount) / (k - 1 + self.strength)
-                for t in table_range[:-1]
-            ]
-            p.append(1.0 * (self.strength + num_tables * self.discount) / (k - 1 + self.strength))
-            table = int(self.rng.choice(table_range, p=p))
+            denominator = k - 1 + strength
+            cumulative = list(accumulate(1.0 * (size - discount) / denominator for size in sizes))
+            cumulative.append(
+                cumulative[-1] + 1.0 * (strength + num_tables * discount) / denominator
+            )
+            total = cumulative[-1]
+
+            table = bisect_right([value / total for value in cumulative], random())
             if table == num_tables:
                 num_tables += 1
-                table_range.append(num_tables)
+                sizes.append(0)
                 c.append([])
+            sizes[table] += 1
             c[table].append(k - 1)
             s.append(table)
 

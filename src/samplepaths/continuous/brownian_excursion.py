@@ -53,12 +53,8 @@ class BrownianExcursion(BrownianBridge):
         """Generate a Brownian excursion."""
         brownian_bridge = self._sample_brownian_bridge(n)
         idx_min = np.argmin(brownian_bridge)
-        s = np.array(
-            [
-                brownian_bridge[(idx_min + idx) % n] - brownian_bridge[idx_min]
-                for idx in range(n + 1)
-            ]
-        )
+        indices = (idx_min + np.arange(n + 1)) % n
+        s: npt.NDArray[np.float64] = brownian_bridge[indices] - brownian_bridge[idx_min]
         return s
 
     def _sample_brownian_excursion_at(
@@ -75,12 +71,8 @@ class BrownianExcursion(BrownianBridge):
         brownian_bridge = self._sample_brownian_bridge_at(times)
         idx_min = np.argmin(brownian_bridge)
         n = len(brownian_bridge)
-        s = np.array(
-            [
-                brownian_bridge[(idx_min + idx) % (n - 1)] - brownian_bridge[idx_min]
-                for idx in range(n)
-            ]
-        )
+        indices = (idx_min + np.arange(n)) % (n - 1)
+        s: npt.NDArray[np.float64] = brownian_bridge[indices] - brownian_bridge[idx_min]
 
         if zero:
             return s

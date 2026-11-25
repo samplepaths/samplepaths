@@ -85,3 +85,13 @@ def test_moran_process_sample_values(
 
     samples = instance.sample_with_start(n=n, start=start)
     np.testing.assert_allclose(samples, expected, rtol=1e-6)
+
+
+def test_moran_process_maximum_change_after_construction() -> None:
+    instance = ProcessType(maximum=5, rng=np.random.default_rng(3))
+
+    instance.maximum = 50
+    samples = instance.sample_with_start(n=40, start=25)
+
+    fresh = ProcessType(maximum=50, rng=np.random.default_rng(3))
+    np.testing.assert_array_equal(samples, fresh.sample_with_start(n=40, start=25))

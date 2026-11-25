@@ -80,6 +80,7 @@ with type hints. See :doc:`project/refactor` for what the fork improves and
    :caption: Project
 
    project/refactor
+   project/performance
    project/migration
    project/development
    project/license

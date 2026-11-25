@@ -66,3 +66,18 @@ def test_colored_noise_sample_values(
     samples = instance.sample(n=n)
 
     assert np.allclose(samples, expected, atol=1e-5)
+
+
+def test_colored_noise_parameter_change_after_sampling() -> None:
+    # The frequencies and their scale are cached between realizations and
+    # must be recomputed when beta or t changes.
+    instance = ProcessType(beta=0.0, t=1.0, rng=np.random.default_rng(7))
+    instance.sample(n=16)
+
+    instance.beta = 2.0
+    instance.t = 3.0
+    instance.rng = np.random.default_rng(11)
+    samples = instance.sample(n=16)
+
+    fresh = ProcessType(beta=2.0, t=3.0, rng=np.random.default_rng(11))
+    np.testing.assert_allclose(samples, fresh.sample(n=16))

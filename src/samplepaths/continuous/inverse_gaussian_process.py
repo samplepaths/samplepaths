@@ -122,7 +122,7 @@ class InverseGaussianProcess(BaseTimeProcess):
                 )
 
         assert self.__ms is not None
-        ls = np.array([self.scale * m**2 for m in self.__ms])
+        ls = self.scale * self.__ms**2
 
         gn = self.rng.normal(size=n)
         ys = gn**2
@@ -135,16 +135,9 @@ class InverseGaussianProcess(BaseTimeProcess):
 
         zs = self.rng.uniform(size=n)
 
-        ign = []
-        for z, x, m in zip(zs, xs, self.__ms, strict=True):
-            if z <= m / (m + x):
-                ign.append(x)
-            else:
-                ign.append(m**2 / x)
+        ign = np.where(zs <= self.__ms / (self.__ms + xs), xs, self.__ms**2 / xs)
 
-        ig = np.array(ign).cumsum()
-        ig = np.insert(ig, [0], 0)
-        return ig
+        return np.concatenate(([0.0], np.cumsum(ign)))
 
     @override
     def sample(self, n: int) -> npt.NDArray[np.float64]:
@@ -163,7 +156,7 @@ class InverseGaussianProcess(BaseTimeProcess):
         for k in range(n):
             ms[k] = self._check_mean(times[k], times[k + 1])
 
-        ls = np.array([self.scale * m**2 for m in ms])
+        ls = self.scale * ms**2
 
         gn = self.rng.normal(size=n)
         ys = gn**2
@@ -172,14 +165,7 @@ class InverseGaussianProcess(BaseTimeProcess):
 
         zs = self.rng.uniform(size=n)
 
-        ign = []
-        for z, x, m in zip(zs, xs, ms, strict=True):
-            if z <= m / (m + x):
-                ign.append(x)
-            else:
-                ign.append(m**2 / x)
-
-        ig = np.array(ign).cumsum()
+        ig = np.cumsum(np.where(zs <= ms / (ms + xs), xs, ms**2 / xs))
         if times[0] == 0:
             ig = np.insert(ig, 0, [0])
 

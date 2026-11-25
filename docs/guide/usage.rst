@@ -215,3 +215,5 @@ Performance
 processes store the results of intermediate computations which depend only
 on ``n`` and on the parameters, so generating many realizations with the same
 ``n`` from one instance is faster than creating a new instance each time.
+
+See :doc:`/project/performance` for measured sampling times.

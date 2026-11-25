@@ -128,12 +128,13 @@ def check_increments(
     :raises ValueError: if a time value is negative or the time values are
         not strictly increasing
     """
-    increments = np.diff(times)
+    values = np.asarray(times, dtype=np.float64)
+    increments = np.diff(values)
 
-    if np.any([t < 0 for t in times]):
+    if np.any(values < 0):
         raise ValueError("Times must be nonnegative.")
 
-    if np.any([t <= 0 for t in increments]):
+    if np.any(increments <= 0):
         raise ValueError("Times must be strictly increasing.")
 
     return increments

@@ -1,5 +1,6 @@
 """Finite state Markov chain."""
 
+from bisect import bisect_right
 from collections.abc import Iterable
 from typing import override
 
@@ -14,6 +15,13 @@ DEFAULT_TRANSITION: npt.NDArray[np.float64] = np.array(
     [[0.5, 0.5], [0.5, 0.5]],
     dtype=np.float64,
 )
+
+
+def _cumulative(probabilities: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+    """Compute a normalized cumulative distribution, as Generator.choice does."""
+    cumulative = np.cumsum(probabilities, dtype=np.float64)
+    cumulative /= cumulative[-1]
+    return cumulative
 
 
 class MarkovChain(BaseSequenceProcess):
@@ -122,10 +130,17 @@ class MarkovChain(BaseSequenceProcess):
     def sample(self, n: int) -> npt.NDArray[np.int64]:
         check_positive_integer(n=n)
 
-        states = range(self.num_states)
+        # Each step inverts the cumulative distribution of the current state
+        # at a uniform variate, which is what Generator.choice does, without
+        # its overhead per call.
+        initial = _cumulative(self.initial).tolist()
+        transition = [_cumulative(row).tolist() for row in self.transition]
+        uniforms = self.rng.random(n).tolist()
 
-        markov_chain = [self.rng.choice(states, p=self.initial)]
-        for _ in range(n - 1):
-            markov_chain.append(self.rng.choice(states, p=self.transition[markov_chain[-1]]))
+        state = bisect_right(initial, uniforms[0])
+        markov_chain = [state]
+        for uniform in uniforms[1:]:
+            state = bisect_right(transition[state], uniform)
+            markov_chain.append(state)
 
         return np.array(markov_chain, dtype=np.int64)
