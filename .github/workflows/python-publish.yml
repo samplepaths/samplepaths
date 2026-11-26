@@ -4,6 +4,11 @@ on:
   release:
     types: [published]
 
+# The job only reads the repository; what it needs beyond that is granted
+# to it below.
+permissions:
+  contents: read
+
 jobs:
   build-and-publish:
     name: Build and publish to PyPI
@@ -14,6 +19,7 @@ jobs:
       url: https://pypi.org/project/samplepaths/
 
     permissions:
+      contents: read
       id-token: write # required for PyPI trusted publishing
 
     steps:
